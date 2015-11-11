@@ -93,12 +93,20 @@
     
     #define GET_SP()                gcc_current_sp()            
 
+// Prevent Clang to raise the warning: variable 'sp' is uninitialized when used here
+#if defined(__clang__)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wuninitialized"
+#endif
     static inline unsigned int gcc_current_sp(void)
     {
         register unsigned sp __ASM("sp");
         return sp;
     }
-    
+#if defined(__clang__)
+  #pragma clang diagnostic pop
+#endif
+
 #elif defined   ( __TASKING__ )
         
     #ifndef __ASM        
