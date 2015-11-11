@@ -77,6 +77,23 @@ Device variables
 | SUPPORT_BLE_CENTRAL             | (0\|1)      | Add Bluetooth Low Energy (BLE) Central support    |
 | SUPPORT_BLE_PERIPHERAL          | (0\|1)      | Add Bluetooth Low Energy (BLE) Peripheral support |
 
+RTOS variables
+--------------
+
+| CMake variable                  | Value      | Description                                       |
+|---------------------------------|------------|---------------------------------------------------|
+| RTOS_CLOCK                      | integer    | Frequency in Hz of the processor                  |
+| RTOS_TICK                       | integer    | When OS_SYSTICK is not set we might need to provide a different tick |
+| RTOS_TASK_COUNT                 | integer    | Number of RTOS task                               |
+| RTOS_TASK_STACK_SIZE            | integer    | Size in bytes of the task (excluding the main and private tasks) |
+| RTOS_MAIN_STACK_SIZE            | integer    | Size in bytes of the main task                    |
+| RTOS_IDLE_STACK_SIZE            | integer    | Size in bytes of the idle task                    |
+| RTOS_TIMER_STACK_SIZE           | integer    | Size in bytes of the timer task                   |
+| RTOS_TASK_PRIVATE_STACK_COUNT   | integer    | Number of private tasks                           |
+| RTOS_TASK_PRIVATE_STACK_SIZE    | integer    | Size in bytes of the private task                 |
+| RTOS_STACK_WATERMARK            | (0\|1)      | Disable/Enable the stack watermark                |
+
+
 Debug
 =====
 

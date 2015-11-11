@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2015, Lab A Part
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * o Redistributions of source code must retain the above copyright notice, this
+ * o list of conditions and the following disclaimer.
+ *
+ * o Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+ 
+#cmakedefine RTOS_CLOCK
+#ifdef RTOS_CLOCK
+  #define OS_CLOCK @RTOS_CLOCK@
+#endif
+
+#cmakedefine RTOS_TASK_COUNT
+#ifdef RTOS_TASK_COUNT
+  #define OS_TASKCNT @RTOS_TASK_COUNT@
+#endif
+
+#cmakedefine RTOS_TASK_STACK_SIZE
+#ifdef RTOS_TASK_STACK_SIZE
+  #define OS_STKSIZE (@RTOS_TASK_STACK_SIZE@ / 4)
+#endif
+
+#cmakedefine RTOS_MAIN_STACK_SIZE
+#ifdef RTOS_MAIN_STACK_SIZE
+ #define OS_MAINSTKSIZE (@RTOS_MAIN_STACK_SIZE@ / 4)
+#endif
+
+#cmakedefine RTOS_IDLE_STACK_SIZE
+#ifdef RTOS_IDLE_STACK_SIZE
+ #define OS_IDLESTKSIZE (@RTOS_IDLE_STACK_SIZE@ / 4)
+#endif
+
+#cmakedefine RTOS_TIMER_STACK_SIZE
+#ifdef RTOS_TIMER_STACK_SIZE
+ #define OS_TIMERSTKSZ (@RTOS_TIMER_STACK_SIZE@ / 4)
+#endif
+
+#cmakedefine RTOS_TASK_PRIVATE_STACK_COUNT
+#ifdef RTOS_TASK_PRIVATE_STACK_COUNT
+ #define OS_PRIVCNT     @RTOS_TASK_PRIVATE_STACK_COUNT@
+#endif
+
+#cmakedefine RTOS_TASK_PRIVATE_STACK_SIZE
+#ifdef RTOS_TASK_PRIVATE_STACK_SIZE
+ #define OS_PRIVSTKSIZE (@RTOS_TASK_PRIVATE_STACK_SIZE@ / 4)
+#endif
+
+#cmakedefine RTOS_STACK_WATERMARK
+#ifdef RTOS_STACK_WATERMARK
+ #define OS_STKINIT @RTOS_STACK_WATERMARK@
+#endif
+
+#cmakedefine RTOS_TICK
+#ifdef RTOS_TICK
+ #define OS_TICK @RTOS_TICK@
+#endif
