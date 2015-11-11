@@ -15,6 +15,8 @@ Support
 - Toolchains:
 	- **GCC**: 4.9-2014: https://launchpad.net/gcc-arm-embedded/4.9/4.9-2014-q4-major
 	- **Clang**: 3.6.0-2ubuntu1~trusty1 (tags/RELEASE_360/final) (based on LLVM 3.6.0)
+- RTOS:
+	- **ARM RTX: V4.79**
 
 Building
 ========
