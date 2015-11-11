@@ -17,6 +17,7 @@ Support
 	- **Clang**: 3.6.0-2ubuntu1~trusty1 (tags/RELEASE_360/final) (based on LLVM 3.6.0)
 - RTOS:
 	- **ARM RTX: V4.79**
+	- **FreeRTOS V8.2.3**
 
 Building
 ========
