@@ -1617,6 +1617,15 @@ BaseType_t xReturn;
 		configASSERT( xReturn );
 	}
 }
+
+/*-----------------------------------------------------------*/
+
+/// Check if the RTOS kernel is already started.
+/// \return 0 RTOS is not started, 1 RTOS is started.
+int32_t osKernelRunning(void) {
+	return xSchedulerRunning;
+}
+
 /*-----------------------------------------------------------*/
 
 void vTaskEndScheduler( void )
