@@ -36,9 +36,6 @@
 #include "bsp.h"
 #include "bsp_btn_ble.h"
 
-#define UART_TX_BUF_SIZE           256                                /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE           1                                  /**< UART RX buffer size. */
-
 #define STRING_BUFFER_LEN          50
 #define BOND_DELETE_ALL_BUTTON_ID  0                                  /**< Button used for deleting all bonded centrals during startup. */
 
@@ -117,35 +114,6 @@ static const ble_gap_conn_params_t m_connection_param =
 static void scan_start(void);
 
 #define APPL_LOG                        app_trace_log             /**< Debug logger macro that will be used in this file to do logging of debug information over UART. */
-
-
-/**@brief Function for asserts in the SoftDevice.
- *
- * @details This function will be called in case of an assert in the SoftDevice.
- *
- * @warning This handler is an example only and does not fit a final product. You need to analyze
- *          how your product is supposed to react in case of Assert.
- * @warning On assert from the SoftDevice, the system can only recover on reset.
- *
- * @param[in] line_num     Line number of the failing ASSERT call.
- * @param[in] p_file_name  File name of the failing ASSERT call.
- */
-void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
-{
-    app_error_handler(0xDEADBEEF, line_num, p_file_name);
-}
-
-void uart_error_handle(app_uart_evt_t * p_event)
-{
-    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
-    {
-        APP_ERROR_HANDLER(p_event->data.error_communication);
-    }
-    else if (p_event->evt_type == APP_UART_FIFO_ERROR)
-    {
-        APP_ERROR_HANDLER(p_event->data.error_code);
-    }
-}
 
 /**@brief Callback handling device manager events.
  *
@@ -791,37 +759,6 @@ static void scan_start(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
-/**@brief Function for initializing the UART.
- */
-static void uart_init(void)
-{
-    uint32_t err_code;
-
-    const app_uart_comm_params_t comm_params =
-       {
-           RX_PIN_NUMBER,
-           TX_PIN_NUMBER,
-           RTS_PIN_NUMBER,
-           CTS_PIN_NUMBER,
-           APP_UART_FLOW_CONTROL_ENABLED,
-           false,
-           UART_BAUDRATE_BAUDRATE_Baud38400
-       };
-
-    APP_UART_FIFO_INIT(&comm_params,
-                          UART_RX_BUF_SIZE,
-                          UART_TX_BUF_SIZE,
-                          uart_error_handle,
-                          APP_IRQ_PRIORITY_LOW,
-                          err_code);
-
-    APP_ERROR_CHECK(err_code);
-
-    app_trace_init();
-}
-
-
 /**@brief Function for initializing buttons and leds.
  *
  * @param[out] p_erase_bonds  Will be true if the clear bonding button was pressed to wake the application up.
@@ -859,8 +796,8 @@ int main(void)
     // Initialize.
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
     buttons_leds_init(&erase_bonds);
-    uart_init();
-    printf("Heart rate collector example\r\n");
+    app_trace_init();
+    puts("Heart rate collector example");
     ble_stack_init();
     device_manager_init(erase_bonds);
     db_discovery_init();
@@ -870,6 +807,7 @@ int main(void)
     // Start scanning for peripherals and initiate connection
     // with devices that advertise Heart Rate UUID.
     scan_start();
+    puts("Scan start");
 
     for (;; )
     {
