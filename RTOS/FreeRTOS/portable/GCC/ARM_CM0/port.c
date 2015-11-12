@@ -179,7 +179,11 @@ void vPortStartFirstTask( void )
 	"	ldr	r2, pxCurrentTCBConst2	\n" /* Obtain location of pxCurrentTCB. */
 	"	ldr r3, [r2]				\n"
 	"	ldr r0, [r3]				\n" /* The first item in pxCurrentTCB is the task top of stack. */
+#ifdef __clang__
+	"	adds r0, #32				\n" /* Discard everything up to r0. */
+#else
 	"	add r0, #32					\n" /* Discard everything up to r0. */
+#endif
 	"	msr psp, r0					\n" /* This is now the new top of stack to use in the task. */
 	"	movs r0, #2					\n" /* Switch to the psp stack. */
 	"	msr CONTROL, r0				\n"
@@ -306,7 +310,11 @@ void xPortPendSVHandler( void )
 	"	ldr	r3, pxCurrentTCBConst			\n" /* Get the location of the current TCB. */
 	"	ldr	r2, [r3]						\n"
 	"										\n"
+#ifdef __clang__
+	"	subs r0, r0, #32					\n" /* Make space for the remaining low registers. */
+#else
 	"	sub r0, r0, #32						\n" /* Make space for the remaining low registers. */
+#endif
 	"	str r0, [r2]						\n" /* Save the new top of stack. */
 	"	stmia r0!, {r4-r7}					\n" /* Store the low registers that are not saved automatically. */
 	" 	mov r4, r8							\n" /* Store the high registers. */
@@ -323,7 +331,11 @@ void xPortPendSVHandler( void )
 	"										\n"
 	"	ldr r1, [r2]						\n"
 	"	ldr r0, [r1]						\n" /* The first item in pxCurrentTCB is the task top of stack. */
+#ifdef __clang__
+	"	adds r0, r0, #16					\n" /* Move to the high registers. */
+#else
 	"	add r0, r0, #16						\n" /* Move to the high registers. */
+#endif
 	"	ldmia r0!, {r4-r7}					\n" /* Pop the high registers. */
 	" 	mov r8, r4							\n"
 	" 	mov r9, r5							\n"
@@ -332,7 +344,11 @@ void xPortPendSVHandler( void )
 	"										\n"
 	"	msr psp, r0							\n" /* Remember the new top of stack for the task. */
 	"										\n"
+#ifdef __clang__
+	"	subs r0, r0, #32					\n" /* Go back for the low registers that are not automatically restored. */
+#else
 	"	sub r0, r0, #32						\n" /* Go back for the low registers that are not automatically restored. */
+#endif
 	" 	ldmia r0!, {r4-r7}              	\n" /* Pop low registers.  */
 	"										\n"
 	"	bx r3								\n"
