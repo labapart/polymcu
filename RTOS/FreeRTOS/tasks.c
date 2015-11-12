@@ -1544,6 +1544,10 @@ void vTaskStartScheduler( void )
 {
 BaseType_t xReturn;
 
+	if (xSchedulerRunning == pdTRUE) {
+		return;
+	}
+
 	/* Add the idle task at the lowest priority. */
 	#if ( INCLUDE_xTaskGetIdleTaskHandle == 1 )
 	{
