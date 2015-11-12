@@ -30,7 +30,6 @@
 #define __CHIP_H_
 
 #include "lpc_types.h"
-#include "sys_config.h"
 #include "cmsis.h"
 
 #ifdef __cplusplus
@@ -129,6 +128,7 @@ extern "C" {
 #define LPC_IOCON_BASE            0x40044000
 #define LPC_SYSCTL_BASE           0x40048000
 #define LPC_USB0_BASE             0x40080000
+#define LPC_USB_BASE              LPC_USB0_BASE
 #define LPC_CAN0_BASE             0x40050000
 #define LPC_SSP1_BASE             0x40058000
 #if defined(CHIP_LPC1125)
