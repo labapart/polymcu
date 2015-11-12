@@ -226,7 +226,7 @@
 void os_idle_demon (void) {
  
   for (;;) {
-    /* HERE: include optional user code to be executed when no thread runs.*/
+	__asm volatile ("wfi");
   }
 }
  
