@@ -223,6 +223,7 @@ uint32_t nrf_drv_rtc_max_ticks_get(nrf_drv_rtc_t const * const p_instance)
     return ticks;
 }
 
+#if (RTC0_ENABLED == 1) || (RTC1_ENABLED == 1) && (!defined(SUPPORT_RTOS))
 /**@brief Generic function for handling RTC interrupt
  *
  * @param[in]  p_reg         Pointer to instance register structure.
@@ -262,6 +263,7 @@ __STATIC_INLINE void nrf_drv_rtc_int_handler(NRF_RTC_Type * p_reg, uint32_t inst
         m_handlers[instance_id](NRF_DRV_RTC_INT_OVERFLOW);
     }
 }
+#endif
 
 #if (RTC0_ENABLED == 1)
 void RTC0_IRQHandler(void)
@@ -270,7 +272,7 @@ void RTC0_IRQHandler(void)
 }
 #endif
 
-#if (RTC1_ENABLED == 1)
+#if (RTC1_ENABLED == 1) && (!defined(SUPPORT_RTOS))
 void RTC1_IRQHandler(void)
 {
     nrf_drv_rtc_int_handler(NRF_RTC1,RTC1_INSTANCE_INDEX);
