@@ -230,43 +230,6 @@ void os_idle_demon (void) {
   }
 }
  
-#if (OS_SYSTICK == 0)   // Functions for alternative timer as RTX kernel timer
- 
-/*--------------------------- os_tick_init ----------------------------------*/
- 
-/// \brief Initializes an alternative hardware timer as RTX kernel timer
-/// \return                             IRQ number of the alternative hardware timer
-int os_tick_init (void) {
-  return (-1);  /* Return IRQ number of timer (0..239) */
-}
- 
-/*--------------------------- os_tick_val -----------------------------------*/
- 
-/// \brief Get alternative hardware timer's current value (0 .. OS_TRV)
-/// \return                             Current value of the alternative hardware timer
-uint32_t os_tick_val (void) {
-  return (0);
-}
- 
-/*--------------------------- os_tick_ovf -----------------------------------*/
- 
-/// \brief Get alternative hardware timer's  overflow flag
-/// \return                             Overflow flag\n
-///                                     - 1 : overflow
-///                                     - 0 : no overflow
-uint32_t os_tick_ovf (void) {
-  return (0);
-}
- 
-/*--------------------------- os_tick_irqack --------------------------------*/
- 
-/// \brief Acknowledge alternative hardware timer interrupt
-void os_tick_irqack (void) {
-  /* ... */
-}
- 
-#endif   // (OS_SYSTICK == 0)
- 
 /*--------------------------- os_error --------------------------------------*/
  
 /* OS Error Codes */
