@@ -50,21 +50,35 @@
 /* Set up and initialize hardware prior to call to main */
 void Chip_SystemInit(void)
 {
+#ifdef SUPPORT_NXP_MAIN_OSC
+	volatile uint32_t i;
+
+	Chip_SYSCTL_PowerUp(SYSCTL_POWERDOWN_SYSOSC_PD);
+	Chip_Clock_SetPLLBypass(0, 0);
+	for (i = 0; i < 200; i++) __NOP();
+
+	Chip_Clock_SetSystemPLLSource(SYSCTL_PLLCLKSRC_MAINOSC);
+#else
 	/* IRC should be powered up */
 	Chip_SYSCTL_PowerUp(SYSCTL_POWERDOWN_IRC_PD);
 	Chip_SYSCTL_PowerUp(SYSCTL_POWERDOWN_IRCOUT_PD);
 
 	/* Set system PLL input to main oscillator */
 	Chip_Clock_SetSystemPLLSource(SYSCTL_PLLCLKSRC_IRC);
+#endif
 
 	/* Power down PLL to change the PLL divider ratio */
 	Chip_SYSCTL_PowerDown(SYSCTL_POWERDOWN_SYSPLL_PD);
 
+#ifdef SUPPORT_NXP_MAIN_OSC
+	Chip_Clock_SetupSystemPLL(3, 2);
+#else
 	/* Setup PLL for main oscillator rate (FCLKIN = 12MHz) * 4 = 48MHz
 	   MSEL = 3 (this is pre-decremented), PSEL = 1 (for P = 2)
 	   FCLKOUT = FCLKIN * (MSEL + 1) = 12MHz * 4 = 48MHz
 	   FCCO = FCLKOUT * 2 * P = 48MHz * 2 * 2 = 192MHz (within FCCO range) */
 	Chip_Clock_SetupSystemPLL(3, 1);
+#endif
 
 	/* Powerup system PLL */
 	Chip_SYSCTL_PowerUp(SYSCTL_POWERDOWN_SYSPLL_PD);

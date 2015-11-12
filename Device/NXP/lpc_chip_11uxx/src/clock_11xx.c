@@ -92,6 +92,7 @@ void Chip_Clock_SetSystemPLLSource(CHIP_SYSCTL_PLLCLKSRC_T src)
 	LPC_SYSCTL->SYSPLLCLKSEL  = (uint32_t) src;
 	LPC_SYSCTL->SYSPLLCLKUEN  = 0;
 	LPC_SYSCTL->SYSPLLCLKUEN  = 1;
+	while (!(LPC_SYSCTL->SYSPLLCLKUEN & 0x01));     /* Wait Until Updated       */
 }
 
 /* Bypass System Oscillator and set oscillator frequency range */
@@ -116,6 +117,7 @@ void Chip_Clock_SetUSBPLLSource(CHIP_SYSCTL_PLLCLKSRC_T src)
 	LPC_SYSCTL->USBPLLCLKSEL  = (uint32_t) src;
 	LPC_SYSCTL->USBPLLCLKUEN  = 0;
 	LPC_SYSCTL->USBPLLCLKUEN  = 1;
+	while (!(LPC_SYSCTL->USBPLLCLKUEN & 0x01));     /* Wait Until Updated       */
 }
 
 #endif
@@ -126,6 +128,7 @@ void Chip_Clock_SetMainClockSource(CHIP_SYSCTL_MAINCLKSRC_T src)
 	LPC_SYSCTL->MAINCLKSEL  = (uint32_t) src;
 	LPC_SYSCTL->MAINCLKUEN  = 0;
 	LPC_SYSCTL->MAINCLKUEN  = 1;
+	while (!(LPC_SYSCTL->MAINCLKUEN & 0x01));       /* Wait Until Updated       */
 }
 
 #if defined(CHIP_LPC11UXX)

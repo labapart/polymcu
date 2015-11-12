@@ -99,6 +99,7 @@ void Chip_Clock_SetSystemPLLSource(CHIP_SYSCTL_PLLCLKSRC_T src);
 STATIC INLINE void Chip_Clock_SetupUSBPLL(uint8_t msel, uint8_t psel)
 {
 	LPC_SYSCTL->USBPLLCTRL = (msel & 0x1F) | ((psel & 0x3) << 5);
+	while (!(LPC_SYSCTL->USBPLLSTAT   & 0x01));     /* Wait Until PLL Locked    */
 }
 
 /**
