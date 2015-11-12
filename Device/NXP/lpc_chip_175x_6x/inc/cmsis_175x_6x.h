@@ -33,7 +33,6 @@
 #define __CMSIS_175X_6X_H_
 
 #include "lpc_types.h"
-#include "sys_config.h"
 
 #ifdef __cplusplus
 extern "C" {
