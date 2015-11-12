@@ -272,8 +272,11 @@ uint32_t ulSetInterruptMaskFromISR( void )
 					" bx lr				  "
 				  );
 
+//Note: Clang return the error: non-ASM statement in naked function is not supporte
+#ifndef __clang__
 	/* To avoid compiler warnings.  This line will never be reached. */
 	return 0;
+#endif
 }
 /*-----------------------------------------------------------*/
 
@@ -284,8 +287,11 @@ void vClearInterruptMaskFromISR( uint32_t ulMask )
 					" bx lr				  "
 				  );
 
+//Note: Clang return the error: non-ASM statement in naked function is not supporte
+#ifndef __clang__
 	/* Just to avoid compiler warning. */
 	( void ) ulMask;
+#endif
 }
 /*-----------------------------------------------------------*/
 
