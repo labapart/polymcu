@@ -63,12 +63,16 @@ ret_code_t nrf_drv_rtc_init(nrf_drv_rtc_t const * const p_instance,
     {
         m_handlers[p_instance->instance_id] = handler;
     }
+#if !defined(SUPPORT_RTOS)
+    // nrf_drv_rtc_init() is invoked with an empty handler when initialized
+    // to be used with an RTOS
     else
     {
         err_code = NRF_ERROR_INVALID_PARAM;
         NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
         return err_code;
     }
+#endif
 
     if (m_cb[p_instance->instance_id].state != NRF_DRV_STATE_UNINITIALIZED)
     {
