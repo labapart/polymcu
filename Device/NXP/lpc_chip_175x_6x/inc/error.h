@@ -173,8 +173,12 @@ typedef enum {
 	/*0x000F0007*/ ERR_ADC_NO_POWER
 } ErrorCode_t;
 
-#ifndef offsetof
-#define offsetof(s, m)   (int) &(((s *) 0)->m)
+#ifdef __clang__
+  #include "stddef.h"
+#else
+  #ifndef offsetof
+   #define offsetof(s, m)   (int) &(((s *) 0)->m)
+  #endif
 #endif
 
 #define COMPILE_TIME_ASSERT(pred)    switch (0) { \

@@ -127,8 +127,12 @@ typedef enum
 } ErrorCode_t;
 
 
-#ifndef offsetof
-#define offsetof(s,m)   (int)&(((s *)0)->m)
+#ifdef __clang__
+  #include "stddef.h"
+#else
+  #ifndef offsetof
+   #define offsetof(s, m)   (int) &(((s *) 0)->m)
+  #endif
 #endif
 
 #define COMPILE_TIME_ASSERT(pred)    switch(0){case 0:case pred:;}
