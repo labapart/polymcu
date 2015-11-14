@@ -1,5 +1,5 @@
 /*
- * @brief Virtual Comm port USB descriptors
+ * @brief HID USB descriptors
  *
  * @note
  * Copyright(C) NXP Semiconductors, 2013
@@ -29,20 +29,12 @@
  * this code.
  */
 
-#include "usbd/usbd_rom_api.h"
-
-// This VID/PID pair is ONLY for MicroNFCBoard
-#define MICRONFCBOARD_USB_VID				0x1FC9 // NXP VID
-#define MICRONFCBOARD_USB_PID				0x8039 // Licensed by NXP to AppNearMe
-#define MICRONFCBOARD_USB_PRODUCT_VERSION 	0x0101
+#include "internal.h"
+#include "app_usbd_cfg.h"
 
 /*****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
-
-#define HID_INPUT_REPORT_BYTES       64				/* size of report in Bytes */
-#define HID_OUTPUT_REPORT_BYTES      64				/* size of report in Bytes */
-#define HID_FEATURE_REPORT_BYTES     64				/* size of report in Bytes */
 
 /**
  * HID Report Descriptor
@@ -54,13 +46,13 @@ const uint8_t HID_ReportDescriptor[] = {
 	HID_LogicalMin(0),	/* value range: 0 - 0xFF */
 	HID_LogicalMaxS(0xFF),
 	HID_ReportSize(8),	/* 8 bits */
-	HID_ReportCount(HID_INPUT_REPORT_BYTES),
+	HID_ReportCount(DEVICE_USB_HID_INPUT_REPORT_SIZE),
 	HID_Usage(0x01),
 	HID_Input(HID_Data | HID_Variable | HID_Absolute),
-	HID_ReportCount(HID_OUTPUT_REPORT_BYTES),
+	HID_ReportCount(DEVICE_USB_HID_OUTPUT_REPORT_SIZE),
 	HID_Usage(0x01),
 	HID_Output(HID_Data | HID_Variable | HID_Absolute),
-	HID_ReportCount(HID_FEATURE_REPORT_BYTES),
+	HID_ReportCount(DEVICE_USB_HID_FEATURE_REPORT_SIZE),
 	HID_Usage(0x01),
 	HID_Feature(HID_Data | HID_Variable | HID_Absolute),
 	HID_EndCollection,
@@ -73,14 +65,14 @@ const uint16_t HID_ReportDescSize = sizeof(HID_ReportDescriptor);
 ALIGNED(4) const uint8_t USB_DeviceDescriptor[] = {
 	USB_DEVICE_DESC_SIZE,				/* bLength */
 	USB_DEVICE_DESCRIPTOR_TYPE,			/* bDescriptorType */
-	WBVAL(0x0200),						/* bcdUSB */
+	WBVAL(0x0200),						/* bcdUSB 2.0 */
 	0x00,								/* bDeviceClass */
 	0x00,								/* bDeviceSubClass */
 	0x00,								/* bDeviceProtocol */
 	USB_MAX_PACKET0,					/* bMaxPacketSize0 */
-	WBVAL(MICRONFCBOARD_USB_VID),		/* idVendor */
-	WBVAL(MICRONFCBOARD_USB_PID),		/* idProduct */
-	WBVAL(MICRONFCBOARD_USB_PRODUCT_VERSION),	/* bcdDevice */
+	WBVAL(DEVICE_USB_VENDOR_ID),		/* idVendor */
+	WBVAL(DEVICE_USB_PRODUCT_ID),		/* idProduct */
+	WBVAL(DEVICE_USB_DEVICE_REVISION),	/* bcdDevice */
 	0x01,								/* iManufacturer */
 	0x02,								/* iProduct */
 	0x03,								/* iSerialNumber */
@@ -96,25 +88,24 @@ ALIGNED(4) uint8_t USB_FsConfigDescriptor[] = {
 	USB_CONFIGURATION_DESC_SIZE,			/* bLength */
 	USB_CONFIGURATION_DESCRIPTOR_TYPE,		/* bDescriptorType */
 	WBVAL(									/* wTotalLength */
-		USB_CONFIGURATION_DESC_SIZE     +
-		/* HID class related descriptors */
-		USB_INTERFACE_DESC_SIZE         +
-		HID_DESC_SIZE                   +
-		USB_ENDPOINT_DESC_SIZE      +
-		0
+		USB_CONFIGURATION_DESC_SIZE   +
+		USB_INTERFACE_DESC_SIZE       +
+		HID_DESC_SIZE                 +
+		USB_ENDPOINT_DESC_SIZE        +
+		USB_ENDPOINT_DESC_SIZE
 		),
-	0x03,									/* bNumInterfaces */
-	0x01,									/* bConfigurationValue */
-	0x00,									/* iConfiguration */
-	USB_CONFIG_SELF_POWERED,				/* bmAttributes  */
-	USB_CONFIG_POWER_MA(500),				/* bMaxPower */
+	0x01,							/* bNumInterfaces */
+	0x01,							/* bConfigurationValue */
+	0x00,							/* iConfiguration */
+	USB_CONFIG_SELF_POWERED,		/* bmAttributes */
+	USB_CONFIG_POWER_MA(100),		/* bMaxPower */
 
 	/* Interface 0, Alternate Setting 0, HID Class */
 	USB_INTERFACE_DESC_SIZE,		/* bLength */
 	USB_INTERFACE_DESCRIPTOR_TYPE,	/* bDescriptorType */
-	USB_HID_IF_NUM,					/* bInterfaceNumber */
+	0x00,							/* bInterfaceNumber */
 	0x00,							/* bAlternateSetting */
-	0x01,							/* bNumEndpoints */
+	0x02,							/* bNumEndpoints */
 	USB_DEVICE_CLASS_HUMAN_INTERFACE,	/* bInterfaceClass */
 	HID_SUBCLASS_NONE,				/* bInterfaceSubClass */
 	HID_PROTOCOL_NONE,				/* bInterfaceProtocol */
@@ -131,13 +122,19 @@ ALIGNED(4) uint8_t USB_FsConfigDescriptor[] = {
 	/* Endpoint, HID Interrupt In */
 	USB_ENDPOINT_DESC_SIZE,			/* bLength */
 	USB_ENDPOINT_DESCRIPTOR_TYPE,	/* bDescriptorType */
-	USB_HID_IN_EP,					/* bEndpointAddress */
+	HID_EP_IN,						/* bEndpointAddress */
 	USB_ENDPOINT_TYPE_INTERRUPT,	/* bmAttributes */
-	WBVAL(64),						/* wMaxPacketSize  - 64 bytes packets */
-	0x05,					        /* bInterval - 5ms */
-
+	WBVAL(DEVICE_USB_HID_INPUT_REPORT_SIZE),	/* wMaxPacketSize */
+	0x20,		/* 16ms */          /* bInterval */
+	/* Endpoint, HID Interrupt Out */
+	USB_ENDPOINT_DESC_SIZE,			/* bLength */
+	USB_ENDPOINT_DESCRIPTOR_TYPE,	/* bDescriptorType */
+	HID_EP_OUT,						/* bEndpointAddress */
+	USB_ENDPOINT_TYPE_INTERRUPT,	/* bmAttributes */
+	WBVAL(DEVICE_USB_HID_OUTPUT_REPORT_SIZE),	/* wMaxPacketSize */
+	0x20,							/* bInterval: 16ms */
 	/* Terminator */
-	0									/* bLength */
+	0								/* bLength */
 };
 
 /**
@@ -149,37 +146,24 @@ ALIGNED(4) const uint8_t USB_StringDescriptor[] = {
 	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
 	WBVAL(0x0409),	/* US English */    /* wLANGID */
 	/* Index 0x01: Manufacturer */
-	(3 * 2 + 2),						/* bLength (13 Char + Type + lenght) */
-	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
-	'N', 0,
-	'X', 0,
-	'P', 0,
+	(DEVICE_USB_DEVICE_MANUFACTURER_SIZE + 2),	/* bLength (String + Type + lenght) */
+	USB_STRING_DESCRIPTOR_TYPE,					/* bDescriptorType */
+	DEVICE_USB_DEVICE_MANUFACTURER,
 	/* Index 0x02: Product */
-	(9 * 2 + 2),						/* bLength */
-	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
-	'H', 0,
-	'I', 0,
-	'D', 0,
-	'0', 0,
-	' ', 0,
-	'P', 0,
-	'o', 0,
-	'r', 0,
-	't', 0,
+	(DEVICE_USB_DEVICE_PRODUCT_SIZE + 2),		/* bLength (12 Char + Type + lenght) */
+	USB_STRING_DESCRIPTOR_TYPE,					/* bDescriptorType */
+	DEVICE_USB_DEVICE_PRODUCT,
 	/* Index 0x03: Serial Number */
-	(6 * 2 + 2),						/* bLength (8 Char + Type + lenght) */
-	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
-	'N', 0,
-	'X', 0,
-	'P', 0,
-	'-', 0,
-	'7', 0,
-	'7', 0,
-	/* Index 0x04: Interface 1, Alternate Setting 0 */
-	( 4 * 2 + 2),						/* bLength (4 Char + Type + lenght) */
-	USB_STRING_DESCRIPTOR_TYPE,			/* bDescriptorType */
+	(DEVICE_USB_DEVICE_SERIAL_SIZE + 2),		/* bLength (13 Char + Type + lenght) */
+	USB_STRING_DESCRIPTOR_TYPE,					/* bDescriptorType */
+	DEVICE_USB_DEVICE_SERIAL,
+	/* Index 0x04: Interface 0, Alternate Setting 0 */
+	(3 * 2 + 2),					/* bLength (3 Char + Type + lenght) */
+	USB_STRING_DESCRIPTOR_TYPE,		/* bDescriptorType */
 	'H', 0,
 	'I', 0,
 	'D', 0,
-	'0', 0,
 };
+
+const uint32_t ep_count = 2;
+const USBD_FUNC_INIT usb_interface_inits[] = { hid_generic_init, NULL };

@@ -81,10 +81,6 @@ if(SUPPORT_DEVICE_USB)
       list(APPEND nxp_SRCS Driver/LPC_VCOM/Driver_USART.c)
     endif()
   endif()
-
-  if(SUPPORT_DEVICE_USB_HID)
-    list(APPEND nxp_SRCS Driver/hid_generic/hid_generic.c)
-  endif()
 endif()
 
 # Internal or External (XTAL) oscillators?

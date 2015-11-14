@@ -24,32 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __INTERNAL_H__
-#define __INTERNAL_H__
+#ifndef __HID_GENERIC_H__
+#define __HID_GENERIC_H__
 
 #include "board.h"
-#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "USBD_ROM.h"
+extern uint32_t g_counter;
 
-void leds_init(void);
+void on_timer_tick(void* data);
+void read_report(uint8_t* report);
 
-/**
- * @brief	USB port init routine
- * @param	hUsb		: Handle to USBD stack instance
- * @param	pDesc		: Pointer to configuration descriptor
- * @param	pUsbParam	: Pointer USB param structure returned by previous init call
- * @return	Always returns LPC_OK.
- */
-ErrorCode_t vcom_init(USBD_HANDLE_T hUsb, USB_CORE_DESCS_T *pDesc, USBD_API_INIT_PARAM_T *pUsbParam);
-ErrorCode_t hid_generic_init(USBD_HANDLE_T hUsb, USB_CORE_DESCS_T *pDesc, USBD_API_INIT_PARAM_T *pUsbParam);
-
-extern const uint32_t ep_count;
-extern const USBD_FUNC_INIT usb_interface_inits[];
-
-/**
- * @}
- */
+void board_timer_initialize(void);
+void board_timer_start(void);
+void board_timer_stop(void);
+void board_send_usb_hid_report(uint8_t* report, uint32_t size);
 
 #endif

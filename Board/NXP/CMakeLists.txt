@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Board)
 find_package(CMSIS)
+find_package(PolyMCU)
 
 set(board_nxp_SRCS LPC1768mbed/board.c)
 

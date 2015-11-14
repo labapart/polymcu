@@ -1,5 +1,5 @@
 /*
- * @brief HID example USB descriptors
+ * @brief HID USB descriptors
  *
  * @note
  * Copyright(C) NXP Semiconductors, 2013
@@ -33,16 +33,8 @@
 #include "app_usbd_cfg.h"
 
 /*****************************************************************************
- * Private types/enumerations/variables
- ****************************************************************************/
-
-/*****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
-
-#define HID_INPUT_REPORT_BYTES       1				/* size of report in Bytes */
-#define HID_OUTPUT_REPORT_BYTES      1				/* size of report in Bytes */
-#define HID_FEATURE_REPORT_BYTES     1				/* size of report in Bytes */
 
 /**
  * HID Report Descriptor
@@ -54,13 +46,13 @@ const uint8_t HID_ReportDescriptor[] = {
 	HID_LogicalMin(0),	/* value range: 0 - 0xFF */
 	HID_LogicalMaxS(0xFF),
 	HID_ReportSize(8),	/* 8 bits */
-	HID_ReportCount(HID_INPUT_REPORT_BYTES),
+	HID_ReportCount(DEVICE_USB_HID_INPUT_REPORT_SIZE),
 	HID_Usage(0x01),
 	HID_Input(HID_Data | HID_Variable | HID_Absolute),
-	HID_ReportCount(HID_OUTPUT_REPORT_BYTES),
+	HID_ReportCount(DEVICE_USB_HID_OUTPUT_REPORT_SIZE),
 	HID_Usage(0x01),
 	HID_Output(HID_Data | HID_Variable | HID_Absolute),
-	HID_ReportCount(HID_FEATURE_REPORT_BYTES),
+	HID_ReportCount(DEVICE_USB_HID_FEATURE_REPORT_SIZE),
 	HID_Usage(0x01),
 	HID_Feature(HID_Data | HID_Variable | HID_Absolute),
 	HID_EndCollection,
@@ -71,20 +63,20 @@ const uint16_t HID_ReportDescSize = sizeof(HID_ReportDescriptor);
  * USB Standard Device Descriptor
  */
 ALIGNED(4) const uint8_t USB_DeviceDescriptor[] = {
-	USB_DEVICE_DESC_SIZE,			/* bLength */
-	USB_DEVICE_DESCRIPTOR_TYPE,		/* bDescriptorType */
-	WBVAL(0x0200),					/* bcdUSB 2.0 */
-	0x00,							/* bDeviceClass */
-	0x00,							/* bDeviceSubClass */
-	0x00,							/* bDeviceProtocol */
-	USB_MAX_PACKET0,				/* bMaxPacketSize0 */
-	WBVAL(0x1FC9),					/* idVendor */
-	WBVAL(0x0081),					/* idProduct */
-	WBVAL(0x0100),					/* bcdDevice */
-	0x01,							/* iManufacturer */
-	0x02,							/* iProduct */
-	0x03,							/* iSerialNumber */
-	0x01							/* bNumConfigurations */
+	USB_DEVICE_DESC_SIZE,				/* bLength */
+	USB_DEVICE_DESCRIPTOR_TYPE,			/* bDescriptorType */
+	WBVAL(0x0200),						/* bcdUSB 2.0 */
+	0x00,								/* bDeviceClass */
+	0x00,								/* bDeviceSubClass */
+	0x00,								/* bDeviceProtocol */
+	USB_MAX_PACKET0,					/* bMaxPacketSize0 */
+	WBVAL(DEVICE_USB_VENDOR_ID),		/* idVendor */
+	WBVAL(DEVICE_USB_PRODUCT_ID),		/* idProduct */
+	WBVAL(DEVICE_USB_DEVICE_REVISION),	/* bcdDevice */
+	0x01,								/* iManufacturer */
+	0x02,								/* iProduct */
+	0x03,								/* iSerialNumber */
+	0x01								/* bNumConfigurations */
 };
 
 /**
@@ -132,14 +124,14 @@ ALIGNED(4) uint8_t USB_FsConfigDescriptor[] = {
 	USB_ENDPOINT_DESCRIPTOR_TYPE,	/* bDescriptorType */
 	HID_EP_IN,						/* bEndpointAddress */
 	USB_ENDPOINT_TYPE_INTERRUPT,	/* bmAttributes */
-	WBVAL(0x0004),					/* wMaxPacketSize */
+	WBVAL(DEVICE_USB_HID_INPUT_REPORT_SIZE),	/* wMaxPacketSize */
 	0x20,		/* 16ms */          /* bInterval */
 	/* Endpoint, HID Interrupt Out */
 	USB_ENDPOINT_DESC_SIZE,			/* bLength */
 	USB_ENDPOINT_DESCRIPTOR_TYPE,	/* bDescriptorType */
 	HID_EP_OUT,						/* bEndpointAddress */
 	USB_ENDPOINT_TYPE_INTERRUPT,	/* bmAttributes */
-	WBVAL(0x0004),					/* wMaxPacketSize */
+	WBVAL(DEVICE_USB_HID_OUTPUT_REPORT_SIZE),	/* wMaxPacketSize */
 	0x20,							/* bInterval: 16ms */
 	/* Terminator */
 	0								/* bLength */
@@ -154,57 +146,17 @@ const uint8_t USB_StringDescriptor[] = {
 	USB_STRING_DESCRIPTOR_TYPE,		/* bDescriptorType */
 	WBVAL(0x0409),					/* wLANGID : US English*/
 	/* Index 0x01: Manufacturer */
-	(18 * 2 + 2),					/* bLength (13 Char + Type + lenght) */
-	USB_STRING_DESCRIPTOR_TYPE,		/* bDescriptorType */
-	'N', 0,
-	'X', 0,
-	'P', 0,
-	' ', 0,
-	'S', 0,
-	'e', 0,
-	'm', 0,
-	'i', 0,
-	'c', 0,
-	'o', 0,
-	'n', 0,
-	'd', 0,
-	'u', 0,
-	'c', 0,
-	't', 0,
-	'o', 0,
-	'r', 0,
-	's', 0,
+	(DEVICE_USB_DEVICE_MANUFACTURER_SIZE + 2),	/* bLength (String + Type + lenght) */
+	USB_STRING_DESCRIPTOR_TYPE,					/* bDescriptorType */
+	DEVICE_USB_DEVICE_MANUFACTURER,
 	/* Index 0x02: Product */
-	(12 * 2 + 2),					/* bLength (12 Char + Type + lenght) */
-	USB_STRING_DESCRIPTOR_TYPE,		/* bDescriptorType */
-	'L', 0,
-	'P', 0,
-	'C', 0,
-	'1', 0,
-	'1', 0,
-	'U', 0,
-	'x', 0,
-	' ', 0,
-	'H', 0,
-	'I', 0,
-	'D', 0,
-	' ', 0,
+	(DEVICE_USB_DEVICE_PRODUCT_SIZE + 2),		/* bLength (12 Char + Type + lenght) */
+	USB_STRING_DESCRIPTOR_TYPE,					/* bDescriptorType */
+	DEVICE_USB_DEVICE_PRODUCT,
 	/* Index 0x03: Serial Number */
-	(13 * 2 + 2),					/* bLength (13 Char + Type + lenght) */
-	USB_STRING_DESCRIPTOR_TYPE,		/* bDescriptorType */
-	'A', 0,
-	'B', 0,
-	'C', 0,
-	'D', 0,
-	'1', 0,
-	'2', 0,
-	'3', 0,
-	'4', 0,
-	'5', 0,
-	'6', 0,
-	'7', 0,
-	'8', 0,
-	'9', 0,
+	(DEVICE_USB_DEVICE_SERIAL_SIZE + 2),		/* bLength (13 Char + Type + lenght) */
+	USB_STRING_DESCRIPTOR_TYPE,					/* bDescriptorType */
+	DEVICE_USB_DEVICE_SERIAL,
 	/* Index 0x04: Interface 0, Alternate Setting 0 */
 	(3 * 2 + 2),					/* bLength (3 Char + Type + lenght) */
 	USB_STRING_DESCRIPTOR_TYPE,		/* bDescriptorType */

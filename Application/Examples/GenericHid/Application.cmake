@@ -24,22 +24,24 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-cmake_minimum_required(VERSION 2.6)
-
-find_package(Board)
-find_package(CMSIS)
-find_package(PolyMCU)
-
-set(board_appnearme_SRCS MicroNFCBoard/board.c MicroNFCBoard/gpio.c)
-
-# If USB support
-if(SUPPORT_DEVICE_USB)
-  # Support No Debug UART
-  if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
-    list(APPEND board_appnearme_SRCS MicroNFCBoard/vcom/usb_desc.c)
-  else()
-    list(APPEND board_appnearme_SRCS MicroNFCBoard/generic_hid/usb_desc.c)
-  endif()
+# We disable USB Virtual COM on MicroNFCBoard to avoid to use USB composite
+if (BOARD STREQUAL "AppNearMe/MicroNFCBoard")
+  set(SUPPORT_DEBUG_UART none)
 endif()
 
-add_library(board_appnearme STATIC ${board_appnearme_SRCS})
+# List of modules needed by the application
+set(LIST_MODULES CMSIS Lib/PolyMCU)
+
+set(SUPPORT_DEVICE_USB 1)
+set(SUPPORT_DEVICE_USB_HID 1)
+
+set(DEVICE_USB_VENDOR_ID       0x123)
+set(DEVICE_USB_PRODUCT_ID      0x456)
+set(DEVICE_USB_DEVICE_REVISION 0x789)
+
+set(DEVICE_USB_DEVICE_MANUFACTURER "'l', 0, 'a', 0, 'b', 0, 'a', 0, 'p', 0, 'a', 0, 'r', 0, 't', 0")
+set(DEVICE_USB_DEVICE_PRODUCT      "'e', 0, 'x', 0, 'a', 0, 'm', 0, 'p', 0, 'l', 0, 'e', 0")
+set(DEVICE_USB_DEVICE_SERIAL       "'s', 0, 'e', 0, 'r', 0, 'i', 0, 'a', 0, 'l', 0, '0', 0, '0', 0")
+
+set(DEVICE_USB_HID_INPUT_REPORT_SIZE  4)
+set(DEVICE_USB_HID_OUTPUT_REPORT_SIZE 4)

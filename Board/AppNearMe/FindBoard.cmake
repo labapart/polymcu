@@ -30,7 +30,12 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/MicroNFCBoard)
 
 # If USB support
 if(SUPPORT_DEVICE_USB)
-  include_directories(${CMAKE_CURRENT_LIST_DIR}/MicroNFCBoard/vcom)
+  if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/MicroNFCBoard/vcom)
+  else()
+    add_definitions(-DSUPPORT_DEBUG_UART_NONE)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/MicroNFCBoard/generic_hid)
+  endif()
 endif()
 
 set(Board_LIBRARIES board_appnearme ${NXP_LIBRARIES})

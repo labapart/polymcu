@@ -24,32 +24,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __INTERNAL_H__
-#define __INTERNAL_H__
+#include "generic_hid_internal.h"
 
-#include "board.h"
-#include <string.h>
-#include <stdio.h>
+uint32_t g_counter = 0;
 
-#include "USBD_ROM.h"
+void on_timer_tick(void* data) {
+    write(1, ".", 1);
+    g_counter++;
+    board_send_usb_hid_report((uint8_t*)&g_counter, INPUT_REPORT_SIZE);
+}
 
-void leds_init(void);
+void read_report(uint8_t* report) {
+	switch(report[0]) {
+	case 1:
+		puts("Start");
+		board_timer_start();
+		break;
+	case 2:
+		puts("Stop");
+		board_timer_stop();
+		break;
+	case 3:
+		puts("Resume");
+		g_counter = 0;
+		board_timer_start();
+		break;
+	default:
+		puts("Command non supported");
+		break;
+	}
+}
 
-/**
- * @brief	USB port init routine
- * @param	hUsb		: Handle to USBD stack instance
- * @param	pDesc		: Pointer to configuration descriptor
- * @param	pUsbParam	: Pointer USB param structure returned by previous init call
- * @return	Always returns LPC_OK.
- */
-ErrorCode_t vcom_init(USBD_HANDLE_T hUsb, USB_CORE_DESCS_T *pDesc, USBD_API_INIT_PARAM_T *pUsbParam);
-ErrorCode_t hid_generic_init(USBD_HANDLE_T hUsb, USB_CORE_DESCS_T *pDesc, USBD_API_INIT_PARAM_T *pUsbParam);
+// The processor clock is initialized by CMSIS startup + system file
+int main (void) {
+	board_timer_initialize();
 
-extern const uint32_t ep_count;
-extern const USBD_FUNC_INIT usb_interface_inits[];
-
-/**
- * @}
- */
-
-#endif
+	while (1) {
+		__WFI();
+	}
+}

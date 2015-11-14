@@ -30,16 +30,20 @@ find_package(Board)
 find_package(CMSIS)
 find_package(PolyMCU)
 
-set(board_appnearme_SRCS MicroNFCBoard/board.c MicroNFCBoard/gpio.c)
+add_definitions(-DINPUT_REPORT_SIZE=${DEVICE_USB_HID_INPUT_REPORT_SIZE})
+include_directories(.)
 
-# If USB support
-if(SUPPORT_DEVICE_USB)
-  # Support No Debug UART
-  if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
-    list(APPEND board_appnearme_SRCS MicroNFCBoard/vcom/usb_desc.c)
-  else()
-    list(APPEND board_appnearme_SRCS MicroNFCBoard/generic_hid/usb_desc.c)
-  endif()
+set(Firmware_SRCS hid_generic.c)
+
+if (BOARD STREQUAL "AppNearMe/MicroNFCBoard")
+  list(APPEND Firmware_SRCS NXP/board_hid_generic.c)
+elseif (BOARD STREQUAL "NXP/LPC1768mbed")
+  list(APPEND Firmware_SRCS NXP/board_hid_generic.c)
+elseif (BOARD STREQUAL "Freescale/FRDMKL25Z")
+  list(APPEND Firmware_SRCS Freescale/board_hid_generic.c)
+else()
+  message(FATAL_ERROR "Board '${BOARD}' not supported.")
 endif()
 
-add_library(board_appnearme STATIC ${board_appnearme_SRCS})
+set(Firmware_LIBS ${Board_LIBRARIES} ${PolyMCU_LIBRARIES})
+BUILD_FIRMWARE(Firmware NXP_HID_Generic "${Firmware_SRCS}" "${Firmware_LIBS}")

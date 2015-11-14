@@ -31,6 +31,7 @@
 #include "lpc_types.h"
 #include "error.h"
 #include "hid_generic.h"
+#include "usb_device_definitions.h"
 
 #ifndef __APP_USB_CFG_H_
 #define __APP_USB_CFG_H_
@@ -40,7 +41,7 @@ extern "C"
 {
 #endif
 
-/** @ingroup EXAMPLES_USBDLIB_17XX40XX_HID_GENERIC
+/** @ingroup NXP LPC1768mbed USB interface
  * @{
  */
 
@@ -71,7 +72,6 @@ extern "C"
 
 /* USB descriptor arrays defined *_desc.c file */
 extern const uint8_t USB_DeviceDescriptor[];
-extern uint8_t USB_HsConfigDescriptor[];
 extern uint8_t USB_FsConfigDescriptor[];
 extern const uint8_t USB_StringDescriptor[];
 extern const uint8_t USB_DeviceQualifier[];
