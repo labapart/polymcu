@@ -19,6 +19,31 @@ Support
 	- **ARM RTX: V4.79**
 	- **FreeRTOS V8.2.3**
 
+Status
+======
+
+The latest test results are available at http://labapart.com/products/polymcu/test_results.
+
+Toolchain / Host
+----------------
+
+| Board                    | Linux - GCC  | Linux - LLVM  | Windows    |
+|--------------------------|--------------|---------------|------------|
+| AppNearMe MicroNFC Board | Pass         | Pass          | _Untested_ |
+| Freescale Freedom KL25   | Pass         | Pass          | _Untested_ |
+| Nordic nRF52 Preview DK  | Pass         | Pass          | _Untested_ |
+| NXP LP1768 mbed          | Pass         | Pass          | _Untested_ |
+
+Application
+-----------
+
+| Board                    | Baremetal  | CMSIS RTOS  | FreeRTOS   |
+|--------------------------|------------|-------------|------------|
+| AppNearMe MicroNFC Board | Pass       | Pass        | **Fail**   |
+| Freescale Freedom KL25   | Pass       | Pass        | Pass       |
+| Nordic nRF52 Preview DK  | Pass       | Pass        | **Fail**   |
+| NXP LP1768 mbed          | Pass       | Pass        | **Fail**   |
+
 Building
 ========
 
