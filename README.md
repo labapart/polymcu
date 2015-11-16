@@ -29,10 +29,10 @@ Toolchain / Host
 
 | Board                    | Linux - GCC  | Linux - LLVM  | Windows    |
 |--------------------------|--------------|---------------|------------|
-| AppNearMe MicroNFC Board | Pass         | Pass          | _Untested_ |
-| Freescale Freedom KL25   | Pass         | Pass          | _Untested_ |
-| Nordic nRF52 Preview DK  | Pass         | Pass          | _Untested_ |
-| NXP LP1768 mbed          | Pass         | Pass          | _Untested_ |
+| AppNearMe MicroNFC Board | Pass         | Pass          | Pass       |
+| Freescale Freedom KL25   | Pass         | Pass          | Pass       |
+| Nordic nRF52 Preview DK  | Pass         | Pass          | Pass       |
+| NXP LP1768 mbed          | Pass         | Pass          | Pass       |
 
 Application
 -----------
@@ -44,10 +44,11 @@ Application
 | Nordic nRF52 Preview DK  | Pass       | Pass        | **Fail**   |
 | NXP LP1768 mbed          | Pass       | Pass        | **Fail**   |
 
-Building
-========
+Building on Linux
+=================
 
 The cross compilation toolchain is either in your `PATH` or defined by the environment variable `CROSS_COMPILE`.
+The latest cross-compilation toolchain for ARM Cortex-M can be found at https://launchpad.net/gcc-arm-embedded.
 
 It is recommended to build out of tree. To do that, create a new directory:
 ```
@@ -78,6 +79,57 @@ cmake -DAPPLICATION=<application_vendor/application_name> ../ && make VERBOSE=1
 ```
 CC=<path-to-clang> cmake -DAPPLICATION=<application_vendor/application_name> ../ && make
 ```
+
+Building on Windows
+===================
+
+Requirements
+------------
+- Install CMake: https://cmake.org/download/ 
+- Install the latest GCC v4.9 2015q3 for ARM Cortex M: https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-win32.zip 
+- Install MinGW: http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download (mingw32-base, mingw32-gcc-g++)
+
+Build
+-----
+
+1. Download the latest sources of PolyMCU at https://github.com/labapart/polymcu/archive/master.zip
+
+2. Un-archive `master.zip`
+
+3. Start a command line shell (ie: `cmd.exe`)
+
+4. Add CMake and MinGW to your `PATH` if it is not already done. For instance:
+```
+SET PATH="c:\Program Files (x86)\CMake\bin";%PATH%
+SET PATH=C:\MinGW\bin;%PATH%
+```
+
+5. Add your toolchain into the `CROSS_COMPILE`. For instance:
+```
+SET CROSS_COMPILE=c:\Users\Olivier\gcc-arm-none-eabi-4_9-2015q3-20150921-win32\bin\arm-none-eabi-
+```
+
+6. Create the `Build` directory into PolyMCU root
+```
+cd <PolyMCU Root>
+mkdir Build
+cd Build
+```
+
+7. **[Optional]** To build with LLVM
+```
+set PATH="C:\Program Files (x86)\LLVM\bin";%PATH%
+set CC=clang.exe
+```
+
+8. Build the project
+```
+cmake -G "MinGW Makefiles" -DAPPLICATION=<application_vendor/application_name> -DBOARD=<board_vendor/board_name> ..
+mingw32-make
+```
+
+* To make the build verbose: `mingw32-make VERBOSE=1`
+
 
 Support
 =======

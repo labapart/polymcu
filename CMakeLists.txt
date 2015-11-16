@@ -26,7 +26,7 @@
 
 cmake_minimum_required(VERSION 2.6)
 
-ENABLE_LANGUAGE(ASM)
+enable_language(ASM)
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
@@ -38,6 +38,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_ASM_COMPILER $ENV{CROSS_COMPILE}gcc)
     set(CMAKE_OBJCOPY $ENV{CROSS_COMPILE}objcopy)
     set(CMAKE_SIZE $ENV{CROSS_COMPILE}size)
+    set(CMAKE_AR $ENV{CROSS_COMPILE}ar)
   else()
     # Test if the cross-compilation toolchain is setup
     find_program(CROSS_COMPILE_GCC arm-none-eabi-gcc)
@@ -49,6 +50,12 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
     set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
     set(CMAKE_SIZE arm-none-eabi-size)
+    set(CMAKE_AR arm-none-eabi-ar)
+  endif()
+
+  if(WIN32)
+    # Redefine the linker command line as some GCC versions do not implement '--out-implib'
+    set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_C_COMPILER> <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
   endif()
 elseif (CMAKE_C_COMPILER_ID STREQUAL "Clang")
   if (DEFINED ENV{CROSS_COMPILE})
@@ -75,6 +82,11 @@ else()
   message(FATAL_ERROR "${CMAKE_C_COMPILER_ID} Toolchain not supported")
 endif()
 
+if(WIN32)
+  # Prevent Windows Standard Libraries to be added
+  set(CMAKE_C_STANDARD_LIBRARIES "")
+endif()
+
 # Build type: If not defined then we set DEBUG build by default
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: Debug Release" FORCE)
@@ -84,7 +96,11 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # Macro to get the list of include path of GCC
 #
 MACRO(GET_GCC_INCLUDE_PATH gcc_path gcc_include_path)
-  execute_process(COMMAND ${gcc_path} -v -x c -E - INPUT_FILE /dev/null ERROR_VARIABLE gcc_output OUTPUT_QUIET)
+  if (WIN32)
+    execute_process(COMMAND ${gcc_path} -v -x c -E NUL ERROR_VARIABLE gcc_output OUTPUT_QUIET)
+  else()
+    execute_process(COMMAND ${gcc_path} -v -x c -E - INPUT_FILE /dev/null ERROR_VARIABLE gcc_output OUTPUT_QUIET)
+  endif()
 
   # Build an array of string from the GCC output
   string(REPLACE "\n" ";" gcc_output "${gcc_output}")
