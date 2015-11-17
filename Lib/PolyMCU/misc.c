@@ -174,13 +174,3 @@ __attribute__((weak)) void critical_section_exit(void) {
 		__enable_irq();
 	}
 }
-
-// Clang might generate this symbol
-__attribute__((weak)) void __aeabi_memset (void *dest, size_t n, int c) {
-	memset (dest, c, n);
-}
-
-// Clang might generate this symbol
-__attribute__((weak)) void __aeabi_memmove (void *dest, const void *src, size_t n) {
-	memmove (dest, src, n);
-}
