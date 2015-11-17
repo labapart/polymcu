@@ -24,21 +24,21 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Support required by the application
-if (NOT DEFINED SUPPORT_RTOS)
-  set(SUPPORT_RTOS   RTX)
-endif()
+cmake_minimum_required(VERSION 2.6)
 
-if(BOARD STREQUAL "NXP/LPC1768mbed")
-  # NXP USB ROM API consumes additional stack size
-  set(RTOS_TASK_STACK_SIZE 400)
-elseif(BOARD STREQUAL "ST/STM32L4xx_Nucleo")
-  set(RTOS_TASK_STACK_SIZE 400)
-else()
-  set(RTOS_TASK_STACK_SIZE 200)
-endif()
-set(RTOS_MAIN_STACK_SIZE 200)
+find_package(Board)
+find_package(PolyMCU)
 
-# List of modules needed by the application
-set(LIST_MODULES CMSIS
-                 Lib/PolyMCU)
+set(st_SRCS ${MCU_ROOT}/Source/gcc/startup_stm32l476xx.s
+            ${MCU_ROOT}/Source/system_stm32l4xx.c
+            ${MCU_HAL_ROOT}/Src/stm32l4xx_hal.c
+            ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_cortex.c
+            ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_gpio.c
+            ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_pwr_ex.c
+            ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_rcc.c
+            ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_uart.c)
+
+list(APPEND st_SRCS Driver/VCom/Driver_USART.c)
+
+# Define 'device_st' as the static library for Device/ST
+add_library(device_st STATIC ${st_SRCS})

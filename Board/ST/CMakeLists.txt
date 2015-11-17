@@ -24,21 +24,11 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Support required by the application
-if (NOT DEFINED SUPPORT_RTOS)
-  set(SUPPORT_RTOS   RTX)
-endif()
+cmake_minimum_required(VERSION 2.6)
 
-if(BOARD STREQUAL "NXP/LPC1768mbed")
-  # NXP USB ROM API consumes additional stack size
-  set(RTOS_TASK_STACK_SIZE 400)
-elseif(BOARD STREQUAL "ST/STM32L4xx_Nucleo")
-  set(RTOS_TASK_STACK_SIZE 400)
-else()
-  set(RTOS_TASK_STACK_SIZE 200)
-endif()
-set(RTOS_MAIN_STACK_SIZE 200)
+find_package(Board)
 
-# List of modules needed by the application
-set(LIST_MODULES CMSIS
-                 Lib/PolyMCU)
+set(board_st_SRCS STM32L4xx_Nucleo/board.c
+                  STM32L4xx_Nucleo/stm32l4xx_nucleo.c)
+
+add_library(board_st STATIC ${board_st_SRCS})

@@ -1,7 +1,7 @@
 Introduction
 ============
 
-[PolyMCU](http://labapart.com/products/polymcu) has been designed from the beginning to be as flexible as possible: **host OS independent** (support Linux, Windows, MacOS), **support any toolchain** (GCC, LLVM), **any RTOS** (ARM RTX, FreeRTOS), **any micro-controller vendor SDK** (Nordic Semiconductor, NXP, Freescale).  
+[PolyMCU](http://labapart.com/products/polymcu) has been designed from the beginning to be as flexible as possible: **host OS independent** (support Linux, Windows, MacOS), **support any toolchain** (GCC, LLVM), **any RTOS** (ARM RTX, FreeRTOS), **any micro-controller vendor SDK** (Nordic Semiconductor, NXP, Freescale, ST).  
 Enabling such flexibility provides by the same time better software quality by testing the same piece of software in various configurations.
 
 The framework is based on [CMake](https://cmake.org/). It provides some examples to build baremetal and RTOS-based projects. 
@@ -23,6 +23,12 @@ Support
 - RTOS:
 	- **ARM RTX: V4.79**
 	- **FreeRTOS V8.2.3**
+- Boards:
+	- AppNearMe MicroNFCBoard
+	- Freescale Freedom KL25
+	- Nordic nRF52 Preview DK
+	- NXP LP1768 mbed
+	- ST STM32L476 Nucleo
 
 Status
 ======
@@ -34,20 +40,22 @@ Toolchain / Host
 
 | Board                    | Linux - GCC  | Linux - LLVM  | Windows    |
 |--------------------------|--------------|---------------|------------|
-| AppNearMe MicroNFC Board | Pass         | Pass          | Pass       |
+| AppNearMe MicroNFCBoard  | Pass         | Pass          | Pass       |
 | Freescale Freedom KL25   | Pass         | Pass          | Pass       |
 | Nordic nRF52 Preview DK  | Pass         | Pass          | Pass       |
 | NXP LP1768 mbed          | Pass         | Pass          | Pass       |
+| ST STM32L476 Nucleo      | Pass         | Pass          | _Not Tested_ |
 
 Application
 -----------
 
 | Board                    | Baremetal  | CMSIS RTOS  | FreeRTOS   |
 |--------------------------|------------|-------------|------------|
-| AppNearMe MicroNFC Board | Pass       | Pass        | **Fail**   |
+| AppNearMe MicroNFCBoard  | Pass       | Pass        | **Fail**   |
 | Freescale Freedom KL25   | Pass       | Pass        | Pass       |
 | Nordic nRF52 Preview DK  | Pass       | Pass        | **Fail**   |
 | NXP LP1768 mbed          | Pass       | Pass        | **Fail**   |
+| ST STM32L476 Nucleo      | Pass       | Pass        | **Fail**   |
 
 Building on Linux
 =================

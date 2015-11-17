@@ -24,21 +24,15 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Support required by the application
-if (NOT DEFINED SUPPORT_RTOS)
-  set(SUPPORT_RTOS   RTX)
-endif()
+# Tell RTOS we are running at 80Mhz
+set(RTOS_CLOCK 80000000)
 
-if(BOARD STREQUAL "NXP/LPC1768mbed")
-  # NXP USB ROM API consumes additional stack size
-  set(RTOS_TASK_STACK_SIZE 400)
-elseif(BOARD STREQUAL "ST/STM32L4xx_Nucleo")
-  set(RTOS_TASK_STACK_SIZE 400)
-else()
-  set(RTOS_TASK_STACK_SIZE 200)
-endif()
-set(RTOS_MAIN_STACK_SIZE 200)
+# List of HW modules
+list(APPEND LIST_MODULES Device/ST
+                         Board/ST
+                         Lib/PolyMCU)
 
-# List of modules needed by the application
-set(LIST_MODULES CMSIS
-                 Lib/PolyMCU)
+#
+# Build options
+#
+set(CPU "ARM Cortex-M4F")

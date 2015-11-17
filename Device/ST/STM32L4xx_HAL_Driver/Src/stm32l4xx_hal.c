@@ -53,6 +53,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
 
+#if defined(__CMSIS_RTOS)
+  #include "cmsis_os.h"
+#endif
+#if defined(SUPPORT_RTOS_NO_CMSIS)
+  #include "FreeRTOS.h"
+  #include "task.h"
+
+  int32_t osKernelRunning(void);
+#endif
+
 /** @addtogroup STM32L4xx_HAL_Driver
   * @{
   */
@@ -96,7 +106,9 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static __IO uint32_t uwTick;
+#if !defined(__CMSIS_RTOS) && !defined(SUPPORT_RTOS_NO_CMSIS)
+  static __IO uint32_t uwTick;
+#endif
 
 /* Private function prototypes -----------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
@@ -290,6 +302,7 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   * @{
   */
 
+#if !defined(__CMSIS_RTOS) && !defined(SUPPORT_RTOS_NO_CMSIS)
 /**
   * @brief This function is called to increment a global variable "uwTick"
   *        used as application time base.
@@ -314,6 +327,41 @@ __weak uint32_t HAL_GetTick(void)
 {
   return uwTick;
 }
+#endif
+
+#if defined(__CMSIS_RTOS)
+/**
+  * @brief Provide a tick value in millisecond.
+  * @note This function is declared as __weak to be overwritten in case of other
+  *       implementations in user file.
+  * @retval tick value
+  */
+__weak uint32_t HAL_GetTick(void)
+{
+  if (osKernelRunning()) {
+    return osKernelSysTick();
+  } else {
+    return 0;
+  }
+}
+#endif
+
+#if defined(SUPPORT_RTOS_NO_CMSIS)
+/**
+  * @brief Provide a tick value in millisecond.
+  * @note This function is declared as __weak to be overwritten in case of other
+  *       implementations in user file.
+  * @retval tick value
+  */
+__weak uint32_t HAL_GetTick(void)
+{
+  if (osKernelRunning()) {
+    return xTaskGetTickCount();
+  } else {
+    return 0;
+  }
+}
+#endif
 
 /**
   * @brief Provide accurate delay (in milliseconds) based on variable incremented.

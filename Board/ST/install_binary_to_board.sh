@@ -1,7 +1,9 @@
+#!/bin/bash
+
 #
 # Copyright (c) 2015, Lab A Part
 # All rights reserved.
-#
+# 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
@@ -24,21 +26,27 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Support required by the application
-if (NOT DEFINED SUPPORT_RTOS)
-  set(SUPPORT_RTOS   RTX)
-endif()
+if [ "$#" -ne 1 ]; then
+	echo "./install_binary_to_board.sh <image.bin>"
+	exit 1
+fi
 
-if(BOARD STREQUAL "NXP/LPC1768mbed")
-  # NXP USB ROM API consumes additional stack size
-  set(RTOS_TASK_STACK_SIZE 400)
-elseif(BOARD STREQUAL "ST/STM32L4xx_Nucleo")
-  set(RTOS_TASK_STACK_SIZE 400)
-else()
-  set(RTOS_TASK_STACK_SIZE 200)
-endif()
-set(RTOS_MAIN_STACK_SIZE 200)
+if [ ! -f "$1" ]; then
+	echo "Binary file '$1' does not exist."
+	exit 1
+fi
 
-# List of modules needed by the application
-set(LIST_MODULES CMSIS
-                 Lib/PolyMCU)
+# Get the serial number for the Vendor ID 0x0483
+export USB_SERIAL=`lsusb -v -d 0483: | grep iSerial | awk '{print $3}'`
+
+# Find the associated USB disk
+export USB_DISK=`ls /dev/disk/by-id/usb-* | grep ${USB_SERIAL}`
+
+# Retrieve the device node
+export USB_DEV=`readlink -e ${USB_DISK}`
+
+# Get the USB Media (note USB Media can have spaces in its name)
+export USB_MEDIA=`mount | grep ${USB_DEV} | cut -d ' ' -f 3- | sed 's/ type .*//'`
+
+echo "Copy $1 to ${USB_MEDIA}"
+cp "$1" ${USB_MEDIA}
