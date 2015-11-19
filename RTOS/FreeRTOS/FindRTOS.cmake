@@ -48,6 +48,8 @@ endif()
 
 if(SUPPORT_RTOS_NO_CMSIS)
   add_definitions(-DSUPPORT_RTOS_NO_CMSIS)
+else()
+  add_definitions(-D__CMSIS_RTOS)
 endif()
 
 set(RTOS_LIBRARIES freertos)
