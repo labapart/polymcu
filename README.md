@@ -3,6 +3,7 @@ Introduction
 
 [PolyMCU](http://labapart.com/products/polymcu) has been designed from the beginning to be as flexible as possible: **host OS independent** (support Linux, Windows, MacOS), **support any toolchain** (GCC, LLVM), **any RTOS** (ARM RTX, FreeRTOS), **any micro-controller vendor SDK** (Nordic Semiconductor, NXP, Freescale, ST).  
 Enabling such flexibility provides by the same time better software quality by testing the same piece of software in various configurations.
+It supports [C](Application/Examples/Baremetal/main.c) and [C++](Application/Examples/Baremetal/main.cpp) languages.
 
 The framework is based on [CMake](https://cmake.org/). It provides some examples to build baremetal and RTOS-based projects. 
 In opposition to ARM mBed that provides its own library, PolyMCU used [Newlib](https://sourceware.org/newlib/). 
