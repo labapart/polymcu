@@ -55,9 +55,9 @@ Application
 |--------------------------|------------|-------------|------------|
 | AppNearMe MicroNFCBoard  | Pass       | Pass        | **Fail**   |
 | Freescale Freedom KL25   | Pass       | Pass        | Pass       |
-| Nordic nRF52 Preview DK  | Pass       | Pass        | **Fail**   |
-| NXP LP1768 mbed          | Pass       | Pass        | **Fail**   |
-| ST STM32L476 Nucleo      | Pass       | Pass        | **Fail**   |
+| Nordic nRF52 Preview DK  | Pass       | Pass        | Pass       |
+| NXP LP1768 mbed          | Pass       | Pass        | Pass       |
+| ST STM32L476 Nucleo      | Pass       | Pass        | Pass       |
 
 Building on Linux
 =================
