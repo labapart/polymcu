@@ -13,6 +13,7 @@ Quick start
 ===========
 
 - For AppNearMe's MicroNFCBoard: [here](/Board/AppNearMe/README.md)
+- To port a new vendor SDK to PolyMCU: [here](/Doc/PortVendorSDK.md)
 
 Support
 =======
