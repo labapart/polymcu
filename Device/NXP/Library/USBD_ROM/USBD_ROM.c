@@ -31,7 +31,7 @@
 #include "PolyMCU.h"
 #include "USBD_ROM.h"
 
-static USBD_HANDLE_T g_hUsb;
+USBD_HANDLE_T g_hUsb;
 #ifndef SUPPORT_NXP_ROMAPI_USB
 extern const  USBD_HW_API_T hw_api;
 extern const  USBD_CORE_API_T core_api;

@@ -29,6 +29,11 @@
 
 #include "usbd/usbd_rom_api.h"
 
+/** \ingroup USBD_Core
+ * USB device stack/module handle.
+ */
+extern USBD_HANDLE_T g_hUsb;
+
 /**
  * @brief	USB Device interface init routine.
  * @param	hUsb		: Handle to USB device stack
