@@ -49,7 +49,8 @@ if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
                ${MCU_DEVICE}/src/clock_11xx.c
                ${MCU_DEVICE}/src/sysctl_11xx.c
                ${MCU_DEVICE}/src/sysinit.c
-               ${MCU_DEVICE}/src/sysinit_11xx.c)
+               ${MCU_DEVICE}/src/sysinit_11xx.c
+               ${MCU_DEVICE}/src/timer_11xx.c)
                #${MCU_DEVICE}/src/aeabi_romdiv_patch.s)
 elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
   set(nxp_SRCS ${MCU_DEVICE}/src/cr_startup_lpc175x_6x.c
@@ -57,7 +58,8 @@ elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
   			   ${MCU_DEVICE}/src/clock_17xx_40xx.c
   			   ${MCU_DEVICE}/src/iocon_17xx_40xx.c
   			   ${MCU_DEVICE}/src/sysinit.c
-  			   ${MCU_DEVICE}/src/sysinit_17xx_40xx.c)
+               ${MCU_DEVICE}/src/sysinit_17xx_40xx.c
+               ${MCU_DEVICE}/src/timer_17xx_40xx.c)
 
   # UART support
   list(APPEND nxp_SRCS Driver/uart_debug/Driver_USART.c
