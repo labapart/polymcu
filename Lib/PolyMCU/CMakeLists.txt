@@ -43,4 +43,27 @@ else()
   list(APPEND polymcu_SRCS uart_device.c)
 endif()
 
+#
+# Macro to get the list of include path of GCC
+#
+MACRO(COUNT_USB_STRING string length)
+  string(REPLACE "," ";" usb_string ${string})
+  list(LENGTH usb_string usb_string_length)
+  set(${length} ${usb_string_length})
+ENDMACRO()
+
+# Generate the USB Device constants
+if(SUPPORT_DEVICE_USB)
+  COUNT_USB_STRING(${DEVICE_USB_DEVICE_MANUFACTURER} DEVICE_USB_DEVICE_MANUFACTURER_SIZE)
+  COUNT_USB_STRING(${DEVICE_USB_DEVICE_PRODUCT}      DEVICE_USB_DEVICE_PRODUCT_SIZE)
+  COUNT_USB_STRING(${DEVICE_USB_DEVICE_SERIAL}       DEVICE_USB_DEVICE_SERIAL_SIZE)
+
+  if(NOT DEVICE_USB_HID_FEATURE_REPORT_SIZE)
+    set(DEVICE_USB_HID_FEATURE_REPORT_SIZE ${DEVICE_USB_HID_INPUT_REPORT_SIZE})
+  endif()
+
+  # Generate Configuration header file
+  configure_file(usb_device_definitions.h.in ${CMAKE_BINARY_DIR}/usb_device_definitions.h)
+endif()
+
 add_library(polymcu STATIC ${polymcu_SRCS})

@@ -163,12 +163,26 @@ Basic variables
 Device variables
 ----------------
 
-| CMake variable                  | Value      | Description                                       |
-|---------------------------------|------------|---------------------------------------------------|
+| CMake variable                  | Value      | Description                                        |
+|---------------------------------|------------|----------------------------------------------------|
 | SUPPORT_DEVICE_USB              | (0\|1)      | Add USB Device support                            |
 | SUPPORT_DEVICE_USB_HID          | (0\|1)      | Add HID USB Device support                        |
 | SUPPORT_BLE_CENTRAL             | (0\|1)      | Add Bluetooth Low Energy (BLE) Central support    |
 | SUPPORT_BLE_PERIPHERAL          | (0\|1)      | Add Bluetooth Low Energy (BLE) Peripheral support |
+
+### USB Specific Variables
+
+| CMake variable                  | Value      | Description                                        |
+|---------------------------------|------------|----------------------------------------------------|
+| DEVICE_USB_VENDOR_ID            | integer    | USB Vendor ID                                      |
+| DEVICE_USB_PRODUCT_ID           | integer    | USB Product ID                                     |
+| DEVICE_USB_DEVICE_REVISION      | integer    | USB Device Revision                                |
+| DEVICE_USB_DEVICE_MANUFACTURER  | string     | USB Device Manufacturer string                     |
+| DEVICE_USB_DEVICE_PRODUCT       | string     | USB Device Product string                          |
+| DEVICE_USB_DEVICE_SERIAL        | string     | USB Device Serial Number string                    |
+| DEVICE_USB_HID_INPUT_REPORT_SIZE   | integer | Size of the USB HID Input Report                   |
+| DEVICE_USB_HID_OUTPUT_REPORT_SIZE  | integer | Size of the USB HID Output Report                  |
+| DEVICE_USB_HID_FEATURE_REPORT_SIZE | integer | Size of the USB HID Feature Report                 |
 
 RTOS variables
 --------------

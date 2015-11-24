@@ -38,6 +38,10 @@ else()
   message(FATAL_ERROR "${CMAKE_C_COMPILER_ID} Toolchain not supported")
 endif()
 
+if(SUPPORT_DEVICE_USB)
+  # 'usb_device_definitions.h' is generated into the binary directory
+  include_directories(${CMAKE_BINARY_DIR})
+endif()
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Include)
 
