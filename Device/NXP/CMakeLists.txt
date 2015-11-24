@@ -62,8 +62,10 @@ elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
                ${MCU_DEVICE}/src/timer_17xx_40xx.c)
 
   # UART support
-  list(APPEND nxp_SRCS Driver/uart_debug/Driver_USART.c
-  					   ${MCU_DEVICE}/src/uart_17xx_40xx.c)
+  if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
+    list(APPEND nxp_SRCS Driver/uart_debug/Driver_USART.c
+                         ${MCU_DEVICE}/src/uart_17xx_40xx.c)
+  endif()
 endif()
 
 #
@@ -75,7 +77,9 @@ if(SUPPORT_DEVICE_USB)
   # This driver is in conflict with 'uart_debug' - you cannot have both
   if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
     # USB UART Support
-    list(APPEND nxp_SRCS Driver/LPC_VCOM/Driver_USART.c)
+    if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
+      list(APPEND nxp_SRCS Driver/LPC_VCOM/Driver_USART.c)
+    endif()
   endif()
 
   if(SUPPORT_DEVICE_USB_HID)

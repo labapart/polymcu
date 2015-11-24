@@ -50,6 +50,8 @@ void hardware_init_hook(void) {
 	// Initialize USBD ROM
 	usbd_rom_init(usb_interface_inits, ep_count);
 
+#ifndef SUPPORT_DEBUG_UART_NONE
 	// Initialize UART
 	Driver_UART_DEBUG.Initialize(NULL);
+#endif
 }

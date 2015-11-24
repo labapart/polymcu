@@ -132,8 +132,10 @@ void hardware_init_hook(void) {
 	Chip_GPIO_WritePortBit(LPC_GPIO, 1, 1 << (LED1 & 0x1F), 1);
 #endif
 
+#ifndef SUPPORT_DEBUG_UART_NONE
 	// Initialize UART
 	Driver_UART_DEBUG.Initialize(NULL);
+#endif
 
 #ifdef SUPPORT_DEVICE_USB
 	// Initialize USBD ROM
