@@ -184,8 +184,14 @@ RTOS variables
 | RTOS_TIMER_STACK_SIZE           | integer    | Size in bytes of the timer task                   |
 | RTOS_TASK_PRIVATE_STACK_COUNT   | integer    | Number of private tasks                           |
 | RTOS_TASK_PRIVATE_STACK_SIZE    | integer    | Size in bytes of the private task                 |
-| RTOS_STACK_WATERMARK            | (0\|1)      | Disable/Enable the stack watermark                |
+| RTOS_STACK_WATERMARK            | (0\|1)     | Disable/Enable the stack watermark                |
 
+Device Specific variables
+-------------------------
+
+| CMake variable                  | Value      | Description                                       |
+|---------------------------------|------------|---------------------------------------------------|
+| SUPPORT_NXP_USE_XTAL            | (0\|1)     | Use external oscillator instead of the internal one |
 
 Debug
 =====

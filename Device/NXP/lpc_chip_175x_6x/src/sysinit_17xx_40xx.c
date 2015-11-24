@@ -174,5 +174,11 @@ void Chip_SetupXtalClocking(void)
 void Chip_SystemInit(void)
 {
 	/* Setup Chip clocking */
+#ifdef SUPPORT_NXP_USE_XTAL
+	// We use external XTAL (Cristal) oscillator to generate the 384Mhz oscillator.
+	// 384Mhz / 8 = 48Mhz required by USB
+	Chip_SetupXtalClocking();
+#else
 	Chip_SetupIrcClocking();
+#endif
 }
