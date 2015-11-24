@@ -49,6 +49,7 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
 				${NORDIC_SDK_ROOT}/drivers_nrf/gpiote/nrf_drv_gpiote.c
 				${NORDIC_SDK_ROOT}/libraries/button/app_button.c
 				${NORDIC_SDK_ROOT}/libraries/fifo/app_fifo.c
+				${NORDIC_SDK_ROOT}/libraries/scheduler/app_scheduler.c
 				${NORDIC_SDK_ROOT}/libraries/sensorsim/sensorsim.c
 				${NORDIC_SDK_ROOT}/libraries/util/app_util_platform.c)
 
@@ -56,9 +57,11 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
 if(SUPPORT_RTOS STREQUAL "RTX")
   add_definitions(-DRTC1_CONFIG_FREQUENCY=${RTOS_CLOCK})
 
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/libraries/timer/app_timer_rtx.c)
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/libraries/timer/app_timer_rtx.c
+                          ${NORDIC_SDK_ROOT}/libraries/timer/app_timer_appsh.c)
 else()
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/libraries/timer/app_timer.c)
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/libraries/timer/app_timer.c
+                          ${NORDIC_SDK_ROOT}/libraries/timer/app_timer_appsh.c)
 endif()
 
 # 'pstorage' depends on SoftDevice API
@@ -70,7 +73,8 @@ endif()
 # Nordic SoftDevice Support
 #
 if (NORDIC_SOFT_DEVICE_VERSION)
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler.c)
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler.c
+                          ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler_appsh.c)
 endif()
 
 # BLE support
@@ -80,18 +84,37 @@ if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
 	  					  ${NORDIC_SDK_ROOT}/ble/common/ble_srv_common.c)
 
   if (SUPPORT_BLE_PERIPHERAL)
+    include_directories(${NORDIC_SDK_ROOT}/ble/ble_racp)
+
     list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/ble/ble_advertising/ble_advertising.c
-	  					    ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas/ble_bas.c
-	  					    ${NORDIC_SDK_ROOT}/ble/ble_services/ble_dis/ble_dis.c
-	  					    ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs/ble_hrs.c
-	  					    ${NORDIC_SDK_ROOT}/ble/device_manager/device_manager_peripheral.c)
+                            ${NORDIC_SDK_ROOT}/ble/ble_racp/ble_racp.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas/ble_bas.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bps/ble_bps.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_cscs/ble_cscs.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_dfu/ble_dfu.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_dis/ble_dis.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_gls/ble_gls.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hids/ble_hids.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs/ble_hrs.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hts/ble_hts.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ias/ble_ias.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_lls/ble_lls.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_nus/ble_nus.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs/ble_rscs.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_tps/ble_tps.c
+                            ${NORDIC_SDK_ROOT}/ble/device_manager/device_manager_peripheral.c)
   endif()
 
   if (SUPPORT_BLE_CENTRAL)
     list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/ble/ble_db_discovery/ble_db_discovery.c
-	  					    ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas_c/ble_bas_c.c
-	  					    ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs_c/ble_hrs_c.c
-	  					    ${NORDIC_SDK_ROOT}/ble/device_manager/device_manager_central.c)
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ancs_c/ble_ancs_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ans_c/ble_ans_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas_c/ble_bas_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_cts_c/ble_cts_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs_c/ble_hrs_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ias_c/ble_ias_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs_c/ble_rscs_c.c
+                            ${NORDIC_SDK_ROOT}/ble/device_manager/device_manager_central.c)
   endif()
 endif()
 

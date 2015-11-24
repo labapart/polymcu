@@ -54,11 +54,6 @@ include_directories(${NORDIC_SDK_ROOT}/ble/common
 					${NORDIC_SDK_ROOT}/ble/ble_db_discovery
 					${NORDIC_SDK_ROOT}/ble/device_manager
 					${NORDIC_SDK_ROOT}/ble/device_manager/config
-					${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas
-					${NORDIC_SDK_ROOT}/ble/ble_services/ble_dis
-					${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs
-					${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas_c
-					${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs_c
 					${NORDIC_SDK_ROOT}/device
 					${NORDIC_SDK_ROOT}/drivers_nrf/clock
                     ${NORDIC_SDK_ROOT}/drivers_nrf/common
@@ -70,12 +65,39 @@ include_directories(${NORDIC_SDK_ROOT}/ble/common
 					${NORDIC_SDK_ROOT}/drivers_nrf/rtc
 					${NORDIC_SDK_ROOT}/libraries/button
 					${NORDIC_SDK_ROOT}/libraries/fifo
+					${NORDIC_SDK_ROOT}/libraries/scheduler
 					${NORDIC_SDK_ROOT}/libraries/sensorsim
 					${NORDIC_SDK_ROOT}/libraries/timer
 					${NORDIC_SDK_ROOT}/libraries/trace
 					${NORDIC_SDK_ROOT}/libraries/uart
 					${NORDIC_SDK_ROOT}/libraries/util
                     ${NORDIC_SDK_ROOT}/toolchain)
+
+if (SUPPORT_BLE_PERIPHERAL)
+  include_directories(${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bps
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_cscs
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_dfu
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_dis
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_gls
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ias
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hids
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_lls
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_nus
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_tps)
+endif()
+
+if (SUPPORT_BLE_CENTRAL)
+  include_directories(${NORDIC_SDK_ROOT}/ble/ble_services/ble_ancs_c
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ans_c
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas_c
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_cts_c
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs_c
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ias_c
+                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs_c)
+endif()
 
 if (NORDIC_SOFT_DEVICE_VERSION)
   include_directories(${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler
