@@ -29,6 +29,10 @@
 
 extern const ARM_DRIVER_USART Driver_UART_DEBUG;
 
+/* System oscillator rate and clock rate on the CLKIN pin */
+const uint32_t OscRateIn = 12000000;
+const uint32_t ExtRateIn = 0;
+
 void __libc_init_array(void) {
 	// Do nothing. NXP LPCOpen already initialized the .data and .bss segments
 }
