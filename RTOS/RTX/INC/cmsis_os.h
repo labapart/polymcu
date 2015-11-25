@@ -443,7 +443,7 @@ osStatus osMutexDelete (osMutexId mutex_id);
 extern const osSemaphoreDef_t os_semaphore_def_##name
 #else                            // define the object
 #define osSemaphoreDef(name)  \
-uint32_t os_semaphore_cb_##name[2] = { 0 }; \
+uint32_t os_semaphore_cb_##name[3] = { 0 }; \
 const osSemaphoreDef_t os_semaphore_def_##name = { (os_semaphore_cb_##name) }
 #endif
 
