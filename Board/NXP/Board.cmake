@@ -27,8 +27,11 @@
 # Tell RTOS we are running at 96Mhz
 set(RTOS_CLOCK 96000000)
 
-# Support
-set(SUPPORT_NXP_USE_XTAL 1)	# Use the external oscillator to derive it and get a 48Mhz oscillator for the USB PLL
+# USB Support
+if (SUPPORT_DEVICE_USB)
+  # Use the external oscillator to derive it and get a 48Mhz oscillator for the USB PLL
+  set(SUPPORT_NXP_USE_XTAL 1)
+endif()
 
 # List of HW modules
 list(APPEND LIST_MODULES Device/NXP
