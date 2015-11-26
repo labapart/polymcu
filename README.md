@@ -197,6 +197,7 @@ RTOS variables
 | RTOS_MAIN_STACK_SIZE            | integer    | Size in bytes of the main task                    |
 | RTOS_IDLE_STACK_SIZE            | integer    | Size in bytes of the idle task                    |
 | RTOS_TIMER_STACK_SIZE           | integer    | Size in bytes of the timer task                   |
+| RTOS_TIMER_CALLBACK_COUNT       | integer    | Number of concurrent active timer callback functions |
 | RTOS_TASK_PRIVATE_STACK_COUNT   | integer    | Number of private tasks                           |
 | RTOS_TASK_PRIVATE_STACK_SIZE    | integer    | Size in bytes of the private task                 |
 | RTOS_STACK_WATERMARK            | (0\|1)     | Disable/Enable the stack watermark                |
