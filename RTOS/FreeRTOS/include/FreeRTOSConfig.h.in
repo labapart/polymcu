@@ -101,7 +101,7 @@ extern uint32_t SystemCoreClock;
 
 #cmakedefine RTOS_TICK
 #ifdef RTOS_TICK
-  #define configTICK_RATE_HZ			( ( TickType_t ) @RTOS_TICK@ )
+  #define configTICK_RATE_HZ			( ( TickType_t ) 1E6/@RTOS_TICK@ )
 #else
   #define configTICK_RATE_HZ			( ( TickType_t ) 1000 )
 #endif
@@ -166,6 +166,13 @@ to exclude the API function. */
 #ifdef SUPPORT_RTOS_NO_CMSIS
   // Required for CMSIS wrapper
   #define INCLUDE_xTaskGetCurrentTaskHandle	1
+#endif
+
+#cmakedefine RTOS_TASK_COUNT
+#ifdef RTOS_TASK_COUNT
+  #define RTOS_TASK_COUNT @RTOS_TASK_COUNT@
+#else
+  #define RTOS_TASK_COUNT 10
 #endif
 
 /* Normal assert() semantics without relying on the provision of an assert.h

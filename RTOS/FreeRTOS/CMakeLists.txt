@@ -32,7 +32,12 @@ find_package(RTOS)
 # Generate Configuration header file
 configure_file(include/FreeRTOSConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/FreeRTOSConfig.h)
 
-set(FreeRTOS_SRCS list.c queue.c tasks.c timers.c hook.c)
+set(FreeRTOS_SRCS event_groups.c
+                  hook.c
+                  list.c
+                  queue.c
+                  tasks.c
+                  timers.c)
 
 list(APPEND FreeRTOS_SRCS "${CMAKE_CURRENT_LIST_DIR}/portable/MemMang/heap_4.c")
 

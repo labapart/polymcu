@@ -60,8 +60,8 @@
 
 
 #define osFeature_MainThread   1       ///< main can be thread
-#define osFeature_Pool         1       ///< Memory Pools available
-#define osFeature_MailQ        1       ///< Mail Queues available
+#define osFeature_Pool         0       ///< Memory Pools available - not supported by FreeRTOS
+#define osFeature_MailQ        0       ///< Mail Queues available - not supported by FreeRTOS
 #define osFeature_MessageQ     1       ///< Message Queues available
 #define osFeature_Signals      16      ///< 16 Signal Flags available per thread
 #define osFeature_Semaphore    65535   ///< Maximum count for \ref osSemaphoreCreate function
@@ -87,14 +87,14 @@ extern "C"
 
 /// Priority used for thread control.
 typedef enum  {
-  osPriorityIdle          = -3,          ///< priority: idle (lowest)
-  osPriorityLow           = -2,          ///< priority: low
-  osPriorityBelowNormal   = -1,          ///< priority: below normal
-  osPriorityNormal        =  0,          ///< priority: normal (default)
-  osPriorityAboveNormal   = +1,          ///< priority: above normal
-  osPriorityHigh          = +2,          ///< priority: high
-  osPriorityRealtime      = +3,          ///< priority: realtime (highest)
-  osPriorityError         =  0x84        ///< system cannot determine priority or thread has illegal priority
+  osPriorityIdle          = 0,          ///< priority: idle (lowest)
+  osPriorityLow           = 1,          ///< priority: low
+  osPriorityBelowNormal   = 2,          ///< priority: below normal
+  osPriorityNormal        = 3,          ///< priority: normal (default)
+  osPriorityAboveNormal   = 4,          ///< priority: above normal
+  osPriorityHigh          = 5,          ///< priority: high
+  osPriorityRealtime      = 6,          ///< priority: realtime (highest)
+  osPriorityError         = 0x84        ///< system cannot determine priority or thread has illegal priority
 } osPriority;
 
 /// Timeout value.
@@ -135,30 +135,27 @@ typedef void (*os_ptimer) (void const *argument);
 // >>> the following data type definitions may shall adapted towards a specific RTOS
 
 /// Thread ID identifies the thread (pointer to a thread control block).
-typedef void *osThreadId;
+typedef struct os_thread_t *osThreadId;
 
 /// Timer ID identifies the timer (pointer to a timer control block).
-typedef struct os_timer_cb *osTimerId;
+typedef struct os_timer_t *osTimerId;
 
 /// Mutex ID identifies the mutex (pointer to a mutex control block).
-typedef struct os_mutex_cb *osMutexId;
+typedef struct os_mutex_t *osMutexId;
 
 /// Semaphore ID identifies the semaphore (pointer to a semaphore control block).
-typedef struct SemaphoreHandle_t *osSemaphoreId;
-
-/// Pool ID identifies the memory pool (pointer to a memory pool control block).
-typedef struct os_pool_cb *osPoolId;
+typedef struct os_semaphore_t *osSemaphoreId;
 
 /// Message ID identifies the message queue (pointer to a message queue control block).
-typedef struct os_messageQ_cb *osMessageQId;
+typedef struct os_message_t *osMessageQId;
 
 /// Mail ID identifies the mail queue (pointer to a mail queue control block).
-typedef struct os_mailQ_cb *osMailQId;
+typedef struct os_mail_t *osMailQId;
 
 
 /// Thread Definition structure contains startup information of a thread.
 typedef struct os_thread_def  {
-  os_pthread               pthread;    ///< start address of thread function
+  os_pthread             pthread;      ///< start address of thread function
   osPriority             tpriority;    ///< initial thread priority
   uint32_t               instances;    ///< maximum number of instances of that thread function
   uint32_t               stacksize;    ///< stack size requirements in bytes; 0 is default stack size
@@ -190,7 +187,7 @@ typedef struct os_pool_def  {
 /// Definition structure for message queue.
 typedef struct os_messageQ_def  {
   uint32_t                queue_sz;    ///< number of elements in the queue
-  void                       *pool;    ///< memory array for messages
+  void                      *queue;
 } osMessageQDef_t;
 
 /// Definition structure for mail queue.
@@ -235,6 +232,7 @@ int32_t osKernelRunning(void);
 extern uint32_t const os_tickfreq;
 extern uint16_t const os_tickus_i;
 extern uint16_t const os_tickus_f;
+extern uint32_t const os_tick_period_ms;
 /// \endcond
 
 /// Get the RTOS kernel system timer counter.
@@ -251,7 +249,7 @@ uint32_t osKernelSysTick (void);
 /*
 #define osKernelSysTickMicroSec(microsec) (((uint64_t)microsec * (osKernelSysTickFrequency)) / 1000000)
 */
-#define osKernelSysTickMicroSec(microsec) ((microsec * os_tickus_i) + ((microsec * os_tickus_f) >> 16))
+#define osKernelSysTickMicroSec(microsec) (microsec / (os_tick_period_ms * 1000))
 
 #endif    // System Timer available
 
@@ -269,7 +267,7 @@ extern const osThreadDef_t os_thread_def_##name
 #else                            // define the object
 #define osThreadDef(name, priority, instances, stacksz)  \
 const osThreadDef_t os_thread_def_##name = \
-{ (name), (priority), (instances), (stacksz)  }
+{ (name), (priority), (instances), (stacksz) }
 #endif
 
 /// Access a Thread definition.
