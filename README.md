@@ -277,3 +277,14 @@ $3 = 0x21004692
 ```
 (gdb) dump binary memory /tmp/gdb.bin 0x0 0x1000
 ```
+
+Debug UART Settings
+===================
+
+All the board UARTs are set with the following settings:
+
+- Baud Rate: 115200
+- Data Bits: 8
+- Stop Bits: 1
+- Parity: None
+- Flow Control: None
