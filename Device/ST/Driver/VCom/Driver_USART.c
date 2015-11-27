@@ -160,7 +160,7 @@ int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 	  - Hardware flow control disabled (RTS and CTS signals) */
 	gUartHandle.Instance        = USARTx;
 
-	gUartHandle.Init.BaudRate   = 9600;
+	gUartHandle.Init.BaudRate   = 115200;
 	gUartHandle.Init.WordLength = UART_WORDLENGTH_8B;
 	gUartHandle.Init.StopBits   = UART_STOPBITS_1;
 	gUartHandle.Init.Parity     = UART_PARITY_NONE;
