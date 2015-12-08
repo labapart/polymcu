@@ -36,11 +36,11 @@ extern USBD_HANDLE_T g_hUsb;
 
 /**
  * @brief	USB Device interface init routine.
+ * @details Memory used by the USB device is reserved by updating pUsbParam.
  * @param	hUsb		: Handle to USB device stack
  * @param	pDesc		: Pointer to the USB Core descriptors
  * @param	pUsbParam	: Pointer to the USB Parameters
  * @return	On success returns LPC_OK.
- * TODO:OM: Should we update the memory information as the Keyboard_init() was doing?
  */
 typedef ErrorCode_t (*USBD_FUNC_INIT)(USBD_HANDLE_T hUsb,
 									  USB_CORE_DESCS_T *pDesc,
