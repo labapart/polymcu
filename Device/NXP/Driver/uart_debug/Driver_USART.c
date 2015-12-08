@@ -65,6 +65,8 @@ static const ARM_USART_CAPABILITIES DriverCapabilities = {
     0  /* Signal RI change event: \ref ARM_USART_EVENT_RI */
 };
 
+static ARM_USART_SignalEvent_t m_SignalEvent;
+
 //
 //   Functions
 //
@@ -77,7 +79,6 @@ ARM_USART_CAPABILITIES ARM_USART_GetCapabilities(void) {
 	return DriverCapabilities;
 }
 
-//TODO: Add support for ARM_USART_SignalEvent_t cb_event
 int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 	Chip_UART_Init(LPC_UART0);
 	Chip_UART_SetBaud(LPC_UART0, 115200);
@@ -85,6 +86,8 @@ int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 
 	// Enable UART Transmit
 	Chip_UART_TXEnable(LPC_UART0);
+
+	m_SignalEvent = cb_event;
 
 	return ARM_DRIVER_OK;
 }
@@ -106,11 +109,20 @@ int32_t ARM_USART_Send(const void *data, uint32_t num) {
 	if ((len >= 2) && (ptr[len-1] == '\n') && (ptr[len-2] != '\r')) {
 		_ttywrch('\r');
 	}
+
+	if (m_SignalEvent) {
+		m_SignalEvent(ARM_USART_EVENT_SEND_COMPLETE);
+	}
 	return sent;
 }
 
 int32_t ARM_USART_Receive(void *data, uint32_t num) {
-	return Chip_UART_Read(LPC_UART0, data, num);
+	int32_t ret = Chip_UART_Read(LPC_UART0, data, num);
+
+	if (m_SignalEvent) {
+		m_SignalEvent(ARM_USART_EVENT_RECEIVE_COMPLETE);
+	}
+	return ret;
 }
 
 int32_t ARM_USART_Transfer(const void *data_out, void *data_in, uint32_t num) {
