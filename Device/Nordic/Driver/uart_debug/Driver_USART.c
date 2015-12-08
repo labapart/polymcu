@@ -79,6 +79,8 @@ static const ARM_USART_CAPABILITIES DriverCapabilities = {
     0  /* Signal RI change event: \ref ARM_USART_EVENT_RI */
 };
 
+static ARM_USART_SignalEvent_t m_SignalEvent;
+
 //
 //   Functions
 //
@@ -99,29 +101,31 @@ void uart_error_handle(app_uart_evt_t * p_event) {
     }
 }
 
-//TODO: Add support for ARM_USART_SignalEvent_t cb_event
 int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 	uint32_t err_code;
 
+	m_SignalEvent = cb_event;
+
 #if NORDIC_UART_FIFO
-    APP_UART_FIFO_INIT(&comm_params,
-                       UART_RX_BUF_SIZE,
-                       UART_TX_BUF_SIZE,
-                       uart_error_handle,
-                       APP_IRQ_PRIORITY_LOW,
-                       err_code);
+	APP_UART_FIFO_INIT(&comm_params,
+					UART_RX_BUF_SIZE,
+					UART_TX_BUF_SIZE,
+					uart_error_handle,
+					APP_IRQ_PRIORITY_LOW,
+					err_code);
 #else
-    APP_UART_INIT(&comm_params,
-    		      uart_error_handle,
-    		      APP_IRQ_PRIORITY_LOW,
-    		      err_code);
+	APP_UART_INIT(&comm_params,
+					uart_error_handle,
+					APP_IRQ_PRIORITY_LOW,
+					err_code);
 #endif
-    if (err_code != NRF_SUCCESS) {
-    	set_led(0, 1);
-    	return ARM_DRIVER_ERROR;
-    } else {
-    	return ARM_DRIVER_OK;
-    }
+
+	if (err_code != NRF_SUCCESS) {
+		set_led(0, 1);
+		return ARM_DRIVER_ERROR;
+	} else {
+		return ARM_DRIVER_OK;
+	}
 }
 
 int32_t ARM_USART_Uninitialize(void) {
@@ -138,40 +142,46 @@ int32_t ARM_USART_PowerControl(ARM_POWER_STATE state) {
 }
 
 int32_t ARM_USART_Send(const void *data, uint32_t num) {
-    int i;
-    const char* p_char = data;
-    uint32_t err_code;
+	int i;
+	const char* p_char = data;
+	uint32_t err_code;
 
-    for (i = 0; i < num; i++) {
-    	do {
-    		err_code = app_uart_put(*p_char);
-    	} while (err_code != NRF_SUCCESS);
-    	p_char++;
-    }
+	for (i = 0; i < num; i++) {
+		do {
+			err_code = app_uart_put(*p_char);
+		} while (err_code != NRF_SUCCESS);
+		p_char++;
+	}
 
-    // Add a return carriage
-    if (*(p_char - 1) == '\n') {
-    	do {
+	// Add a return carriage
+	if (*(p_char - 1) == '\n') {
+		do {
 			err_code = app_uart_put('\r');
 		} while (err_code != NRF_SUCCESS);
-    }
+	}
 
-    return num;
+	if (m_SignalEvent) {
+		m_SignalEvent(ARM_USART_EVENT_SEND_COMPLETE);
+	}
+	return num;
 }
 
 int32_t ARM_USART_Receive(void *data, uint32_t num) {
-    int i;
-    const char* p_char = data;
-    uint32_t err_code;
+	int i;
+	const char* p_char = data;
+	uint32_t err_code;
 
-    for (i = 0; i < num; i++) {
-    	do {
+	for (i = 0; i < num; i++) {
+		do {
 			err_code = app_uart_get((uint8_t *)p_char);
 		} while (err_code != NRF_SUCCESS);
-    	p_char++;
-    }
+		p_char++;
+	}
 
-    return num;
+	if (m_SignalEvent) {
+		m_SignalEvent(ARM_USART_EVENT_RECEIVE_COMPLETE);
+	}
+	return num;
 }
 
 int32_t ARM_USART_Transfer(const void *data_out, void *data_in, uint32_t num) {
