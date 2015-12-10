@@ -35,7 +35,8 @@ add_definitions(-DRIOT_VERSION="2015.09")
 # Remove '-DDEBUG' to avoid to get conflict with the RioT's macro DEBUG() 
 string(REPLACE "-DDEBUG" "" CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 
-set(riot_SRSC ${RIOT_CORE_ROOT}/atomic.c
+set(riot_SRSC riotos.c
+              ${RIOT_CORE_ROOT}/atomic.c
               ${RIOT_CORE_ROOT}/bitarithm.c
               ${RIOT_CORE_ROOT}/c11_atomic.c
               ${RIOT_CORE_ROOT}/clist.c
