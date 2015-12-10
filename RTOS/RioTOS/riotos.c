@@ -73,3 +73,17 @@ __attribute__((weak)) enum lpm_mode lpm_arch_set(enum lpm_mode target)
     }
     return 0;
 }
+
+__attribute__((naked)) void SVC_Handler(void)
+{
+    __ASM volatile (
+    "b  isr_svc               \n"
+    );
+}
+
+__attribute__((naked)) void PendSV_Handler(void)
+{
+    __ASM volatile (
+    "b  isr_pendsv            \n"
+    );
+}
