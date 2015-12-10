@@ -59,4 +59,8 @@ list(APPEND riot_SRSC ${RIOT_CPU_ROOT}/cortexm_common/atomic_arch.c
                       ${RIOT_CPU_ROOT}/cortexm_common/reboot_arch.c
                       ${RIOT_CPU_ROOT}/cortexm_common/thread_arch.c)
 
+if (NOT DEFINED SUPPORT_RTOS_NO_CMSIS)
+  list(APPEND riot_SRSC cmsis.c)
+endif()
+
 add_library(riot_rtos STATIC ${riot_SRSC})

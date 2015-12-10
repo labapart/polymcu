@@ -41,3 +41,10 @@ include_directories(${RIOT_CPU_ROOT}/cortexm_common/include)
 add_definitions(-DCOREIF_NG=1)
 
 set(RTOS_LIBRARIES riot_rtos)
+
+# CMSIS RTOS support
+if(SUPPORT_RTOS_NO_CMSIS)
+  add_definitions(-DSUPPORT_RTOS_NO_CMSIS)
+else()
+  add_definitions(-D__CMSIS_RTOS)
+endif()
