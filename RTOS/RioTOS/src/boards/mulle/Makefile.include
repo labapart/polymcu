@@ -1,0 +1,119 @@
+# define the cpu used by the Mulle board
+export CPU = k60
+
+# Default GDB port
+export GDBPORT ?= 3333
+
+# MULLE_SERIAL is used to select which specific Mulle board we are compiling for.
+# This was called MULLE_BOARD_SERIAL_NUMBER previously, renamed because
+# MULLE_BOARD_SERIAL_NUMBER is too long to type.
+ifdef MULLE_SERIAL
+  ifeq "200" "$(word 1, $(sort 200 $(MULLE_SERIAL)))"
+    # >= 200
+    ifneq "220" "$(word 1, $(sort 220 $(MULLE_SERIAL)))"
+      # < 220
+      CPU_MODEL = K60DN256ZVLL10
+      # It seems some of the MK60DZ10 devices have problems with JTAG speeds >= around 400 KHz
+      # when programming, we reduce the speed to 300 KHz with this command.
+      CPU_OOCD_FLAGS += -c 'adapter_khz 300'
+    else
+      # >= 220
+      CPU_MODEL = K60DN512VLL10
+    endif
+  endif
+  CFLAGS += -DMULLE_SERIAL=$(MULLE_SERIAL)
+endif
+
+### CPU part number (must have a specific linker script for each part)
+# Note that MK60DN256ZVLL10 (version 1.x) and MK60DN256VLL10 (version 2.x, no Z)
+# only differ in some register locations etc, not in the actual memory layout,
+# so it is safe to use the same linker script for both version 1.x and version
+# 2.x silicon.
+# The linker script needs to know the flash and RAM sizes of the device.
+
+ifeq ($(CPU_MODEL),)
+  CPU_MODEL = K60DN512VLL10
+endif
+
+export CPU_MODEL
+
+# OpenOCD settings for Mulle board.
+# Try to determine which version of the OpenOCD config file we should use.
+# Specify PROGRAMMER_VERSION or PROGRAMMER_SERIAL to choose a specific programmer board.
+ifeq ($(PROGRAMMER_VERSION),)
+  ifneq ($(PROGRAMMER_SERIAL),)
+    # Makefile-way of comparing numbers, using lexicographical sorting since we don't have any arithmetic comparisons.
+    # Programmers with serial 100 -- 148 are version 0.60
+    # Programmers with serial 301 -- 330 are version 0.70
+    ifeq "100" "$(word 1, $(sort 100 $(PROGRAMMER_SERIAL)))"
+      # >= 100
+      ifneq "149" "$(word 1, $(sort 149 $(PROGRAMMER_SERIAL)))"
+        # < 149
+        PROGRAMMER_VERSION = 0.60
+      else
+        # >= 149
+        PROGRAMMER_VERSION = 0.70
+      endif
+    endif
+  endif
+  # Default to version 0.60 programmer for now.
+  PROGRAMMER_VERSION ?= 0.60
+endif
+
+export OPENOCD_CONFIG = $(RIOTBOARD)/$(BOARD)/dist/openocd/mulle-programmer-$(PROGRAMMER_VERSION).conf
+
+# Add serial matching command
+ifneq ($(PROGRAMMER_SERIAL),)
+  OPENOCD_EXTRA_INIT += -c 'ftdi_serial $(PROGRAMMER_SERIAL)'
+endif
+
+OPENOCD_EXTRA_INIT += $(CPU_OOCD_FLAGS)
+
+# Host OS name
+OS := $(shell uname)
+
+ifeq ($(PORT),)
+  # try to find tty name by serial number, only works on Linux currently.
+  ifeq ($(OS),Linux)
+    ifneq ($(PROGRAMMER_SERIAL),)
+      PORT := $(shell $(RIOTBASE)/dist/tools/usb-serial/find-tty.sh '^$(PROGRAMMER_SERIAL)$$')
+    else
+      # find-tty.sh will return the first USB tty if no serial is given.
+      PORT := $(shell $(RIOTBASE)/dist/tools/usb-serial/find-tty.sh)
+  endif
+  else ifeq ($(OS),Darwin)
+    PORT := $(shell ls -1 /dev/tty.usbserial* | head -n 1)
+  endif
+endif
+ifeq ($(PORT),)
+  # fall back to a sensible default
+  PORT := /dev/ttyUSB0
+endif
+
+# We need special handling of the watchdog if we want to speed up the flash
+# verification by using the MCU to compute the image checksum after flashing.
+# wdog-disable.bin is a precompiled binary which will disable the watchdog and
+# return control to the debugger (OpenOCD)
+export OPENOCD_PRE_VERIFY_CMDS += \
+  -c 'load_image $(RIOTCPU)/kinetis_common/dist/wdog-disable.bin 0x20000000 bin' \
+  -c 'resume 0x20000000'
+export OPENOCD_EXTRA_INIT
+export PRE_FLASH_CHECK_SCRIPT = $(RIOTCPU)/kinetis_common/dist/check-fcfield-hex.sh
+
+.PHONY: flash
+flash: $(RIOTCPU)/kinetis_common/dist/wdog-disable.bin
+
+# Reset the default goal.
+.DEFAULT_GOAL :=
+
+# this board uses openocd
+include $(RIOTBOARD)/Makefile.include.openocd
+
+# setup serial terminal
+include $(RIOTBOARD)/Makefile.include.serial
+
+# include board dependencies
+include $(RIOTBOARD)/$(BOARD)/Makefile.dep
+
+# include cortex defaults
+include $(RIOTBOARD)/Makefile.include.cortexm_common

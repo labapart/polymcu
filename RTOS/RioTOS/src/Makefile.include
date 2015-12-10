@@ -1,0 +1,434 @@
+all:
+
+# set undefined variables
+RIOTBASE ?= $(shell dirname "$(lastword $(MAKEFILE_LIST))")
+RIOTBASE := $(abspath $(RIOTBASE))
+
+CCACHE_BASEDIR := $(RIOTBASE)
+
+RIOTCPU ?= $(RIOTBASE)/cpu
+RIOTCPU := $(abspath $(RIOTCPU))
+
+RIOTBOARD ?= $(RIOTBASE)/boards
+RIOTBOARD := $(abspath $(RIOTBOARD))
+
+RIOTPROJECT ?= $(shell git rev-parse --show-toplevel 2>/dev/null || pwd)
+RIOTPROJECT := $(abspath $(RIOTPROJECT))
+
+# Include Docker settings near the top because we need to build the environment
+# command line before some of the variable origins are overwritten below when
+# using abspath, strip etc.
+include $(RIOTBASE)/Makefile.docker
+
+# Static code analysis tools provided by LLVM
+include $(RIOTBASE)/Makefile.scan-build
+
+# Path to the current directory relative to the git root
+BUILDRELPATH ?= $(shell git rev-parse --show-prefix)
+
+APPDIR ?= $(CURDIR)
+APPDIR := $(abspath $(APPDIR))/
+
+BINDIRBASE ?= $(APPDIR)/bin
+BINDIRBASE := $(abspath $(BINDIRBASE))
+
+BINDIR ?= $(BINDIRBASE)/$(BOARD)
+BINDIR := $(abspath $(BINDIR))/
+
+COLOR_GREEN  :=
+COLOR_RED    :=
+COLOR_PURPLE :=
+COLOR_RESET  :=
+COLOR_ECHO   := /bin/echo
+
+OS := $(shell uname)
+
+ifeq (, ${JENKINS_URL})
+  ifeq (0,  $(shell tput colors 2>&1 > /dev/null; echo $$?))
+    COLOR_GREEN  := \033[1;32m
+    COLOR_RED    := \033[1;31m
+    COLOR_YELLOW := \033[1;33m
+    COLOR_PURPLE := \033[1;35m
+    COLOR_RESET  := \033[0m
+    ifeq ($(OS),Darwin)
+      COLOR_ECHO   := echo -e
+      SHELL=bash
+    else
+      COLOR_ECHO   := /bin/echo -e
+    endif
+  endif
+endif
+
+ifeq ($(OS),Darwin)
+  OPEN   := open
+else
+  OPEN   := xdg-open
+endif
+
+ifeq ($(QUIET),1)
+  AD=@
+  MAKEFLAGS += --no-print-directory
+else
+  AD=
+endif
+
+# Fail on warnings. Can be overridden by `make WERROR=0`.
+WERROR ?= 1
+export WERROR
+ifeq ($(WERROR),1)
+  CFLAGS += -Werror
+endif
+
+ifneq (10,$(if ${RIOT_VERSION},1,0)$(if ${__RIOTBUILD_FLAG},1,0))
+
+# Provide a shallow sanity check. You cannot call `make` in a module directory.
+export __RIOTBUILD_FLAG := RIOT
+
+BOARD := $(strip $(BOARD))
+APPLICATION := $(strip $(APPLICATION))
+
+# provide common external programs for `Makefile.include`s
+
+ifeq (,$(and $(DOWNLOAD_TO_STDOUT),$(DOWNLOAD_TO_FILE)))
+  ifeq (,$(WGET))
+    ifeq (0,$(shell which wget 2>&1 > /dev/null ; echo $$?))
+      WGET := $(shell which wget)
+    endif
+  endif
+  ifeq (,$(CURL))
+    ifeq (0,$(shell which curl 2>&1 > /dev/null ; echo $$?))
+      CURL := $(shell which curl)
+    endif
+  endif
+  ifeq (,$(WGET)$(CURL))
+    $(error Neither wget nor curl is installed!)
+  endif
+
+  ifeq (,$(DOWNLOAD_TO_STDOUT))
+    DOWNLOAD_TO_STDOUT := $(if $(CURL),$(CURL) -s,$(WGET) -q -O-)
+  endif
+  ifeq (,$(DOWNLOAD_TO_FILE))
+    DOWNLOAD_TO_FILE := $(if $(WGET),$(WGET) -nv -c -O,$(CURL) -s -o)
+  endif
+endif
+
+ifeq (,$(UNZIP_HERE))
+  ifeq (0,$(shell which unzip 2>&1 > /dev/null ; echo $$?))
+    UNZIP_HERE := $(shell which unzip) -q
+  else
+    ifeq (0,$(shell which 7z 2>&1 > /dev/null ; echo $$?))
+      UNZIP_HERE := $(shell which 7z) x -bd
+    else
+      $(error Neither unzip nor 7z is installed.)
+    endif
+  endif
+endif
+
+ifneq (0,$(shell test -d $(RIOTBOARD)/$(BOARD); echo $$?))
+    $(error The specified board $(BOARD) does not exist.)
+endif
+
+# mandatory includes!
+include $(RIOTBASE)/Makefile.modules
+include $(RIOTBOARD)/$(BOARD)/Makefile.include
+include $(RIOTCPU)/$(CPU)/Makefile.include
+
+# get number of interfaces straight before resolving dependencies
+GNRC_NETIF_NUMOF ?= 1
+
+ifneq ($(GNRC_NETIF_NUMOF),1)
+  CFLAGS += -DGNRC_NETIF_NUMOF=$(GNRC_NETIF_NUMOF)
+endif
+
+include $(RIOTBASE)/Makefile.dep
+
+USEMODULE += $(filter-out $(DISABLE_MODULE), $(DEFAULT_MODULE))
+
+ifeq ($(strip $(MCU)),)
+	MCU = $(CPU)
+endif
+
+# if you want to publish the board into the sources as an uppercase #define
+BOARDDEF := $(shell echo $(BOARD) | tr 'a-z' 'A-Z' | tr '-' '_')
+CPUDEF := $(shell echo $(CPU) | tr 'a-z' 'A-Z' | tr '-' '_')
+MCUDEF := $(shell echo $(MCU) | tr 'a-z' 'A-Z' | tr '-' '_')
+CFLAGS += -DBOARD_$(BOARDDEF)=\"$(BOARD)\" -DRIOT_BOARD=BOARD_$(BOARDDEF)
+CFLAGS += -DCPU_$(CPUDEF)=\"$(CPU)\" -DRIOT_CPU=CPU_$(CPUDEF)
+CFLAGS += -DMCU_$(MCUDEF)=\"$(MCU)\" -DRIOT_MCU=MCU_$(MCUDEF)
+
+# OSX fails to create empty archives. Provide a wrapper to catch that error.
+ifneq (0, $(shell mkdir -p $(BINDIR); $(AR) rc $(BINDIR)empty-archive.a 2> /dev/null; \
+            echo $$?; rm -f $(BINDIR)empty-archive.a 2>&1 > /dev/null))
+	AR := $(RIOTBASE)/dist/ar-wrapper $(AR)
+endif
+
+# Feature test default CFLAGS and LINKFLAGS for the set compiled.
+include $(RIOTBASE)/Makefile.cflags
+
+# make the RIOT version available to the program
+ifeq ($(origin RIOT_VERSION), undefined)
+  GIT_STRING := $(shell git --git-dir="$(RIOTBASE)/.git" describe --always --abbrev=4 --dirty=-`hostname` 2> /dev/null)
+  ifneq (,$(GIT_STRING))
+    GIT_BRANCH := $(shell git --git-dir="$(RIOTBASE)/.git" rev-parse --abbrev-ref HEAD)
+    ifeq ($(strip $(GIT_BRANCH)),master)
+      RIOT_VERSION := $(GIT_STRING)
+    else
+      RIOT_VERSION := $(GIT_STRING)-$(GIT_BRANCH)
+    endif
+  else
+    RIOT_VERSION := "UNKNOWN (builddir: $(RIOTBASE))"
+  endif
+endif
+
+ifneq (,$(RIOT_VERSION_OVERRIDE))
+export CFLAGS += -DRIOT_VERSION=\"$(RIOT_VERSION_OVERRIDE)\"
+else
+export CFLAGS += -DRIOT_VERSION=\"$(RIOT_VERSION)\"
+endif
+
+# the binaries to link
+BASELIBS += $(BINDIR)$(BOARD)_base.a
+BASELIBS += $(BINDIR)${APPLICATION}.a
+BASELIBS += $(USEPKG:%=${BINDIR}%.a)
+
+.PHONY: all clean flash term doc debug debug-server reset objdump help info-modules
+.PHONY: ..in-docker-container
+
+ELFFILE ?= $(BINDIR)$(APPLICATION).elf
+HEXFILE ?= $(ELFFILE:.elf=.hex)
+
+# variables used to compile and link c++
+CPPMIX ?= $(if $(wildcard *.cpp),1,)
+
+# We assume $(LINK) to be gcc-like. Use `LINKFLAGPREFIX :=` for ld-like linker options.
+LINKFLAGPREFIX ?= -Wl,
+
+DIRS += $(EXTERNAL_MODULE_DIRS)
+
+ifeq ($(BUILD_IN_DOCKER),1)
+all: ..in-docker-container
+else
+## make script for your application. Build RIOT-base here!
+all: ..compiler-check ..build-message $(USEPKG:%=${BINDIR}%.a) $(APPDEPS)
+	$(AD)DIRS="$(DIRS)" "$(MAKE)" -C $(CURDIR) -f $(RIOTBASE)/Makefile.application
+ifeq (,$(RIOTNOLINK))
+ifeq ($(BUILDOSXNATIVE),1)
+	$(AD)$(if $(CPPMIX),$(CXX),$(LINK)) $(UNDEF) -o $(ELFFILE) $$(find $(BASELIBS) -size +8c) $(LINKFLAGS) $(LINKFLAGPREFIX)-no_pie
+else
+	$(AD)$(if $(CPPMIX),$(CXX),$(LINK)) $(UNDEF) -o $(ELFFILE) $(LINKFLAGPREFIX)--start-group $(BASELIBS) -lm $(LINKFLAGPREFIX)--end-group  $(LINKFLAGPREFIX)-Map=$(BINDIR)$(APPLICATION).map $(LINKFLAGPREFIX)--cref $(LINKFLAGS)
+endif
+	$(AD)$(SIZE) $(ELFFILE)
+	$(AD)$(OBJCOPY) $(OFLAGS) $(ELFFILE) $(HEXFILE)
+endif
+endif # BUILD_IN_DOCKER
+
+..compiler-check:
+	$(AD)command -v $(CC) >/dev/null 2>&1 || \
+		{ $(COLOR_ECHO) \
+		'${COLOR_RED} Compiler $(CC) is required but not found in PATH.  Aborting.${COLOR_RESET}'; \
+		exit 1; }
+
+..build-message:
+	@$(COLOR_ECHO) '${COLOR_GREEN}Building application "$(APPLICATION)" for "$(BOARD)" with MCU "$(MCU)".${COLOR_RESET}'
+	@$(COLOR_ECHO)
+
+# add extra include paths for packages in $(USEMODULE)
+export USEMODULE_INCLUDES =
+
+include $(RIOTBASE)/sys/Makefile.include
+include $(RIOTBASE)/drivers/Makefile.include
+
+USEMODULE_INCLUDES_ = $(shell echo $(USEMODULE_INCLUDES) | tr ' ' '\n' | awk '!a[$$0]++' | tr '\n' ' ')
+
+INCLUDES += $(USEMODULE_INCLUDES_:%=-I%)
+
+# The `clean` needs to be serialized before everything else.
+ifneq (, $(filter clean, $(MAKECMDGOALS)))
+    all $(BASELIBS) $(USEPKG:%=$(RIOTBASE)/pkg/%/Makefile.include): clean
+endif
+
+# include Makefile.includes for packages in $(USEPKG)
+$(RIOTBASE)/pkg/%/Makefile.include::
+	$(AD)"$(MAKE)" -C $(RIOTBASE)/pkg/$* Makefile.include
+
+.PHONY: $(USEPKG:%=$(RIOTBASE)/pkg/%/Makefile.include)
+-include $(USEPKG:%=$(RIOTBASE)/pkg/%/Makefile.include)
+
+.PHONY: $(USEPKG:%=${BINDIR}%.a)
+$(USEPKG:%=${BINDIR}%.a):
+	@mkdir -p ${BINDIR}
+	"$(MAKE)" -C $(RIOTBASE)/pkg/$(patsubst ${BINDIR}%.a,%,$@)
+
+clean:
+	-@for i in $(USEPKG) ; do "$(MAKE)" -C $(RIOTBASE)/pkg/$$i clean ; done
+	-@rm -rf $(BINDIR)
+	-@rm -rf $(SCANBUILD_OUTPUTDIR)
+
+# Remove intermediates, but keep the .elf, .hex and .map etc.
+clean-intermediates:
+	-@for i in $(USEPKG) ; do "$(MAKE)" -C $(RIOTBASE)/pkg/$$i clean ; done
+	-@rm -rf $(BINDIR)/*.a $(BINDIR)/*/
+
+distclean:
+	-@for i in $(USEPKG) ; do "$(MAKE)" -C $(RIOTBASE)/pkg/$$i distclean ; done
+	-@rm -rf $(BINDIRBASE)
+
+flash: all
+	$(AD)command -v $(FLASHER) >/dev/null 2>&1 || \
+		{ $(COLOR_ECHO) \
+		'${COLOR_RED} Flash program $(FLASHER) not found. Aborting.${COLOR_RESET}'; \
+		exit 1; }
+	$(FLASHER) $(FFLAGS)
+
+term: $(filter flash, $(MAKECMDGOALS))
+	$(AD)command -v $(TERMPROG) >/dev/null 2>&1 || \
+		{ $(COLOR_ECHO) \
+		'${COLOR_RED} Terminal program $(TERMPROG) not found. Aborting.${COLOR_RESET}'; \
+		exit 1; }
+	$(TERMPROG) $(TERMFLAGS)
+
+doc:
+	make -BC $(RIOTBASE) doc
+
+debug:
+	$(AD)command -v $(DEBUGGER) >/dev/null 2>&1 || \
+		{ $(COLOR_ECHO) \
+		'${COLOR_RED} Debug program $(DEBUGGER) not found. Aborting.${COLOR_RESET}'; \
+		exit 1; }
+	$(DEBUGGER) $(DEBUGGER_FLAGS)
+
+debug-server:
+	$(AD)command -v $(DEBUGSERVER) >/dev/null 2>&1 || \
+		{ $(COLOR_ECHO) \
+		'${COLOR_RED} Debug server program $(DEBUGSERVER) not found. Aborting.${COLOR_RESET}'; \
+		exit 1; }
+	$(DEBUGSERVER) $(DEBUGSERVER_FLAGS)
+
+reset:
+	$(AD)command -v $(RESET) >/dev/null 2>&1 || \
+		{ $(COLOR_ECHO) \
+		'${COLOR_RED} Reset program $(RESET) not found. Aborting.${COLOR_RESET}'; \
+		exit 1; }
+	$(RESET) $(RESET_FLAGS)
+
+objdump:
+	$(AD)command -v $(PREFIX)objdump >/dev/null 2>&1 || \
+		{ $(COLOR_ECHO) \
+		'${COLOR_RED} Objdump program $(PREFIX)objdump not found. Aborting.${COLOR_RESET}'; \
+		exit 1; }
+	$(PREFIX)objdump -S -D -h $(ELFFILE) | less
+
+# Generate an XML file containing all macro definitions and include paths for
+# use in Eclipse CDT
+.PHONY: eclipsesym eclipsesym.xml $(CURDIR)/eclipsesym.xml
+eclipsesym: $(CURDIR)/eclipsesym.xml
+eclipsesym.xml: $(CURDIR)/eclipsesym.xml
+
+$(CURDIR)/eclipsesym.xml:
+	$(AD)printf "%s\n" $(CC) $(CFLAGS) $(INCLUDES) | \
+		$(RIOTBASE)/dist/tools/eclipsesym/cmdline2xml.sh > $@
+
+# Extra make goals for testing and comparing changes.
+include $(RIOTBASE)/Makefile.buildtests
+
+# import list of provided features
+-include $(RIOTBOARD)/$(BOARD)/Makefile.features
+
+# Export variables used throughout the whole make system:
+include $(RIOTBASE)/Makefile.vars
+
+# Warn if the selected board and drivers don't provide all needed featues:
+ifneq (, $(filter all, $(if $(MAKECMDGOALS), $(MAKECMDGOALS), all)))
+  EXPECT_ERRORS :=
+  EXPECT_CONFLICT :=
+
+  # Test if there where dependencies against a module in DISABLE_MODULE.
+  ifneq (, $(filter $(DISABLE_MODULE), $(USEMODULE)))
+    $(shell $(COLOR_ECHO) "$(COLOR_RED)Required modules were disabled using DISABLE_MODULE:$(COLOR_RESET)"\
+                          "$(sort $(filter $(DISABLE_MODULE), $(USEMODULE)))" 1>&2)
+    USEMODULE := $(filter-out $(DISABLE_MODULE), $(USEMODULE))
+    EXPECT_ERRORS := 1
+  endif
+
+  # Test if all feature requirements were met by the selected board.
+  ifneq (, $(filter-out $(FEATURES_PROVIDED) $(FEATURES_OPTIONAL), $(FEATURES_REQUIRED)))
+    $(shell $(COLOR_ECHO) "$(COLOR_RED)There are unsatisfied feature requirements:$(COLOR_RESET)"\
+                          "$(sort $(filter-out $(FEATURES_PROVIDED) $(FEATURES_OPTIONAL), $(FEATURES_REQUIRED)))" 1>&2)
+    EXPECT_ERRORS := 1
+  endif
+
+  # Test if any required feature conflict with another one.
+  CONFLICT := $(foreach var,$(FEATURES_CONFLICT),$(if $(filter $(words $(subst :, ,$(var))),$(words $(filter $(FEATURES_REQUIRED),$(subst :, ,$(var))))),$(subst :, ,$(var))))
+  ifneq (, $(strip $(CONFLICT)))
+    $(shell $(COLOR_ECHO) "$(COLOR_YELLOW)The following features may conflict:$(COLOR_RESET)"\
+                          "$(COLOR_GREEN)$(sort $(filter $(FEATURES_REQUIRED), $(CONFLICT)))$(COLOR_RESET)" 1>&2)
+    ifneq (, $(FEATURES_CONFLICT_MSG))
+        $(shell $(COLOR_ECHO) "$(COLOR_YELLOW)Rationale: $(COLOR_RESET)$(FEATURES_CONFLICT_MSG)" 1>&2)
+    endif
+    EXPECT_CONFLICT := 1
+  endif
+
+  # If there is a whitelist, then test if the board is whitelisted.
+  ifneq (, $(BOARD_WHITELIST))
+    ifeq (, $(filter $(BOARD_WHITELIST), $(BOARD)))
+      $(shell $(COLOR_ECHO) "$(COLOR_RED)The selected BOARD=${BOARD} is not whitelisted:$(COLOR_RESET) ${BOARD_WHITELIST}" 1>&2)
+      EXPECT_ERRORS := 1
+    endif
+  endif
+
+  # If there is a blacklist, then test if the board is blacklisted.
+  ifneq (, $(BOARD_BLACKLIST))
+    ifneq (, $(filter $(BOARD_BLACKLIST), $(BOARD)))
+      $(shell $(COLOR_ECHO) "$(COLOR_RED)The selected BOARD=${BOARD} is blacklisted:$(COLOR_RESET) ${BOARD_BLACKLIST}" 1>&2)
+      EXPECT_ERRORS := 1
+    endif
+  endif
+
+  ifneq (, $(EXPECT_CONFLICT))
+    $(shell $(COLOR_ECHO) "\n$(COLOR_YELLOW)EXPECT undesired behaviour!$(COLOR_RESET)" 1>&2)
+  endif
+
+  ifneq (, $(EXPECT_ERRORS))
+    $(shell $(COLOR_ECHO) "\n\n$(COLOR_RED)EXPECT ERRORS!$(COLOR_RESET)\n\n" 1>&2)
+  endif
+
+endif
+
+else # RIOT_VERSION
+
+  export __RIOTBUILD_FLAG := RIOT
+
+  NUM_RIOT_VERSION := $(shell cd $(RIOTBASE) && git rev-parse --verify --short "$(RIOT_VERSION)" 2>/dev/null)
+  ifeq (, ${NUM_RIOT_VERSION})
+    $(error The supplied RIOT_VERSION=$(RIOT_VERSION) is invalid!)
+  endif
+
+  all $(filter-out clean, ${MAKECMDGOALS}): ..delegate
+  ifneq (, $(filter clean, $(MAKECMDGOALS)))
+    all $(filter-out clean, ${MAKECMDGOALS}): clean
+  endif
+
+  clean:
+	-$(AD)rm -rf $(BINDIR)
+
+  $(BINDIR)riot-version/$(NUM_RIOT_VERSION)/Makefile.include:
+	$(AD)rm -rf $(@D)
+	$(AD)mkdir -p $(@D)
+	$(AD)cd $(RIOTBASE) && git archive --format=tar $(NUM_RIOT_VERSION) | ( cd $(@D) && tar x 1>&2 )
+
+  ..delegate: $(BINDIR)riot-version/$(NUM_RIOT_VERSION)/Makefile.include
+	@$(COLOR_ECHO) '$(COLOR_GREEN)Using RIOT_VERSION=${NUM_RIOT_VERSION}$(COLOR_RESET)' 1>&2
+	@$(COLOR_ECHO)
+	$(MAKE) RIOTBASE=$(<D) $(filter-out clean, ${MAKECMDGOALS})
+
+endif
+
+help:
+	@$(MAKE) -qp | sed -ne 's/\(^[a-z][a-z_-]*\):.*/\1/p' | sort | uniq
+
+info-modules:
+	@for i in $(sort $(USEMODULE)); do echo $$i; done
+
+ifneq (,$(filter iotlab-m3 wsn430-v1_3b wsn430-v1_4,$(BOARD)))
+  include $(RIOTBASE)/dist/testbed-support/Makefile.iotlab
+endif

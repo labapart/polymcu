@@ -1,0 +1,3 @@
+USEMODULE += gnrc_netif
+
+CFLAGS += -DGNRC_NETIF_NUMOF=3

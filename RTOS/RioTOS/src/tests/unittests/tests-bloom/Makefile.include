@@ -1,0 +1,2 @@
+USEMODULE += bloom
+USEMODULE += hashes

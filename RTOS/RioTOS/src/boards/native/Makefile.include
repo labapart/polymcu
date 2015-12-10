@@ -1,0 +1,154 @@
+include $(RIOTBOARD)/$(BOARD)/Makefile.dep
+
+export NATIVEINCLUDES += -DNATIVE_INCLUDES
+export NATIVEINCLUDES += -I$(RIOTBOARD)/$(BOARD)/include/
+export NATIVEINCLUDES += -I$(RIOTBASE)/core/include/
+export NATIVEINCLUDES += -I$(RIOTBASE)/drivers/include/
+
+export CPU = native
+export ELF = $(BINDIR)$(APPLICATION).elf
+
+# toolchain:
+export PREFIX =
+export CC ?= $(PREFIX)gcc
+export CXX ?= $(PREFIX)g++
+export AR ?= $(PREFIX)ar
+export AS ?= $(PREFIX)as
+export LINK ?= $(PREFIX)gcc
+export SIZE ?= $(PREFIX)size
+ifneq ($(shell uname -s),Darwin)
+export OBJCOPY ?= $(PREFIX)objcopy
+else
+ifeq (0,$(shell which gobjcopy 2>&1 > /dev/null ; echo $$?))
+export OBJCOPY ?= gobjcopy
+export OFLAGS ?= -O ihex
+else
+# If gobjcopy is not available, just create an empty file. The hexfile
+# is not used for native anyways.
+export OBJCOPY ?= touch
+export OFLAGS =
+endif
+endif
+
+export DEBUGGER = gdb
+export TERMPROG = $(ELF)
+export FLASHER = true
+export VALGRIND ?= valgrind
+export CGANNOTATE ?= cg_annotate
+export GPROF ?= gprof
+
+# basic cflags:
+export CFLAGS += -Wall -Wextra -pedantic
+export CFLAGS += -ffunction-sections -fdata-sections
+ifeq ($(shell uname -m),x86_64)
+export CFLAGS += -m32
+endif
+ifneq (,$(filter -DDEVELHELP,$(CFLAGS)))
+export CFLAGS += -fstack-protector-all
+endif
+ifeq ($(shell uname -s),FreeBSD)
+ifeq ($(shell uname -m),amd64)
+export CFLAGS += -m32 -DCOMPAT_32BIT -B/usr/lib32
+endif
+endif
+ifeq ($(shell uname -s),Darwin)
+export CFLAGS += -Wno-deprecated-declarations
+endif
+
+# unwanted (CXXUWFLAGS) and extra (CXXEXFLAGS) flags for c++
+export CXXUWFLAGS +=
+export CXXEXFLAGS +=
+
+ifeq ($(shell uname -m),x86_64)
+export LINKFLAGS += -m32
+endif
+ifeq ($(shell uname -s),FreeBSD)
+ifeq ($(shell uname -m),amd64)
+export LINKFLAGS += -m32 -DCOMPAT_32BIT -L/usr/lib32 -B/usr/lib32
+endif
+export LINKFLAGS += -L $(BINDIR)
+else
+export LINKFLAGS += -ldl
+endif
+
+# set the tap interface for term/valgrind
+ifneq (,$(filter netdev2_tap,$(USEMODULE)))
+	export PORT ?= tap0
+else
+	export PORT =
+endif
+
+export TERMFLAGS := $(PORT) $(TERMFLAGS)
+
+export ASFLAGS =
+export DEBUGGER_FLAGS = --args $(ELF) $(TERMFLAGS)
+term-valgrind: export VALGRIND_FLAGS ?= \
+	--track-origins=yes \
+	--fullpath-after=$(RIOTBASE)/ \
+	--read-var-info=yes
+term-cachegrind: export CACHEGRIND_FLAGS += --tool=cachegrind
+term-gprof: export TERMPROG = GMON_OUT_PREFIX=gmon.out $(ELF)
+all-valgrind: export CFLAGS += -DHAVE_VALGRIND_H -g
+all-valgrind: export NATIVEINCLUDES += $(shell pkg-config valgrind --cflags)
+all-debug: export CFLAGS += -g
+all-cachegrind: export CFLAGS += -g
+all-gprof: export CFLAGS += -pg
+all-gprof: export LINKFLAGS += -pg
+all-asan: export CFLAGS += -fsanitize=address -fno-omit-frame-pointer -g
+all-asan: export CFLAGS += -DNATIVE_IN_CALLOC
+all-asan: export LINKFLAGS += -fsanitize=address -fno-omit-frame-pointer -g
+
+export INCLUDES += $(NATIVEINCLUDES)
+
+# workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=52624
+ifneq ($(shell gcc --version | head -1 | grep -E ' (4.6|4.7)'),)
+	export CFLAGS += -DHAVE_NO_BUILTIN_BSWAP16
+endif
+
+# backward compatability with glibc <= 2.17 for native
+ifeq ($(CPU),native)
+ifeq ($(shell uname -s),Linux)
+ifeq ($(shell ldd --version |  awk '/^ldd/{if ($$NF < 2.17) {print "yes"} else {print "no"} }'),yes)
+	LINKFLAGS += -lrt
+endif
+endif
+endif
+
+# clumsy way to enable building native on osx:
+BUILDOSXNATIVE = 0
+ifeq ($(CPU),native)
+ifeq ($(shell uname -s),Darwin)
+	BUILDOSXNATIVE = 1
+endif
+endif
+
+all: # do not override first target
+
+all-debug: all
+
+all-gprof: all
+
+all-asan: all
+
+all-valgrind: all
+
+all-cachegrind: all
+
+term-valgrind:
+# use this if you want to attach gdb from valgrind:
+#	echo 0 > /proc/sys/kernel/yama/ptrace_scope
+#	VALGRIND_FLAGS += --db-attach=yes
+	$(VALGRIND) $(VALGRIND_FLAGS) $(ELF) $(PORT)
+
+term-cachegrind:
+	$(VALGRIND) $(CACHEGRIND_FLAGS) $(ELF) $(PORT)
+
+term-gprof: term
+
+eval-gprof:
+	$(GPROF) $(ELF) $(shell ls -rt gmon.out* | tail -1)
+
+eval-cachegrind:
+	$(CGANNOTATE) $(shell ls -rt cachegrind.out* | tail -1)
+
+export UNDEF += $(BINDIR)cpu/startup.o

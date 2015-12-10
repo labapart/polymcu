@@ -1,0 +1,23 @@
+# define the cpu used by the stm32f4-discovery board
+export CPU = stm32f4
+export CPU_MODEL = stm32f415rg
+
+# define the default port depending on the host OS
+PORT_LINUX ?= /dev/ttyUSB0
+PORT_DARWIN ?= $(shell ls -1 /dev/tty.SLAB_USBtoUART* | head -n 1)
+
+# setup serial terminal
+include $(RIOTBOARD)/Makefile.include.serial
+
+# st-flash
+export FLASHER = st-flash
+export DEBUGGER = $(RIOTBOARD)/$(BOARD)/dist/debug.sh
+export DEBUGSERVER = st-util
+
+# define st-flash parameters
+export OFLAGS = -O binary
+export FFLAGS = write bin/$(BOARD)/$(APPLICATION).hex 0x8000000
+export DEBUGGER_FLAGS = $(RIOTBOARD)/$(BOARD)/dist/gdb.conf $(BINDIR)/$(APPLICATION).elf
+
+# include cortex defaults
+include $(RIOTBOARD)/Makefile.include.cortexm_common

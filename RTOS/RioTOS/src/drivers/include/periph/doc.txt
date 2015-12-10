@@ -1,0 +1,17 @@
+/*
+ * Copyright (C) 2013 Freie Universität Berlin
+ *
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
+ */
+
+/**
+ * @defgroup    driver_periph   Peripheral drivers
+ * @ingroup     drivers
+ * @brief       Low-level peripheral drivers
+ *
+ * The module contains the low-level peripheral driver layer. It consists of a set
+ * of platform independent interface definitions and cpu specific implementations
+ * for every targeted platform.
+ */

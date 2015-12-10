@@ -1,0 +1,5 @@
+INCLUDES += -I$(RIOTCPU)/lpc2387/include
+
+include $(RIOTCPU)/arm7_common/Makefile.include
+
+USEMODULE += arm7_common periph periph_common bitfield newlib

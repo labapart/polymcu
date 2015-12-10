@@ -1,0 +1,11 @@
+ifneq (,$(filter gnrc_netif_default,$(USEMODULE)))
+  USEMODULE += at86rf212b
+  USEMODULE += gnrc_nomac
+endif
+
+# The RTT clock drives the core clock in the default configuration
+FEATURES_REQUIRED += periph_rtt
+
+# The Mulle uses NVRAM to store persistent variables, such as boot count.
+#~ USEMODULE += nvram_spi
+# Uncomment above when #2353 is merged.

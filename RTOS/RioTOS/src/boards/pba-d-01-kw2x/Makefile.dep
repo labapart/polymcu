@@ -1,0 +1,4 @@
+ifneq (,$(filter gnrc_netif_default,$(USEMODULE)))
+  USEMODULE += kw2xrf
+  USEMODULE += gnrc_nomac
+endif
