@@ -25,6 +25,7 @@
  */
 
 #include "board.h"
+#include "arch/lpm_arch.h"
 
 /*
  * Newlib software hook
@@ -43,4 +44,32 @@ __attribute__((naked)) void software_init_hook(void) {
     "bl   kernel_init\n"
     "bl   exit\n"
   );
+}
+
+/**
+ * @brief Try to set the controller to a given power mode
+ *
+ * @param[in] target    the desired power mode
+ *
+ * @return              the power mode that was actually set
+ */
+__attribute__((weak)) enum lpm_mode lpm_arch_set(enum lpm_mode target)
+{
+    switch (target) {
+        /* wait for next interrupt */
+        case LPM_IDLE:
+        case LPM_SLEEP:
+        case LPM_POWERDOWN:
+        case LPM_OFF:
+            __DSB();
+            __WFI();
+            break;
+
+        /* do nothing here */
+        case LPM_UNKNOWN:
+        case LPM_ON:
+        default:
+            break;
+    }
+    return 0;
 }
