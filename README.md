@@ -26,6 +26,7 @@ Support
 - RTOS:
 	- **ARM RTX: V4.79**
 	- **FreeRTOS V8.2.3**
+	- **RioT-OS 2015.09**
 - Boards:
 	- AppNearMe MicroNFCBoard
 	- Freescale Freedom KL25
