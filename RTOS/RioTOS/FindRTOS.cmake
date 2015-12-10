@@ -28,7 +28,8 @@ set(RIOT_CPU_ROOT  ${CMAKE_CURRENT_LIST_DIR}/src/cpu)
 set(RIOT_CORE_ROOT ${CMAKE_CURRENT_LIST_DIR}/src/core)
 set(RIOT_SYS_ROOT  ${CMAKE_CURRENT_LIST_DIR}/src/sys)
 
-include_directories(${RIOT_CORE_ROOT}/include
+include_directories(${CMAKE_CURRENT_LIST_DIR}/include
+                    ${RIOT_CORE_ROOT}/include
                     ${RIOT_SYS_ROOT}/include)
 
 #
