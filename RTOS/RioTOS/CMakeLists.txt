@@ -30,6 +30,10 @@ find_package(Board)
 find_package(CMSIS)
 find_package(RTOS)
 
+# Generate Configuration header file
+configure_file(include/cmsis_riotos.h.in ${CMAKE_CURRENT_BINARY_DIR}/cmsis_riotos.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 add_definitions(-DRIOT_VERSION="2015.09")
 
 # Remove '-DDEBUG' to avoid to get conflict with the RioT's macro DEBUG() 

@@ -26,6 +26,12 @@
 
 #include "cmsis_os.h"
 #include "thread.h"
+#include "cmsis_riotos.h"
+
+// Stack allocations
+//TODO: This is a simple allocator, we do not support task termination...
+char m_stacks[RTOS_TASK_COUNT * RTOS_TASK_STACK_SIZE];
+char* m_stacks_ptr = m_stacks;
 
 osStatus osDelay (uint32_t millisec) {
 	//TODO: Implement me
@@ -38,9 +44,26 @@ osStatus osDelay (uint32_t millisec) {
 /// \return thread ID for reference by other functions or NULL in case of error.
 /// \note MUST REMAIN UNCHANGED: \b osThreadCreate shall be consistent in every CMSIS-RTOS.
 osThreadId osThreadCreate(const osThreadDef_t *thread_def, void *argument) {
-	return thread_create(NULL,
-						thread_def->stacksize,
-						thread_def->tpriority,
+	// The RIOT priority is the inverse of the CMSIS RTOS priority (ie: RIOT highest priority is '0')
+	char priority = THREAD_PRIORITY_MAIN - thread_def->tpriority;
+	char* stack = m_stacks_ptr;
+	int stacksize = thread_def->stacksize;
+
+	// Check if we are requesting a default stack
+	if (stacksize == 0) {
+		stacksize = RTOS_TASK_STACK_SIZE;
+	}
+
+	// Allocate stack
+	if (m_stacks_ptr + stacksize > m_stacks + sizeof(m_stacks)) {
+		return (osThreadId)NULL;
+	} else {
+		m_stacks_ptr += stacksize;
+	}
+
+	return thread_create(stack,
+						stacksize,
+						priority,
 						CREATE_STACKTEST,
 						(thread_task_func_t)thread_def->pthread,
 						argument,

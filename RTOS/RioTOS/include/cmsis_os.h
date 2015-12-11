@@ -175,7 +175,7 @@ typedef struct os_thread_def  {
   os_pthread               pthread;    ///< start address of thread function
   osPriority             tpriority;    ///< initial thread priority
   uint32_t               instances;    ///< maximum number of instances of that thread function
-  uint32_t               stacksize;    ///< stack size requirements in bytes; 0 is default stack size
+  int                    stacksize;    ///< stack size requirements in bytes; 0 is default stack size
 } osThreadDef_t;
  
 /// Timer Definition structure contains timer parameters.
