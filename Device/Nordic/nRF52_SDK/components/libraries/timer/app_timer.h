@@ -100,6 +100,14 @@
 /**@brief Timer id type. */
 typedef uint32_t app_timer_id_t;
 
+/**
+ * @brief Create a timer identifier and statically allocate memory for the timer.
+ *
+ * @param timer_id Name of the timer identifier variable that will be used to control the timer.
+ */
+#define APP_TIMER_DEF(timer_id)                                  \
+    static app_timer_id_t timer_id
+
 /**@brief Application timeout handler type. */
 typedef void (*app_timer_timeout_handler_t)(void * p_context);
 

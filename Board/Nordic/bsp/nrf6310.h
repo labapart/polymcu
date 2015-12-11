@@ -155,4 +155,7 @@
 
 #define SER_CONN_ASSERT_LED_PIN     LED_2
 
+// Low frequency clock source to be used by the SoftDevice
+#define NRF_CLOCK_LFCLKSRC      NRF_CLOCK_LFCLKSRC_XTAL_20_PPM
+
 #endif  // NRF6310_H__

@@ -115,10 +115,10 @@ static sensorsim_state_t                 m_heart_rate_sim_state;                
 static sensorsim_cfg_t                   m_rr_interval_sim_cfg;                     /**< RR Interval sensor simulator configuration. */
 static sensorsim_state_t                 m_rr_interval_sim_state;                   /**< RR Interval sensor simulator state. */
 
-static app_timer_id_t                    m_battery_timer_id;                        /**< Battery timer. */
-static app_timer_id_t                    m_heart_rate_timer_id;                     /**< Heart rate measurement timer. */
-static app_timer_id_t                    m_rr_interval_timer_id;                    /**< RR interval timer. */
-static app_timer_id_t                    m_sensor_contact_timer_id;                 /**< Sensor contact detected timer. */
+APP_TIMER_DEF(m_battery_timer_id);                                                  /**< Battery timer. */
+APP_TIMER_DEF(m_heart_rate_timer_id);                                               /**< Heart rate measurement timer. */
+APP_TIMER_DEF(m_rr_interval_timer_id);                                              /**< RR interval timer. */                 /**< RR interval timer. */
+APP_TIMER_DEF(m_sensor_contact_timer_id);                                           /**< Sensor contact detected timer. */
 
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by device manager */
 
@@ -251,7 +251,11 @@ static void timers_init(void)
     uint32_t err_code;
 
     // Initialize timer module.
+#ifdef NRF52
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, false);
+#else
+    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, false);
+#endif
 
     // Create timers.
     err_code = app_timer_create(&m_battery_timer_id,
@@ -714,11 +718,11 @@ static void ble_stack_init(void)
     // Initialize the SoftDevice handler module.
     SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
 
-#if defined(S110) || defined(S130) || defined(S132)
+#if defined(S110) || defined(S130) || defined(S310)  || defined(S132)
     // Enable BLE stack.
     ble_enable_params_t ble_enable_params;
     memset(&ble_enable_params, 0, sizeof(ble_enable_params));
-#if (defined(S130) || defined(S132))
+#if defined(S130) || defined(S310) || defined(S132)
     ble_enable_params.gatts_enable_params.attr_tab_size   = BLE_GATTS_ATTR_TAB_SIZE_DEFAULT;
 #endif
     ble_enable_params.gatts_enable_params.service_changed = IS_SRVC_CHANGED_CHARACT_PRESENT;

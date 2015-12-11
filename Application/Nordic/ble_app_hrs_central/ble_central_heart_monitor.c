@@ -150,9 +150,14 @@ static ret_code_t device_manager_event_handler(const dm_handle_t    * p_handle,
 
             m_dm_device_handle = (*p_handle);
 
+#ifdef NRF52
             // Discover peer's services. 
             err_code = ble_db_discovery_start(&m_ble_db_discovery,
                                               p_event->event_param.p_gap_param->conn_handle);
+#else
+            // Initiate bonding.
+            err_code = dm_security_setup_req(&m_dm_device_handle);
+#endif
             APP_ERROR_CHECK(err_code);
 
             m_peer_count++;
@@ -196,15 +201,23 @@ static ret_code_t device_manager_event_handler(const dm_handle_t    * p_handle,
         case DM_EVT_SECURITY_SETUP_COMPLETE:
         {
             APPL_LOG("[APPL]: >> DM_EVT_SECURITY_SETUP_COMPLETE\r\n");
+#ifdef NRF52
             // Heart rate service discovered. Enable notification of Heart Rate Measurement.
             err_code = ble_hrs_c_hrm_notif_enable(&m_ble_hrs_c);
             APP_ERROR_CHECK(err_code);
+#endif
             APPL_LOG("[APPL]: << DM_EVT_SECURITY_SETUP_COMPLETE\r\n");
             break;
         }
 
         case DM_EVT_LINK_SECURED:
             APPL_LOG("[APPL]: >> DM_LINK_SECURED_IND\r\n");
+#ifndef NRF52
+            // Discover peer's services. 
+            err_code = ble_db_discovery_start(&m_ble_db_discovery,
+                                              p_event->event_param.p_gap_param->conn_handle);
+            APP_ERROR_CHECK(err_code);
+#endif
             APPL_LOG("[APPL]: << DM_LINK_SECURED_IND\r\n");
             break;
 
@@ -345,7 +358,10 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
                         err_code = bsp_indication_set(BSP_INDICATE_IDLE);
                         APP_ERROR_CHECK(err_code);
 
-                        m_scan_param.selective = 0; 
+                        m_scan_param.selective = 0;
+#ifndef NRF52
+                        m_scan_param.p_whitelist = NULL;
+#endif
 
                         // Initiate connection.
                         err_code = sd_ble_gap_connect(&p_gap_evt->params.adv_report.peer_addr,
@@ -588,9 +604,11 @@ static void hrs_c_evt_handler(ble_hrs_c_t * p_hrs_c, ble_hrs_c_evt_t * p_hrs_c_e
     switch (p_hrs_c_evt->evt_type)
     {
         case BLE_HRS_C_EVT_DISCOVERY_COMPLETE:
+#ifdef NRF52
             // Initiate bonding.
             err_code = dm_security_setup_req(&m_dm_device_handle);
             APP_ERROR_CHECK(err_code);
+#endif
 
             // Heart rate service discovered. Enable notification of Heart Rate Measurement.
             err_code = ble_hrs_c_hrm_notif_enable(p_hrs_c);
@@ -794,7 +812,11 @@ int main(void)
     bool erase_bonds;
 
     // Initialize.
+#ifdef NRF52
     APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_MAX_TIMERS, APP_TIMER_OP_QUEUE_SIZE, NULL);
+#else
+    APP_TIMER_INIT(APP_TIMER_PRESCALER, APP_TIMER_OP_QUEUE_SIZE, NULL);
+#endif
     buttons_leds_init(&erase_bonds);
     app_trace_init();
     puts("Heart rate collector example");

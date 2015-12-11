@@ -49,16 +49,16 @@
 static bsp_indication_t m_stable_state        = BSP_INDICATE_IDLE;
 static uint32_t         m_app_ticks_per_100ms = 0;
 static uint32_t         m_indication_type     = 0;
-static app_timer_id_t   m_leds_timer_id;
-static app_timer_id_t   m_alert_timer_id;
+static uint32_t         m_alert_mask          = 0;
+APP_TIMER_DEF(m_leds_timer_id);
+APP_TIMER_DEF(m_alert_timer_id);
 #endif // LEDS_NUMBER > 0 && !(defined BSP_SIMPLE)
 
 #if BUTTONS_NUMBER > 0
 #ifndef BSP_SIMPLE
 static bsp_event_callback_t   m_registered_callback         = NULL;
 static bsp_button_event_cfg_t m_events_list[BUTTONS_NUMBER] = {{BSP_EVENT_NOTHING, BSP_EVENT_NOTHING}};
-
-static app_timer_id_t   m_button_timer_id;
+APP_TIMER_DEF(m_button_timer_id);
 static void bsp_button_event_handler(uint8_t pin_no, uint8_t button_action);
 #endif // BSP_SIMPLE
 
@@ -228,13 +228,13 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
     switch (indicate)
     {
         case BSP_INDICATE_IDLE:
-            LEDS_OFF(LEDS_MASK & ~ALERT_LED_MASK);
+            LEDS_OFF(LEDS_MASK & ~m_alert_mask);
             m_stable_state = indicate;
             break;
 
         case BSP_INDICATE_SCANNING:
         case BSP_INDICATE_ADVERTISING:
-            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~ALERT_LED_MASK);
+            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~m_alert_mask);
 
             // in advertising blink LED_0
             if (LED_IS_ON(BSP_LED_0_MASK))
@@ -257,7 +257,7 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
             break;
 
         case BSP_INDICATE_ADVERTISING_WHITELIST:
-            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~ALERT_LED_MASK);
+            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~m_alert_mask);
 
             // in advertising quickly blink LED_0
             if (LED_IS_ON(BSP_LED_0_MASK))
@@ -281,7 +281,7 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
             break;
 
         case BSP_INDICATE_ADVERTISING_SLOW:
-            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~ALERT_LED_MASK);
+            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~m_alert_mask);
 
             // in advertising slowly blink LED_0
             if (LED_IS_ON(BSP_LED_0_MASK))
@@ -303,7 +303,7 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
             break;
 
         case BSP_INDICATE_ADVERTISING_DIRECTED:
-            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~ALERT_LED_MASK);
+            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~m_alert_mask);
 
             // in advertising very quickly blink LED_0
             if (LED_IS_ON(BSP_LED_0_MASK))
@@ -327,7 +327,7 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
             break;
 
         case BSP_INDICATE_BONDING:
-            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~ALERT_LED_MASK);
+            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~m_alert_mask);
 
             // in bonding fast blink LED_0
             if (LED_IS_ON(BSP_LED_0_MASK))
@@ -345,7 +345,7 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
             break;
 
         case BSP_INDICATE_CONNECTED:
-            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~ALERT_LED_MASK);
+            LEDS_OFF(LEDS_MASK & ~BSP_LED_0_MASK & ~m_alert_mask);
             LEDS_ON(BSP_LED_0_MASK);
             m_stable_state = indicate;
             break;
@@ -377,6 +377,7 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
         case BSP_INDICATE_FATAL_ERROR:
             // on fatal error turn on all leds
             LEDS_ON(LEDS_MASK);
+            m_stable_state = indicate;
             break;
 
         case BSP_INDICATE_ALERT_0:
@@ -390,16 +391,18 @@ static uint32_t bsp_led_indication(bsp_indication_t indicate)
             // a little trick to find out that if it did not fall through ALERT_OFF
             if (next_delay && (err_code == NRF_SUCCESS))
             {
+                m_alert_mask = ALERT_LED_MASK;
                 if (next_delay > 1)
                 {
                     err_code = app_timer_start(m_alert_timer_id, BSP_MS_TO_TICK(
                                                    (next_delay * ALERT_INTERVAL)), NULL);
                 }
-                LEDS_ON(ALERT_LED_MASK);
+                LEDS_ON(m_alert_mask);
             }
             else
             {
-                LEDS_OFF(ALERT_LED_MASK);
+                LEDS_OFF(m_alert_mask);
+                m_alert_mask = 0;
             }
             break;
 
