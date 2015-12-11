@@ -26,9 +26,19 @@
 
 find_package(Nordic)
 
-add_definitions(-DBOARD_PCA10036 -DBSP_UART_SUPPORT -DBLE_STACK_SUPPORT_REQD)
+add_definitions(-DBSP_UART_SUPPORT -DBLE_STACK_SUPPORT_REQD)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/nRF52DK
+if (NORDIC_BOARD STREQUAL "nRF52DK")
+  add_definitions(-DBOARD_PCA10036)
+elseif (NORDIC_BOARD STREQUAL "nRF51DK")
+  add_definitions(-DBOARD_PCA10028)
+elseif (NORDIC_BOARD STREQUAL "nRF51Dongle")
+  add_definitions(-DBOARD_PCA10031)
+elseif (NORDIC_BOARD STREQUAL "nRF51822")
+  add_definitions(-DBOARD_PCA10024)
+endif()
+
+include_directories(${CMAKE_CURRENT_LIST_DIR}/${NORDIC_BOARD}
 					${CMAKE_CURRENT_LIST_DIR}/bsp)
 
 set(Board_LIBRARIES board_nordic ${NORDIC_LIBRARIES})

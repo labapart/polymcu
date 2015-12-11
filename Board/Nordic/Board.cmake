@@ -24,19 +24,42 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Tell RTOS we are running at 64Mhz
-set(RTOS_CLOCK 64000000)
+# Identify Nordic Board
+string(REGEX REPLACE "Nordic/" "" NORDIC_BOARD ${BOARD})
+
+if (NORDIC_BOARD STREQUAL "nRF52DK")
+  # Tell RTOS we are running at 64Mhz
+  set(RTOS_CLOCK 64000000)
+
+  # Build options
+  set(CPU "ARM Cortex-M4F")
+  add_definitions(-DNRF52)
+  set(NORDIC_SDK nRF52_SDK)
+elseif ((NORDIC_BOARD STREQUAL "nRF51DK") OR (NORDIC_BOARD STREQUAL "nRF51Dongle"))
+  # Tell RTOS we are running at 32Mhz
+  set(RTOS_CLOCK 32000000)
+
+  # Build options
+  set(CPU "ARM Cortex-M0")
+  add_definitions(-DNRF51)
+  set(NORDIC_SDK nRF51_SDK)
+elseif (NORDIC_BOARD STREQUAL "nRF51822")
+  # Tell RTOS we are running at 16Mhz
+  set(RTOS_CLOCK 16000000)
+
+  # Build options
+  set(CPU "ARM Cortex-M0")
+  add_definitions(-DNRF51)
+  set(NORDIC_SDK nRF51_SDK)
+else()
+  message(FATAL_ERROR "Nordic board '${NORDIC_BOARD}' non supported.")
+endif()
+
 
 # List of HW modules
 list(APPEND LIST_MODULES Device/Nordic
                          Board/Nordic
                          Lib/PolyMCU)
-
-#
-# Build options
-#
-set(CPU "ARM Cortex-M4F")
-add_definitions(-DNRF52)
 
 # nRF52 has not got Systick
 if(SUPPORT_RTOS STREQUAL "RTX")
