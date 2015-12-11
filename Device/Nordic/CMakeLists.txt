@@ -41,9 +41,7 @@ include_directories(${NORDIC_SDK_ROOT}
                     ${NORDIC_SDK_ROOT}/libraries/util)
 
 add_definitions(-DCONFIG_GPIO_AS_PINRESET -DGPIOTE_ENABLED=1)
-set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
-				${NORDIC_SDK_ROOT}/toolchain/system_nrf52.c
-				${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
+set(nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/clock/nrf_drv_clock.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/rtc/nrf_drv_rtc.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/gpiote/nrf_drv_gpiote.c
@@ -52,6 +50,14 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
 				${NORDIC_SDK_ROOT}/libraries/scheduler/app_scheduler.c
 				${NORDIC_SDK_ROOT}/libraries/sensorsim/sensorsim.c
 				${NORDIC_SDK_ROOT}/libraries/util/app_util_platform.c)
+
+if (NORDIC_SDK STREQUAL "nRF52_SDK")
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
+                          ${NORDIC_SDK_ROOT}/toolchain/system_nrf52.c)
+elseif (NORDIC_SDK STREQUAL "nRF51_SDK")
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf51.s
+                          ${NORDIC_SDK_ROOT}/toolchain/system_nrf51.c)
+endif()
 
 # Timer support
 if(SUPPORT_RTOS STREQUAL "RTX")

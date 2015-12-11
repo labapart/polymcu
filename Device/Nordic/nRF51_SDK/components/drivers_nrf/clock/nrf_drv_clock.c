@@ -246,12 +246,15 @@ ret_code_t nrf_drv_clock_init(nrf_drv_clock_config_t const * p_config)
 
 #endif // CLOCK_CONFIG_LF_SRC == NRF_CLOCK_LF_SRC_RC
 #else // SOFTDEVICE_PRESENT
+// We must initialize SoftDevice before enabling RTOS
+#ifndef __CMSIS_RTOS
         uint8_t is_enabled;
         result = sd_softdevice_is_enabled(&is_enabled);
         if((result == NRF_SUCCESS) && !is_enabled)
         {
             result = NRF_ERROR_SOFTDEVICE_NOT_ENABLED;
         }
+#endif
 #endif // SOFTDEVICE_PRESENT
     }
     else
