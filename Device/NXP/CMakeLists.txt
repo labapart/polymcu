@@ -45,21 +45,60 @@ if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
   # Use main oscillator instead of the internal one
   add_definitions(-DSUPPORT_NXP_MAIN_OSC)
 
-  set(nxp_SRCS ${MCU_DEVICE}/src/cr_startup_lpc11xx.c
+  set(nxp_SRCS ${MCU_DEVICE}/src/adc_11xx.c
+               ${MCU_DEVICE}/src/cr_startup_lpc11xx.c
                ${MCU_DEVICE}/src/clock_11xx.c
+               ${MCU_DEVICE}/src/gpio_11xx_1.c
+               ${MCU_DEVICE}/src/gpio_11xx_2.c
+               ${MCU_DEVICE}/src/gpiogroup_11xx.c
+               ${MCU_DEVICE}/src/i2c_11xx.c
+               ${MCU_DEVICE}/src/i2cm_11xx.c
+               ${MCU_DEVICE}/src/iocon_11xx.c
+               ${MCU_DEVICE}/src/pinint_11xx.c
+               ${MCU_DEVICE}/src/pmu_11xx.c
+               ${MCU_DEVICE}/src/ring_buffer.c
+               ${MCU_DEVICE}/src/ssp_11xx.c
                ${MCU_DEVICE}/src/sysctl_11xx.c
                ${MCU_DEVICE}/src/sysinit.c
                ${MCU_DEVICE}/src/sysinit_11xx.c
-               ${MCU_DEVICE}/src/timer_11xx.c)
+               ${MCU_DEVICE}/src/timer_11xx.c
+               ${MCU_DEVICE}/src/uart_11xx.c
+               ${MCU_DEVICE}/src/wwdt_11xx.c)
                #${MCU_DEVICE}/src/aeabi_romdiv_patch.s)
 elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
-  set(nxp_SRCS ${MCU_DEVICE}/src/cr_startup_lpc175x_6x.c
+  set(nxp_SRCS ${MCU_DEVICE}/src/adc_17xx_40xx.c
+               ${MCU_DEVICE}/src/can_17xx_40xx.c
+               ${MCU_DEVICE}/src/clock_17xx_40xx.c
+               ${MCU_DEVICE}/src/cmp_17xx_40xx.c
+               ${MCU_DEVICE}/src/crc_17xx_40xx.c
   			   ${MCU_DEVICE}/src/chip_17xx_40xx.c
-  			   ${MCU_DEVICE}/src/clock_17xx_40xx.c
+               ${MCU_DEVICE}/src/cr_startup_lpc175x_6x.c
+               ${MCU_DEVICE}/src/dac_17xx_40xx.c
+               ${MCU_DEVICE}/src/eeprom_17xx_40xx.c
+               ${MCU_DEVICE}/src/emc_17xx_40xx.c
+               ${MCU_DEVICE}/src/enet_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/gpdma_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/gpio_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/gpioint_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/i2c_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/i2s_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/iap.c
   			   ${MCU_DEVICE}/src/iocon_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/lcd_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/pmu_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/ring_buffer.c
+  			   ${MCU_DEVICE}/src/ritimer_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/rtc_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/sdc_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/sdmmc_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/spi_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/ssp_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/stopwatch_17xx_40xx.c
+  			   ${MCU_DEVICE}/src/sysctl_17xx_40xx.c
   			   ${MCU_DEVICE}/src/sysinit.c
                ${MCU_DEVICE}/src/sysinit_17xx_40xx.c
-               ${MCU_DEVICE}/src/timer_17xx_40xx.c)
+               ${MCU_DEVICE}/src/timer_17xx_40xx.c
+               ${MCU_DEVICE}/src/wwdt_17xx_40xx.c)
 
   # UART support
   if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
