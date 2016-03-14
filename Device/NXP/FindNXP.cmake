@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,8 @@ set(NXP_LIBRARIES device_nxp)
 # USB Support
 #
 if(SUPPORT_DEVICE_USB)
+  add_definitions(-DSUPPORT_DEVICE_USB)
+
   if(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
     list(APPEND NXP_LIBRARIES ${CMAKE_CURRENT_LIST_DIR}/lpc_chip_175x_6x/libs/libusbd_175x_6x_lib.a)
   endif()

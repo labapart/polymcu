@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,13 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "USBD_ROM.h"
+#ifdef SUPPORT_DEVICE_USB
+  #include "USBD_ROM.h"
+#endif
 
 void leds_init(void);
 
+#ifdef SUPPORT_DEVICE_USB
 /**
  * @brief	USB port init routine
  * @param	hUsb		: Handle to USBD stack instance
@@ -47,6 +50,7 @@ ErrorCode_t hid_generic_init(USBD_HANDLE_T hUsb, USB_CORE_DESCS_T *pDesc, USBD_A
 
 extern const uint32_t ep_count;
 extern const USBD_FUNC_INIT usb_interface_inits[];
+#endif
 
 /**
  * @}

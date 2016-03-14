@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,9 @@
 #
 
 # We force USB Device support as it is where we will get UART support from
-set(SUPPORT_DEVICE_USB 1)
+if(NOT DEFINED SUPPORT_DEVICE_USB)
+  set(SUPPORT_DEVICE_USB 1)
+endif()
 
 # Tell RTOS we are running at 48Mhz
 set(RTOS_CLOCK 48000000)

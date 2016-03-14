@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ void hardware_init_hook(void) {
 	// LED Init
 	leds_init();
 
+#ifdef SUPPORT_DEVICE_USB
 	//Setup USB-related pins
 	//USB_VBUS input with pull-down
 	LPC_IOCON->PIO0[3] = 0x00000009;
@@ -53,6 +54,7 @@ void hardware_init_hook(void) {
 
 	// Initialize USBD ROM
 	usbd_rom_init(usb_interface_inits, ep_count);
+#endif
 
 #ifndef SUPPORT_DEBUG_UART_NONE
 	// Initialize UART

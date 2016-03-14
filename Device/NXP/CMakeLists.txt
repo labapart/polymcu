@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,13 @@ if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
                ${MCU_DEVICE}/src/uart_11xx.c
                ${MCU_DEVICE}/src/wwdt_11xx.c)
                #${MCU_DEVICE}/src/aeabi_romdiv_patch.s)
+
+  # Add UART support if SUPPORT_DEVICE_USB is not defined
+  if(NOT SUPPORT_DEVICE_USB)
+    if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
+      list(APPEND nxp_SRCS Driver/uart_debug/Driver_USART.c)
+    endif()
+  endif()
 elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
   set(nxp_SRCS ${MCU_DEVICE}/src/adc_17xx_40xx.c
                ${MCU_DEVICE}/src/can_17xx_40xx.c

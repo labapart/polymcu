@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,21 @@
 #include "board.h"
 #include "PolyMCU.h"
 #include "Driver_USART.h"
-#include "uart_17xx_40xx.h"
+#ifdef CHIP_LPC11UXX
+  #include "uart_11xx.h"
+#elif CHIP_LPC175X_6X
+  #include "uart_17xx_40xx.h"
+#else
+  #error "Chip not recognized"
+#endif
 
 #define ARM_USART_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)  /* driver version */
+
+#ifdef CHIP_LPC11UXX
+	#define LPC_UART		LPC_USART
+#elif CHIP_LPC175X_6X
+	#define LPC_UART		LPC_UART0
+#endif
 
 void _ttywrch(int ch);
 
@@ -80,12 +92,12 @@ ARM_USART_CAPABILITIES ARM_USART_GetCapabilities(void) {
 }
 
 int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
-	Chip_UART_Init(LPC_UART0);
-	Chip_UART_SetBaud(LPC_UART0, 115200);
-	Chip_UART_ConfigData(LPC_UART0, UART_LCR_WLEN8 | UART_LCR_SBS_1BIT | UART_LCR_PARITY_DIS);
+	Chip_UART_Init(LPC_UART);
+	Chip_UART_SetBaud(LPC_UART, 115200);
+	Chip_UART_ConfigData(LPC_UART, UART_LCR_WLEN8 | UART_LCR_SBS_1BIT | UART_LCR_PARITY_DIS);
 
 	// Enable UART Transmit
-	Chip_UART_TXEnable(LPC_UART0);
+	Chip_UART_TXEnable(LPC_UART);
 
 	m_SignalEvent = cb_event;
 
@@ -93,7 +105,7 @@ int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 }
 
 int32_t ARM_USART_Uninitialize(void) {
-	Chip_UART_DeInit(LPC_UART0);
+	Chip_UART_DeInit(LPC_UART);
 	return ARM_DRIVER_OK;
 }
 
@@ -103,7 +115,7 @@ int32_t ARM_USART_PowerControl(ARM_POWER_STATE state) {
 
 int32_t ARM_USART_Send(const void *data, uint32_t num) {
 	const char *ptr = data; int len = num;
-	int32_t sent = Chip_UART_SendBlocking(LPC_UART0, data, num);
+	int32_t sent = Chip_UART_SendBlocking(LPC_UART, data, num);
 
 	// Ensure we return carriage
 	if ((len >= 2) && (ptr[len-1] == '\n') && (ptr[len-2] != '\r')) {
@@ -117,7 +129,7 @@ int32_t ARM_USART_Send(const void *data, uint32_t num) {
 }
 
 int32_t ARM_USART_Receive(void *data, uint32_t num) {
-	int32_t ret = Chip_UART_Read(LPC_UART0, data, num);
+	int32_t ret = Chip_UART_Read(LPC_UART, data, num);
 
 	if (m_SignalEvent) {
 		m_SignalEvent(ARM_USART_EVENT_RECEIVE_COMPLETE);
@@ -144,7 +156,7 @@ int32_t ARM_USART_Control(uint32_t control, uint32_t arg) {
 	uint32_t lcr = 0;
 
 	// Set baud rate
-	Chip_UART_SetBaud(LPC_UART0, arg);
+	Chip_UART_SetBaud(LPC_UART, arg);
 
 	switch (control & ARM_USART_DATA_BITS_Msk) {
 	case ARM_USART_DATA_BITS_5:
@@ -198,7 +210,7 @@ int32_t ARM_USART_Control(uint32_t control, uint32_t arg) {
 		assert (ARM_DRIVER_ERROR_UNSUPPORTED);
 	}
 
-	Chip_UART_ConfigData(LPC_UART0, lcr);
+	Chip_UART_ConfigData(LPC_UART, lcr);
 
 	return status;
 }
