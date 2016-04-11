@@ -92,6 +92,12 @@ ARM_USART_CAPABILITIES ARM_USART_GetCapabilities(void) {
 }
 
 int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
+#ifdef CHIP_LPC11UXX
+	// PinMux
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 18, IOCON_FUNC1 | IOCON_MODE_INACT);	/* PIO0_18 used for RXD */
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 19, IOCON_FUNC1 | IOCON_MODE_INACT);	/* PIO0_19 used for TXD */
+#endif
+
 	Chip_UART_Init(LPC_UART);
 #ifdef DEBUG_UART_BAUDRATE
 	Chip_UART_SetBaud(LPC_UART, DEBUG_UART_BAUDRATE);
