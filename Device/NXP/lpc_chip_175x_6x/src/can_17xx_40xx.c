@@ -748,7 +748,14 @@ STATIC CHIP_SYSCTL_PCLK_T Chip_CAN_GetClkIndex(LPC_CAN_T *pCAN)
 /* Initialize CAN Interface */
 void Chip_CAN_Init(LPC_CAN_T *pCAN, LPC_CANAF_T *pCANAF, LPC_CANAF_RAM_T *pCANAFRam)
 {
+#if defined (__GNUC__) &&  !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
 	volatile uint32_t i;
+#if defined (__GNUC__) &&  !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 	Chip_Clock_EnablePeriphClock(Chip_CAN_GetClockIndex(pCAN));
 #if defined(CHIP_LPC177X_8X) || defined(CHIP_LPC40XX)

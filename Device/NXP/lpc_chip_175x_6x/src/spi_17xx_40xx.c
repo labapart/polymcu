@@ -135,11 +135,19 @@ rw_end:
 /* Clean all data in RX FIFO of SPI */
 void Chip_SPI_Int_FlushData(LPC_SPI_T *pSPI)
 {
+#if defined (__GNUC__) &&  !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
 	volatile uint32_t tmp;
+#if defined (__GNUC__) &&  !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 	Chip_SPI_GetStatus(pSPI);
 	tmp = Chip_SPI_ReceiveFrame(pSPI);
 	Chip_SPI_Int_ClearStatus(pSPI, SPI_INT_SPIF);
 }
+
 
 /* SPI Interrupt Read/Write with 8-bit frame width */
 Status Chip_SPI_Int_RWFrames(LPC_SPI_T *pSPI, SPI_DATA_SETUP_T *pXfSetup, uint8_t bytes)
