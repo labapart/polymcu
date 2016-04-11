@@ -96,6 +96,15 @@ The board should appear as an USB mass storage device with the label `CRP DISABL
     - Indicate the path where you downloaded micronfcboard_serial.inf
     - Accept the warning message
 
+### MicroNFCBoard hardware
+
+The board uses NXP LPC11U34FHN33/421 (ARM Cortex-M0).
+
+![MicroNFCBoard pins](MicroNFCBoard/micronfcboard-pins.png)
+
+* `LPC_SSP0` is exposed to the MicroNFCBoard pin 9-12.
+* `LPC_SSP1` is connected to NXP PN512.
+
 ### Status
 
 - CMSIS RTOS example does not work (yet) on the board
