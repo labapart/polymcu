@@ -206,9 +206,16 @@ GET_APPLICATION_LIST(APPLICATION_LIST)
 if (NOT APPLICATION)
   message(FATAL_ERROR "Define APPLICATION variable with one of these available applications: ${APPLICATION_LIST}")
 else()
-  list (FIND APPLICATION_LIST ${APPLICATION} _index)
-  if (NOT ${_index} GREATER -1)
-    message(FATAL_ERROR "Application '${APPLICATION}' is not supported. Here is the list of available applications: ${APPLICATION_LIST}")
+  # Check if the application is defined outside of the PolyMCU tree
+  if (IS_ABSOLUTE ${APPLICATION})
+    if (NOT EXISTS ${APPLICATION})
+      message(FATAL_ERROR "The external application '${APPLICATION}' does not exist.")
+    endif()
+  else()
+    list (FIND APPLICATION_LIST ${APPLICATION} _index)
+    if (NOT ${_index} GREATER -1)
+      message(FATAL_ERROR "Application '${APPLICATION}' is not supported. Here is the list of available applications: ${APPLICATION_LIST}")
+    endif()
   endif()
 endif()
 
@@ -272,7 +279,11 @@ MACRO(BUILD_FIRMWARE Target Name SourceList LibraryList)
 ENDMACRO(BUILD_FIRMWARE)
 
 # Include application & middleware configurations
-include(Application/${APPLICATION}/Application.cmake)
+if(IS_ABSOLUTE ${APPLICATION})
+  include(${APPLICATION}/Application.cmake)
+else()
+  include(Application/${APPLICATION}/Application.cmake)
+endif()
 
 # Check if the given board is valid
 GET_BOARD_LIST(BOARD_LIST)
@@ -348,7 +359,11 @@ foreach(module ${LIST_MODULES})
 endforeach()
 
 # And finally add the application itself
-add_subdirectory(Application/${APPLICATION})
+if(IS_ABSOLUTE ${APPLICATION})
+  add_subdirectory(${APPLICATION})
+else()
+  add_subdirectory(Application/${APPLICATION})
+endif()
 
 # Add Test support if the Test Framework is present
 include(Test/Tests.cmake OPTIONAL)

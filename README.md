@@ -34,6 +34,9 @@ Support
 	- NXP LP1768 mbed
 	- ST STM32L476 Nucleo
 
+- Features:
+	- The application defined by `APPLICATION` can live out of the PolyMCU tree if `APPLICATION` defined an absolute path.
+
 Status
 ======
 
