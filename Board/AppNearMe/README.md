@@ -105,6 +105,8 @@ The board uses NXP LPC11U34FHN33/421 (ARM Cortex-M0).
 * `LPC_SSP0` is exposed to the MicroNFCBoard pin 9-12.
 * `LPC_SSP1` is connected to NXP PN512.
 
+To redirect `printf` output through the UART/Serial port instead of using UART-over-USB rebuild your application with the CMake parameters `-DSUPPORT_DEVICE_USB=0 -DDEBUG_UART_BAUDRATE=9600` (eg: use a baudrate of 9600).
+
 ### Status
 
 - CMSIS RTOS example does not work (yet) on the board
