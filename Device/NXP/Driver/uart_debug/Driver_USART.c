@@ -93,7 +93,11 @@ ARM_USART_CAPABILITIES ARM_USART_GetCapabilities(void) {
 
 int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 	Chip_UART_Init(LPC_UART);
+#ifdef DEBUG_UART_BAUDRATE
+	Chip_UART_SetBaud(LPC_UART, DEBUG_UART_BAUDRATE);
+#else
 	Chip_UART_SetBaud(LPC_UART, 115200);
+#endif
 	Chip_UART_ConfigData(LPC_UART, UART_LCR_WLEN8 | UART_LCR_SBS_1BIT | UART_LCR_PARITY_DIS);
 
 	// Enable UART Transmit

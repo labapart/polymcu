@@ -134,6 +134,10 @@ if(SUPPORT_NXP_USE_XTAL)
   add_definitions(-DSUPPORT_NXP_USE_XTAL)
 endif()
 
+if(DEBUG_UART_BAUDRATE)
+  add_definitions(-DDEBUG_UART_BAUDRATE=${DEBUG_UART_BAUDRATE})
+endif()
+
 add_library(device_nxp STATIC ${nxp_SRCS})
 
 # Rename the symbols to use the libray with Newlib

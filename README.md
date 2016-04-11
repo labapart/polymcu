@@ -161,6 +161,7 @@ Basic variables
 | SUPPORT_RUN_FROM_RAM            | (0\|1)      | Define the firmware must be built to run from RAM
 | EXTERNAL_PROJECT_IN_BINARY_DIR  | (0\|1)      | Build the external project into the binary directory instead of the source directory |
 | SUPPORT_DEBUG_UART              | (none\|itm\|1) | Define which UART support to use for debugging  |
+| DEBUG_UART_BAUDRATE             | integer    | Debug UART Baud Rate (default: 115200)            |
 
 Device variables
 ----------------
