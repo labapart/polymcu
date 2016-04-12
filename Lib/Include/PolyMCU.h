@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,43 @@ void critical_section_enter(void);
 void critical_section_exit(void);
 
 typedef int status_t;
+
+#ifdef SUPPORT_TIMER
+
+#define TIMER_PERIOD_MILLISECOND    1000
+#define TIMER_PERIOD_SECOND         1
+
+typedef struct polymcu_timer_task* polymcu_timer_task_t;
+typedef void (*polymcu_timer_task_func_t)(void* arg);
+
+/*
+ * Initialize PolyMCU timer to tick every `period`.
+ * The period is defined as how many `period` are in one second.
+ * For instance:
+ *   - `period` = 1 means that PolyMCU timer tick would be every second
+ *   - `period` = 1000 means that PolyMCU timer tick would be every millisecond
+ */
+int polymcu_timer_init(unsigned int period);
+
+/*
+ * Return the `period` used at initialization when calling `polymcu_timer_init()`.
+ */
+unsigned int polymcu_timer_get_period(void);
+
+polymcu_timer_task_t polymcu_timer_create_periodic_task(polymcu_timer_task_func_t function, unsigned int period, void* arg);
+polymcu_timer_task_t polymcu_timer_create_one_time_task(polymcu_timer_task_func_t function, unsigned int delay, void* arg);
+void polymcu_timer_remove_task(polymcu_timer_task_t task);
+int polymcu_timer_start_task(polymcu_timer_task_t task);
+int polymcu_timer_stop_task(polymcu_timer_task_t task);
+int polymcu_timer_task_is_scheduled(polymcu_timer_task_t task);
+
+/*
+ * Wait number of `period`. `period` is defined when calling `polymcu_timer_init()`
+ */
+void polymcu_wait(unsigned int delay);
+unsigned int polymcu_timer_get_value(void);
+
+#endif
 
 void print_hex(uint8_t* ptr, unsigned size);
 

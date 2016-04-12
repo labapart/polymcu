@@ -165,6 +165,8 @@ Basic variables
 | EXTERNAL_PROJECT_IN_BINARY_DIR  | (0\|1)      | Build the external project into the binary directory instead of the source directory |
 | SUPPORT_DEBUG_UART              | (none\|itm\|1) | Define which UART support to use for debugging  |
 | DEBUG_UART_BAUDRATE             | integer    | Debug UART Baud Rate (default: 115200)            |
+| SUPPORT_TIMER                   | (0\|1)     | Add PolyMCU Timer API                             |
+| TIMER_TASK_MAX                  | integer    | Number maximum of PolyMCU Timer tasks (default: 5) |
 
 Device variables
 ----------------

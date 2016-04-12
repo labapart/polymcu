@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,10 @@ endif()
 if(SUPPORT_DEVICE_USB)
   # 'usb_device_definitions.h' is generated into the binary directory
   include_directories(${CMAKE_BINARY_DIR})
+endif()
+
+if(SUPPORT_TIMER)
+  add_definitions(-DSUPPORT_TIMER)
 endif()
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Include)

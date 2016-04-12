@@ -43,6 +43,15 @@ else()
   list(APPEND polymcu_SRCS uart_device.c)
 endif()
 
+if(SUPPORT_TIMER)
+  list(APPEND polymcu_SRCS timer_systick.c)
+
+  if(NOT DEFINED TIMER_TASK_MAX)
+    set(TIMER_TASK_MAX 5)
+  endif()
+  add_definitions(-DTIMER_TASK_MAX=${TIMER_TASK_MAX})
+endif()
+
 #
 # Macro to get the length of the USB String
 #
