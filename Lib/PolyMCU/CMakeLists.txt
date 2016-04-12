@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ else()
 endif()
 
 #
-# Macro to get the list of include path of GCC
+# Macro to get the length of the USB String
 #
 MACRO(COUNT_USB_STRING string length)
   string(REPLACE "," ";" usb_string ${string})
