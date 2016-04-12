@@ -46,6 +46,7 @@ if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
   add_definitions(-DSUPPORT_NXP_MAIN_OSC)
 
   set(nxp_SRCS ${MCU_DEVICE}/src/adc_11xx.c
+               ${MCU_DEVICE}/src/chip_11xx.c
                ${MCU_DEVICE}/src/cr_startup_lpc11xx.c
                ${MCU_DEVICE}/src/clock_11xx.c
                ${MCU_DEVICE}/src/gpio_11xx_1.c

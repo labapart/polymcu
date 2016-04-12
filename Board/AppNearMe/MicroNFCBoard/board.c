@@ -60,4 +60,7 @@ void hardware_init_hook(void) {
 	// Initialize UART
 	Driver_UART_DEBUG.Initialize(NULL);
 #endif
+
+	// Ensure SystemCoreClock is set
+	SystemCoreClockUpdate();
 }

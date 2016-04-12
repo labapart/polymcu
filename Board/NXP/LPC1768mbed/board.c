@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -141,6 +141,9 @@ void hardware_init_hook(void) {
 	// Initialize USBD ROM
 	usbd_rom_init(usb_interface_inits, ep_count);
 #endif
+
+	// Ensure SystemCoreClock is set
+	SystemCoreClockUpdate();
 }
 
 void set_led(int led, int value) {
