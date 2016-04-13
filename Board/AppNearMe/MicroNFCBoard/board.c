@@ -33,13 +33,26 @@ extern const ARM_DRIVER_USART Driver_UART_DEBUG;
 const uint32_t OscRateIn = 12000000;
 const uint32_t ExtRateIn = 0;
 
+#define LED_COUNT  2
+
+static const int g_led_gpio_port_num[LED_COUNT] = { 0,   0 };
+static const int g_led_gpio_bit_num[LED_COUNT]  = { 11, 12 };
+
 void __libc_init_array(void) {
 	// Do nothing. NXP LPCOpen already initialized the .data and .bss segments
 }
 
 void hardware_init_hook(void) {
-	// LED Init
-	leds_init();
+	int i;
+
+	// Setup pin muxings
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 11, IOCON_MODE_PULLUP | IOCON_FUNC1); /* P0.11: GPIO/LED1 */
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 12, IOCON_MODE_PULLUP | IOCON_FUNC1); /* P0.12: GPIO/LED2 */
+
+	// Initialize Board LEDs
+	for (i = 0; i < LED_COUNT; i++) {
+		Chip_GPIO_WriteDirBit(LPC_GPIO, g_led_gpio_port_num[i], g_led_gpio_bit_num[i], true);
+	}
 
 #ifdef SUPPORT_DEVICE_USB
 	//Setup USB-related pins
@@ -63,4 +76,10 @@ void hardware_init_hook(void) {
 
 	// Ensure SystemCoreClock is set
 	SystemCoreClockUpdate();
+}
+
+void set_led(int led, int value) {
+	if(led < LED_COUNT) {
+		Chip_GPIO_WritePortBit(LPC_GPIO, g_led_gpio_port_num[led], g_led_gpio_bit_num[led], value);
+	}
 }

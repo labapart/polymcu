@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@ find_package(Board)
 find_package(CMSIS)
 find_package(PolyMCU)
 
-set(board_appnearme_SRCS MicroNFCBoard/board.c MicroNFCBoard/gpio.c)
+set(board_appnearme_SRCS MicroNFCBoard/board.c)
 
 # If USB support
 if(SUPPORT_DEVICE_USB)
