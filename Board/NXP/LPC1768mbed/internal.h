@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 #include "lpc_types.h"
 #include "chip_lpc175x_6x.h"
 #include "gpio_17xx_40xx.h"
-#include "mbed.h"
 #ifdef SUPPORT_DEVICE_USB
   #include "USBD_ROM.h"
 #endif
