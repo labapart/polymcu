@@ -227,7 +227,38 @@ int32_t ARM_USART_Control(uint32_t control, uint32_t arg) {
 
 ARM_USART_STATUS ARM_USART_GetStatus(void) {
 	ARM_USART_STATUS status = { 0 };
-	DEBUG_NOT_IMPLEMENTED();
+	uint32_t line_status = Chip_UART_ReadLineStatus(LPC_UART);
+
+	// If the UART transmitter is not empty then it is busy
+	if ((line_status & UART_LSR_TEMT) == 0) {
+		status.tx_busy = 1;
+	}
+
+	// If the UART Transmitter is not ready then it is busy
+	if ((line_status & UART_LSR_RDR) == 0) {
+		status.rx_busy = 1;
+	}
+
+	// Check Overrun error
+	if (line_status & UART_LSR_OE) {
+		status.rx_overflow = 1;
+	}
+
+	// Check Break interrupt
+	if (line_status & UART_LSR_BI) {
+		status.rx_break = 1;
+	}
+
+	// Check Framing error
+	if (line_status & UART_LSR_FE) {
+		status.rx_framing_error = 1;
+	}
+
+	// Check Parity error
+	if (line_status & UART_LSR_PE) {
+		status.rx_parity_error = 1;
+	}
+
 	return status;
 }
 
