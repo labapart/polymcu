@@ -53,8 +53,8 @@ typedef struct {
 	  	  (uint8_t*)&polymcu_mailbox_##name + (sizeof(type) * count), \
 		  (uint32_t**)((uint8_t*)&polymcu_mailbox_##name + ((sizeof(type) + sizeof(uint8_t)) * count))};
 
-#define HOST_MAILBOX_DECLARE_EXTERN(name)	extern polymcu_mailbox_t polymcu_mailbox_##name##_def
-#define HOST_MAILBOX_NAME(name)				&polymcu_mailbox_##name##_def
+#define POLYMCU_MAILBOX_DECLARE_EXTERN(name)	extern polymcu_mailbox_t polymcu_mailbox_##name##_def
+#define POLYMCU_MAILBOX_NAME(name)				&polymcu_mailbox_##name##_def
 
 void polymcu_mailbox_init(polymcu_mailbox_t *mail);
 void* polymcu_mailbox_allocate(polymcu_mailbox_t *mail);
