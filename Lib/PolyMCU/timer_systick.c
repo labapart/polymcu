@@ -41,6 +41,8 @@ struct polymcu_timer_task {
 
 struct polymcu_timer_task g_polymcu_timer_tasks[TIMER_TASK_MAX];
 uint32_t g_counter;
+// Keep track of how many instance are using the timer
+uint32_t g_timer_user = 0;
 
 void SysTick_Handler(void) {
 	unsigned int tick;
@@ -124,6 +126,10 @@ int polymcu_timer_start_task(polymcu_timer_task_t task) {
 	task->attributes |= POLYMCU_TIMER_STARTED;
 	task->next_tick   = polymcu_timer_get_value() + task->delta;
 
+	// If we are the first task then resume Systick
+	if (++g_timer_user == 1) {
+		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+	}
 	return 0;
 }
 
@@ -132,6 +138,11 @@ int polymcu_timer_stop_task(polymcu_timer_task_t task) {
 
 	task->attributes &= ~POLYMCU_TIMER_STARTED;
 
+	// If we were the last instance to use the timer then we should stop it
+	// to save power
+	if (--g_timer_user == 0) {
+		SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+	}
 	return 0;
 }
 
@@ -142,8 +153,14 @@ int polymcu_timer_task_is_scheduled(polymcu_timer_task_t task) {
 }
 
 void polymcu_wait(unsigned int delay) {
-	unsigned int current_value = polymcu_timer_get_value();
-	unsigned int wait_until;
+	unsigned int current_value, wait_until;
+
+	// If we are the first task then resume Systick
+	if (++g_timer_user == 1) {
+		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+	}
+
+	current_value = polymcu_timer_get_value();
 
 	// Check overflow
 	if (current_value > UINT_MAX - delay) {
@@ -166,6 +183,12 @@ void polymcu_wait(unsigned int delay) {
 		while (polymcu_timer_get_value() < wait_until) {
 			__WFI();
 		}
+	}
+
+	// If we were the last instance to use the timer then we should stop it
+	// to save power
+	if (--g_timer_user == 0) {
+		SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
 	}
 }
 
