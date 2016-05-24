@@ -34,10 +34,11 @@ set(board_appnearme_SRCS MicroNFCBoard/board.c)
 
 # If USB support
 if(SUPPORT_DEVICE_USB)
-  # Support No Debug UART
-  if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
+  if(SUPPORT_DEVICE_USB_SERIAL)
     list(APPEND board_appnearme_SRCS MicroNFCBoard/vcom/usb_desc.c)
-  else()
+  endif()
+
+  if(SUPPORT_DEVICE_USB_HID)
     list(APPEND board_appnearme_SRCS MicroNFCBoard/generic_hid/usb_desc.c)
   endif()
 endif()

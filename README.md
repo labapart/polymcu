@@ -163,7 +163,7 @@ Basic variables
 | FIRMWARE_STACK	              | integer    | Size in bytes of the firmware stack               |
 | SUPPORT_RUN_FROM_RAM            | (0\|1)      | Define the firmware must be built to run from RAM
 | EXTERNAL_PROJECT_IN_BINARY_DIR  | (0\|1)      | Build the external project into the binary directory instead of the source directory |
-| SUPPORT_DEBUG_UART              | (none\|itm\|1) | Define which UART support to use for debugging  |
+| SUPPORT_DEBUG_UART              | (none\|itm\|usb\|1) | Define which UART support to use for debugging  |
 | DEBUG_UART_BAUDRATE             | integer    | Debug UART Baud Rate (default: 115200)            |
 | SUPPORT_TIMER                   | (0\|1)     | Add PolyMCU Timer API                             |
 | TIMER_TASK_MAX                  | integer    | Number maximum of PolyMCU Timer tasks (default: 5) |
@@ -174,6 +174,7 @@ Device variables
 | CMake variable                  | Value      | Description                                        |
 |---------------------------------|------------|----------------------------------------------------|
 | SUPPORT_DEVICE_USB              | (0\|1)      | Add USB Device support                            |
+| SUPPORT_DEVICE_USB_SERIAL       | (0\|1)      | Add Serial USB Device support                     |
 | SUPPORT_DEVICE_USB_HID          | (0\|1)      | Add HID USB Device support                        |
 | SUPPORT_BLE_CENTRAL             | (0\|1)      | Add Bluetooth Low Energy (BLE) Central support    |
 | SUPPORT_BLE_PERIPHERAL          | (0\|1)      | Add Bluetooth Low Energy (BLE) Peripheral support |

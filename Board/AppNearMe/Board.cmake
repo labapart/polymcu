@@ -24,9 +24,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# We force USB Device support as it is where we will get UART support from
-if(NOT DEFINED SUPPORT_DEVICE_USB)
-  set(SUPPORT_DEVICE_USB 1)
+# Use Serial-over-USB if not specified.
+# Note: Use `set(SUPPORT_DEBUG_UART 1)` in your application to use
+#       UART controller instead of UART-over-USB
+if(NOT DEFINED SUPPORT_DEBUG_UART)
+  set(SUPPORT_DEBUG_UART        "usb")
+  set(SUPPORT_DEVICE_USB        1)
+  set(SUPPORT_DEVICE_USB_SERIAL 1)
 endif()
 
 # Tell RTOS we are running at 48Mhz

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,11 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/MicroNFCBoard)
 
 # If USB support
 if(SUPPORT_DEVICE_USB)
-  if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
+  if(SUPPORT_DEVICE_USB_SERIAL)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/MicroNFCBoard/vcom)
-  else()
+  endif()
+
+  if(SUPPORT_DEVICE_USB_HID)
     add_definitions(-DSUPPORT_DEBUG_UART_NONE)
     include_directories(${CMAKE_CURRENT_LIST_DIR}/MicroNFCBoard/generic_hid)
   endif()
