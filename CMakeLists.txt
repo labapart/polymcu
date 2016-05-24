@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -360,7 +360,8 @@ endforeach()
 
 # And finally add the application itself
 if(IS_ABSOLUTE ${APPLICATION})
-  add_subdirectory(${APPLICATION})
+  get_filename_component(APPLICATION_NAME ${APPLICATION} NAME)
+  add_subdirectory(${APPLICATION} ${PROJECT_BINARY_DIR}/Application/${APPLICATION_NAME})
 else()
   add_subdirectory(Application/${APPLICATION})
 endif()
