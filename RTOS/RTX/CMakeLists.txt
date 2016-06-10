@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,10 @@ find_package(CMSIS)
 find_package(RTOS)
 
 include_directories(SRC)
+
+if(SUPPORT_RTOS_NO_CMSIS)
+  message(FATAL_ERROR "SUPPORT_RTOS_NO_CMSIS is not supported yet.")
+endif()
 
 if(NOT DEFINED RTOS_STACK_WATERMARK)
   set(RTOS_STACK_WATERMARK 1)

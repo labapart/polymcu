@@ -199,6 +199,7 @@ RTOS variables
 
 | CMake variable                  | Value      | Description                                       |
 |---------------------------------|------------|---------------------------------------------------|
+| SUPPORT_RTOS_NO_CMSIS           | (0\|1)     | Disable CMSIS wrapper of the RTOS.                |
 | RTOS_CLOCK                      | integer    | Frequency in Hz of the processor                  |
 | RTOS_TICK                       | integer    | When OS_SYSTICK is not set we might need to provide a different tick |
 | RTOS_TASK_COUNT                 | integer    | Number of RTOS task                               |
