@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #ifndef NDEBUG
-  #define PRINT_DEBUG(str) write(1, str, strlen(str)+1)
+  #define PRINT_DEBUG(str) write(1, str, strlen(str))
 #else
   #define PRINT_DEBUG(str)
 #endif
@@ -93,13 +93,14 @@ void print_int(int i) {
 void __assert_func(const char *filename, int line, const char *function, const char *txt) {
 	set_led(1, 1);
 	PRINT_DEBUG("ASSERT: '");
-	PRINT_DEBUG(txt);
+	if (txt) PRINT_DEBUG(txt);
 	PRINT_DEBUG("' in ");
 	if (filename) PRINT_DEBUG(filename);
 	PRINT_DEBUG(":");
 	if (function) PRINT_DEBUG(function);
 	PRINT_DEBUG(":");
 	print_int(line);
+	PRINT_DEBUG("\n");
 	__BKPT(0);
 	while(1);
 }
