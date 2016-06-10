@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -124,9 +124,7 @@ endif()
 add_definitions(-DUART0_ENABLED=1)
 
 # Use UART FIFO by default
-if(NOT DEFINED NORDIC_UART_FIFO)
-  set(NORDIC_UART_FIFO 1)
-endif()
+set(NORDIC_UART_FIFO TRUE CACHE BOOL "Use UART FIFO")
 
 if(NORDIC_UART_FIFO)
   add_definitions(-DNORDIC_UART_FIFO)

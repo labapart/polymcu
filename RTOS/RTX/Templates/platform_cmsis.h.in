@@ -71,7 +71,7 @@
 
 #cmakedefine RTOS_STACK_WATERMARK
 #ifdef RTOS_STACK_WATERMARK
- #define OS_STKINIT @RTOS_STACK_WATERMARK@
+ #define OS_STKINIT 1
 #endif
 
 #cmakedefine RTOS_TICK

@@ -28,9 +28,7 @@
 set(SUPPORT_RTOS   FreeRTOS)
 
 # Disable CMSIS wrapper
-if(NOT DEFINED SUPPORT_RTOS_NO_CMSIS)
-  set(SUPPORT_RTOS_NO_CMSIS 1)
-endif()
+set(SUPPORT_RTOS_NO_CMSIS TRUE CACHE BOOL "Disable CMSIS wrapper of the RTOS.")
 
 # List of modules needed by the application
 set(LIST_MODULES CMSIS

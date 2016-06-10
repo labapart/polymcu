@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,9 +25,7 @@
 #
 
 # Support required by the application
-if (NOT DEFINED SUPPORT_RTOS)
-  set(SUPPORT_RTOS   RioTOS)
-endif()
+set(SUPPORT_RTOS RioTOS CACHE STRING "Enable RTOS support with the name of specified RTOS (eg: RTX, FreeRTOS).")
 
 # List of modules needed by the application
 set(LIST_MODULES CMSIS

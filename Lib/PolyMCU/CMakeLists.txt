@@ -46,9 +46,7 @@ endif()
 if(SUPPORT_TIMER)
   list(APPEND polymcu_SRCS timer_systick.c)
 
-  if(NOT DEFINED TIMER_TASK_MAX)
-    set(TIMER_TASK_MAX 5)
-  endif()
+  set(TIMER_TASK_MAX 5 CACHE STRING "Maximum number of Timer tasks.")
   add_definitions(-DTIMER_TASK_MAX=${TIMER_TASK_MAX})
 endif()
 

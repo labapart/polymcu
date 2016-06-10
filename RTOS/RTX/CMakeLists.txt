@@ -35,9 +35,7 @@ if(SUPPORT_RTOS_NO_CMSIS)
   message(FATAL_ERROR "SUPPORT_RTOS_NO_CMSIS is not supported yet.")
 endif()
 
-if(NOT DEFINED RTOS_STACK_WATERMARK)
-  set(RTOS_STACK_WATERMARK 1)
-endif()
+set(RTOS_STACK_WATERMARK TRUE CACHE BOOL "Enable RTOS Stack Watermark")
 
 # Generate Configuration header file
 configure_file(Templates/platform_cmsis.h.in ${CMAKE_CURRENT_BINARY_DIR}/platform_cmsis.h)

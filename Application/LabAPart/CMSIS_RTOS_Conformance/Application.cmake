@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,9 +25,7 @@
 #
 
 # Support required by the application
-if (NOT DEFINED SUPPORT_RTOS)
-  set(SUPPORT_RTOS   RTX)
-endif()
+set(SUPPORT_RTOS RTX CACHE STRING "Enable RTOS support with the name of specified RTOS (eg: RTX, FreeRTOS).")
 
 set(RTOS_TASK_STACK_SIZE 800)
 set(RTOS_MAIN_STACK_SIZE 800)
