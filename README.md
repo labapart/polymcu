@@ -167,6 +167,7 @@ Basic variables
 | DEBUG_UART_BAUDRATE             | integer    | Debug UART Baud Rate (default: 115200)            |
 | SUPPORT_TIMER                   | (0\|1)     | Add PolyMCU Timer API                             |
 | TIMER_TASK_MAX                  | integer    | Number maximum of PolyMCU Timer tasks (default: 5) |
+| SUPPORT_RTOS                    | string     | Enable RTOS support with the name of specified RTOS |
 
 Device variables
 ----------------
