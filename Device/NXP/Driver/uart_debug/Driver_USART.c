@@ -183,7 +183,7 @@ int32_t ARM_USART_Control(uint32_t control, uint32_t arg) {
 		break;
 	default:
 		status = ARM_DRIVER_ERROR_UNSUPPORTED;
-		assert(0);
+		DEBUG_NOT_SUPPORTED();
 		break;
 	}
 
@@ -208,7 +208,7 @@ int32_t ARM_USART_Control(uint32_t control, uint32_t arg) {
 		break;
 	default:
 		status = ARM_DRIVER_ERROR_UNSUPPORTED;
-		assert(0);
+		DEBUG_NOT_SUPPORTED();
 		break;
 	}
 

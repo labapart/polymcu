@@ -61,7 +61,7 @@ void polymcu_mailbox_free(polymcu_mailbox_t *mail, void* buffer) {
 
 	if (offset % mail->type_size != 0) {
 		// The buffer must be a multiple of 'type_size'
-		assert(0);
+		DEBUG_NOT_VALID();
 	} else {
 		assert(mail->status[offset / mail->type_size] == POLYMCU_MAIL_ENTRY_STATUS_ALLOCATED);
 		mail->status[offset / mail->type_size] = POLYMCU_MAIL_ENTRY_STATUS_FREE;
@@ -86,7 +86,7 @@ int polymcu_mailbox_put(polymcu_mailbox_t *mail, void* buffer) {
 
 	if (offset % mail->type_size != 0) {
 		// The buffer must be a multiple of 'type_size'
-		assert(0);
+		DEBUG_NOT_VALID();
 		return -1;
 	} else {
 		index = offset / mail->type_size;
@@ -131,7 +131,7 @@ int polymcu_mailbox_put(polymcu_mailbox_t *mail, void* buffer) {
 			critical_section_exit();
 			return 0;
 		} else {
-			assert(0);
+			DEBUG_NOT_VALID();
 			critical_section_exit();
 			return -2;
 		}
@@ -149,7 +149,7 @@ int polymcu_mailbox_insert_first(polymcu_mailbox_t *mail, void* buffer) {
 
 	if (offset % mail->type_size != 0) {
 		// The buffer must be a multiple of 'type_size'
-		assert(0);
+		DEBUG_NOT_VALID();
 		return -1;
 	} else {
 		index = offset / mail->type_size;

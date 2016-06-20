@@ -300,6 +300,13 @@ endif()
 string(REGEX REPLACE "/.*" "" BOARD_VENDOR ${BOARD})
 include(Board/${BOARD_VENDOR}/Board.cmake)
 
+# Debug Support
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(DEBUG_MASK 0x0 CACHE STRING "PolyMCU Debug Mask")
+else()
+  set(DEBUG_MASK 0xF CACHE STRING "PolyMCU Debug Mask")
+endif()
+
 # Add RTOS Support
 if (SUPPORT_RTOS)
   list(APPEND LIST_MODULES "RTOS/${SUPPORT_RTOS}")

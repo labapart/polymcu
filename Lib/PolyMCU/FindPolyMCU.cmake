@@ -47,6 +47,9 @@ if(SUPPORT_TIMER)
   add_definitions(-DSUPPORT_TIMER)
 endif()
 
+# Debug Support
+add_definitions(-DDEBUG_MASK=${DEBUG_MASK})
+
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Include)
 
 set(PolyMCU_LIBRARIES polymcu)

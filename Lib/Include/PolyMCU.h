@@ -108,16 +108,40 @@ unsigned int polymcu_timer_get_value(void);
 
 void print_hex(uint8_t* ptr, unsigned size);
 
-#ifdef DEBUG
-  #define DEBUG_PRINTF(args...)	printf(args)
-  #define DEBUG_PUTS(txt)		puts(txt)
+//
+// PolyMCU Debug Support
+//
+#define DEBUG_ERROR       (1 << 0)
+#define DEBUG_WARN        (1 << 1)
+#define DEBUG_INFO        (1 << 2)
+#define DEBUG_VERBOSE     (1 << 3)
+
+#define DEBUG_BOARD       (1 << 4)
+#define DEBUG_RTOS        (1 << 5)
+#define DEBUG_CMSIS       (1 << 6)
+#define DEBUG_USB         (1 << 7)
+#define DEBUG_APP         (0xFF << 16)
+#define DEBUG_LIB         (0xFF << 24)
+
+// Define the levels of debug messages applications and libraries can declare
+// their own debug level
+#define DEBUG_APP_LEVEL   16
+#define DEBUG_LIB_LEVEL   24
+
+#if DEBUG_MASK > 0
+  #define DEBUG_PRINTF(level, args...)	if (level & DEBUG_MASK) printf(args)
+  #define DEBUG_PUTS(level, txt)		if (level & DEBUG_MASK) puts(txt)
 
   #define DEBUG_NOT_IMPLEMENTED() assert(0)
+  #define DEBUG_NOT_SUPPORTED() assert(0)
+  #define DEBUG_NOT_VALID() assert(0)
 #else
-  #define DEBUG_PRINTF(args...)
-  #define DEBUG_PUTS(txt)
+  #define DEBUG_PRINTF(level, args...)
+  #define DEBUG_PUTS(level, txt)
 
-  #define DEBUG_NOT_IMPLEMENTED() assert(0)
+  #define DEBUG_NOT_IMPLEMENTED()
+  #define DEBUG_NOT_SUPPORTED()
+  #define DEBUG_NOT_VALID()
 #endif
 
 #endif

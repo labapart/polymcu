@@ -114,7 +114,7 @@ static void usb_pin_clk_init(void) {
     LPC_USB->USBClkCtrl = 0x12;                /* Dev, AHB clock enable */
     while ((LPC_USB->USBClkSt & 0x12) != 0x12);
 
-    DEBUG_PUTS("usb_pin_clk_init() done"); //OM: Why do we need this string to make it works?!?
+    puts("usb_pin_clk_init() done"); //OM: Why do we need this string to make it works?!?
     // USB is expected to work at 48Mhz
     assert(Chip_Clock_GetUSBClockRate() == 48000000);
 #endif
