@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,18 @@
 # Tell RTOS we are running at 96Mhz
 set(RTOS_CLOCK 96000000)
 
+#
 # USB Support
+#
 if (SUPPORT_DEVICE_USB)
   # Use the external oscillator to derive it and get a 48Mhz oscillator for the USB PLL
   set(SUPPORT_NXP_USE_XTAL 1)
 endif()
+
+# Default USB Settings
+set(DEVICE_USB_VENDOR_ID 0x1FC9 CACHE STRING "Set USB Vendor ID")
+set(DEVICE_USB_PRODUCT_ID 0x8039 CACHE STRING "Set USB Product ID")
+set(DEVICE_USB_DEVICE_REVISION 0x0101 CACHE STRING "Set USB Device Revision")
 
 # List of HW modules
 list(APPEND LIST_MODULES Device/NXP
