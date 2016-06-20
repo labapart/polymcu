@@ -102,11 +102,34 @@ The board uses NXP LPC11U34FHN33/421 (ARM Cortex-M0).
 
 ![MicroNFCBoard pins](MicroNFCBoard/micronfcboard-pins.png)
 
+| AppNearMe Diagram Label  | Board Label  | NXP LPC11U3x label              |
+|--------------------------|--------------|---------------------------------|
+| M9/CS                    | CS           | PIO0_2/SSEL0                    |
+| M10/MISO                 | MISO         | PIO0_8/MISO0                    |
+| M11/MOSI                 | MOSI         | PIO0_9/MOSI0                    |
+| M12/SCK                  | SCK          | SWCLK/PIO0_10/SCK0              |
+| M15                      | A1           | SWDIO/PIO0_15/AD4               |
+
 * `LPC_SSP0` is exposed to the MicroNFCBoard pin 9-12.
 * `LPC_SSP1` is connected to NXP PN512.
 * GPIO@M9 (SPI_CS) is PIO0_2.
 
+* SWD Debug pins:
+
+    * `SWCLK` pin M12
+    * `SWDIO` pin M15
+
 To redirect `printf` output through the UART/Serial port instead of using UART-over-USB rebuild your application with the CMake parameters `-DSUPPORT_DEVICE_USB=0 -DDEBUG_UART_BAUDRATE=9600` (eg: use a baudrate of 9600).
+
+### CMSIS-DAP Debugging
+
+| SWD pin     | Mbed pin     | AppNearMe pin   |
+|-------------|--------------|-----------------|
+| SWCLK       | pin15        | M12             |
+| SWDIO       | pin16        | M15             |
+| nRESET      | pin17        | M1              |
+
+MicroNFCBoard SWDIO and SWDCLK pins are on function 0. So, there is no need to change pin mapping.
 
 ### Status
 
