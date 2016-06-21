@@ -47,6 +47,10 @@ if(SUPPORT_TIMER)
   add_definitions(-DSUPPORT_TIMER)
 endif()
 
+if(SUPPORT_WATCHDOG)
+  add_definitions(-DSUPPORT_WATCHDOG -DWATCHDOG_RESOLUTION_MS=${WATCHDOG_RESOLUTION_MS})
+endif()
+
 # Debug Support
 add_definitions(-DDEBUG_MASK=${DEBUG_MASK})
 

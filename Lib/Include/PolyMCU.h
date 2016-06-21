@@ -106,6 +106,14 @@ unsigned int polymcu_timer_get_value(void);
 
 #endif
 
+#ifdef SUPPORT_WATCHDOG
+void polymcu_watchdog_init(void);
+void polymcu_watchdog_alive(void);
+void polymcu_watchdog_set_timeout(uint32_t timeout_ms);
+void polymcu_watchdog_restore_default_timeout(void);
+void polymcu_watchdog_trigger(void);
+#endif
+
 void print_hex(uint8_t* ptr, unsigned size);
 
 //

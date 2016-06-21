@@ -26,6 +26,7 @@
 
 #include "internal.h"
 #include "Driver_USART.h"
+#include "PolyMCU.h"
 
 extern const ARM_DRIVER_USART Driver_UART_DEBUG;
 
@@ -76,6 +77,10 @@ void hardware_init_hook(void) {
 
 	// Ensure SystemCoreClock is set
 	SystemCoreClockUpdate();
+
+#ifdef SUPPORT_WATCHDOG
+	polymcu_watchdog_init();
+#endif
 }
 
 void set_led(int led, int value) {

@@ -28,12 +28,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include "PolyMCU.h"
 
 #ifndef NDEBUG
   #define PRINT_DEBUG(str) write(1, str, strlen(str))
 #else
   #define PRINT_DEBUG(str)
 #endif
+
+__attribute__((weak, noreturn)) void polymcu_watchdog_trigger(void) {
+	NVIC_SystemReset();
+	// We should never reach this line...
+	while(1);
+}
 
 void abort(void) {
 	while(1) {
@@ -50,8 +57,12 @@ caddr_t _sbrk_r(void *reent, size_t incr) {
 	}
 	prev_heap_end = heap_end;
 	if (heap_end + incr > &__StackLimit) {
+#ifdef SUPPORT_WATCHDOG
+		polymcu_watchdog_trigger();
+#else
 		PRINT_DEBUG("Heap and stack collision\n");
 		abort();
+#endif
 	}
 
 	heap_end += incr;
@@ -101,8 +112,12 @@ void __assert_func(const char *filename, int line, const char *function, const c
 	PRINT_DEBUG(":");
 	print_int(line);
 	PRINT_DEBUG("\n");
+#ifdef SUPPORT_WATCHDOG
+	polymcu_watchdog_trigger();
+#else
 	__BKPT(0);
 	while(1);
+#endif
 }
 
 #if defined (__GNUC__) &&  !defined(__clang__)
@@ -145,6 +160,9 @@ void prvGetRegistersFromStack(uint32_t *pulFaultStackAddress) {
 /* The prototype shows it is a naked function - in effect this is just an
 assembly function. */
 __attribute__((naked)) void HardFault_Handler(void) {
+#ifdef SUPPORT_WATCHDOG
+		polymcu_watchdog_trigger();
+#else
 	__asm volatile
 	(
 		"  mov  r0, lr                                                \n"
@@ -160,6 +178,7 @@ __attribute__((naked)) void HardFault_Handler(void) {
 		"  nop                                                       \n"
 		"  handler2_address_const: .word prvGetRegistersFromStack    \n"
 	);
+#endif
 }
 
 static uint32_t m_in_critical_section = 0;

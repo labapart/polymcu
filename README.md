@@ -168,6 +168,7 @@ Basic variables
 | SUPPORT_TIMER                   | (0\|1)     | Add PolyMCU Timer API                             |
 | TIMER_TASK_MAX                  | integer    | Number maximum of PolyMCU Timer tasks (default: 5) |
 | SUPPORT_RTOS                    | string     | Enable RTOS support with the name of specified RTOS |
+| SUPPORT_WATCHDOG                | (0\|1)     | Add PolyMCU Watchdog API                          |
 
 Device variables
 ----------------

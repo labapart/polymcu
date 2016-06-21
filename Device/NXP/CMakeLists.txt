@@ -147,6 +147,17 @@ if(SUPPORT_DEVICE_USB)
   endif()
 endif()
 
+#
+# PolyMCU Watchdog
+#
+if(SUPPORT_WATCHDOG)
+  if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
+    list(APPEND nxp_SRCS Library/PolyMCU/lpc_chip_11uxx/watchdog.c)
+  elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
+    list(APPEND nxp_SRCS Library/PolyMCU/lpc_chip_175x_6x/watchdog.c)
+  endif()
+endif()
+
 # Internal or External (XTAL) oscillators?
 if(SUPPORT_NXP_USE_XTAL)
   add_definitions(-DSUPPORT_NXP_USE_XTAL)

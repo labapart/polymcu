@@ -25,6 +25,7 @@
  */
 
 #include "internal.h"
+#include "PolyMCU.h"
 
 #define LED_COUNT  4
 
@@ -67,6 +68,10 @@ void hardware_init_hook(void) {
 
 	// Ensure SystemCoreClock is set
 	SystemCoreClockUpdate();
+
+#ifdef SUPPORT_WATCHDOG
+	polymcu_watchdog_init();
+#endif
 }
 
 void set_led(int led, int value) {

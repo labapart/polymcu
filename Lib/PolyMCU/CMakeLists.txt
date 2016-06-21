@@ -50,6 +50,10 @@ if(SUPPORT_TIMER)
   add_definitions(-DTIMER_TASK_MAX=${TIMER_TASK_MAX})
 endif()
 
+if(SUPPORT_WATCHDOG)
+  set(WATCHDOG_RESOLUTION_MS 1000 CACHE STRING "PolyMCU Watchdog Resolution")
+endif()
+
 #
 # Macro to get the length of the USB String
 #
