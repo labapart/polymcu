@@ -54,6 +54,7 @@ if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
                ${MCU_DEVICE}/src/gpiogroup_11xx.c
                ${MCU_DEVICE}/src/i2c_11xx.c
                ${MCU_DEVICE}/src/i2cm_11xx.c
+               ${MCU_DEVICE}/src/iap.c
                ${MCU_DEVICE}/src/iocon_11xx.c
                ${MCU_DEVICE}/src/pinint_11xx.c
                ${MCU_DEVICE}/src/pmu_11xx.c

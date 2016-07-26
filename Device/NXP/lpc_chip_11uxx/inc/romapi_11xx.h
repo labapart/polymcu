@@ -32,6 +32,7 @@
 #ifndef __ROMAPI_11XX_H_
 #define __ROMAPI_11XX_H_
 
+#include "iap.h"
 #include "error.h"
 
 #ifdef __cplusplus
