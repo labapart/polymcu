@@ -169,6 +169,7 @@ Basic variables
 | TIMER_TASK_MAX                  | integer    | Number maximum of PolyMCU Timer tasks (default: 5) |
 | SUPPORT_RTOS                    | string     | Enable RTOS support with the name of specified RTOS |
 | SUPPORT_WATCHDOG                | (0\|1)     | Add PolyMCU Watchdog API                          |
+| SUPPORT_RAM_VECTOR_TABLE        | (0\|1)     | Tell if the Vector Table lives in RAM             |
 
 Device variables
 ----------------

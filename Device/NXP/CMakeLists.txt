@@ -116,6 +116,10 @@ elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
   endif()
 endif()
 
+if(SUPPORT_RAM_VECTOR_TABLE)
+  add_definitions(-DSUPPORT_RAM_VECTOR_TABLE)
+endif()
+
 #
 # NXP USBD ROM Support
 #

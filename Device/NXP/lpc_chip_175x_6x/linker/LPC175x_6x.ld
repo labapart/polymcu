@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,8 @@
 INCLUDE "LPC175x_6x_mem.ld"
 
 ENTRY(ResetISR)
+
+M_VECTOR_RAM_SIZE = DEFINED(__ram_vector_table__) ? 0x0100 : 0x0;
 
 SECTIONS
 {
@@ -89,6 +91,16 @@ SECTIONS
     
     /* MAIN DATA SECTION */
     
+    .interrupts_ram :
+    {
+        . = ALIGN(4);
+        __VECTOR_RAM__ = .;
+        __interrupts_ram_start__ = .; /* Create a global symbol at data start */
+        *(.m_interrupts_ram)     /* This is a user defined section */
+        . += M_VECTOR_RAM_SIZE;
+        . = ALIGN(4);
+        __interrupts_ram_end__ = .; /* Define a global symbol at data end */
+    } > RamLoc32
 
     .uninit_RESERVED : ALIGN(4)
     {

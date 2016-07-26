@@ -29,6 +29,8 @@
 // this code.
 //*****************************************************************************
 
+#include "chip.h"
+
 #if defined (__cplusplus)
 #ifdef __REDLIB__
 #error Redlib does not support C++
@@ -286,6 +288,28 @@ ResetISR(void) {
 
 #if defined (__USE_CMSIS) || defined (__USE_LPCOPEN)
     SystemInit();
+#endif
+
+#ifdef SUPPORT_RAM_VECTOR_TABLE
+    //
+    // Support for ARM Vector Table in RAM
+    //
+    extern uint32_t __vectors_start__[];
+    extern uint32_t __interrupts_ram_start__[];
+    extern uint32_t __interrupts_ram_end__[];
+    uint32_t __interrupts_ram_size__ = (uint32_t)__interrupts_ram_end__ - (uint32_t)__interrupts_ram_start__;
+
+    if (__interrupts_ram_start__ != __vectors_start__) {
+        uint32_t n;
+
+        // Copy the vector table from ROM to RAM
+        for (n = 0; n < __interrupts_ram_size__ / sizeof(uint32_t); n++)
+        {
+            __interrupts_ram_start__[n] = __vectors_start__[n];
+        }
+        // Point the VTOR to the position of vector table
+        SCB->VTOR = (uint32_t)__interrupts_ram_start__;
+    }
 #endif
 
 #if defined (__cplusplus)

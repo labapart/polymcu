@@ -27,6 +27,9 @@
 // CODE RED TECHNOLOGIES LTD. 
 //
 //*****************************************************************************
+
+#include "chip.h"
+
 #if defined (__cplusplus)
 #ifdef __REDLIB__
 #error Redlib does not support C++
@@ -270,7 +273,14 @@ extern void _vStackTop(void);
 //*****************************************************************************
 extern void (* const g_pfnVectors[])(void);
 __attribute__ ((section(".isr_vector")))
+#ifdef SUPPORT_RAM_VECTOR_TABLE
+// System memory remap register (ie: SYSMEMREMAP) remaps the first 512 bytes
+// (ie: 0x200), we need to make sure there is no code after the Vector Table
+// as the code would be shadowed by the remapped SRAM.
+void (* const g_pfnVectors[0x200 / sizeof(uint32_t)])(void) = {
+#else
 void (* const g_pfnVectors[])(void) = {
+#endif
     &_vStackTop,		      // The initial stack pointer
     ResetISR,                         // The reset handler
     NMI_Handler,                      // The NMI handler
@@ -665,6 +675,29 @@ ResetISR(void) {
 
 	extern void SystemInit(void);
 	SystemInit();
+
+#ifdef SUPPORT_RAM_VECTOR_TABLE
+    //
+    // Support for ARM Vector Table in RAM
+    //
+    extern uint32_t __vectors_start__[];
+    extern uint32_t __interrupts_ram_start__[];
+    extern uint32_t __interrupts_ram_end__[];
+    uint32_t __interrupts_ram_size__ = (uint32_t)__interrupts_ram_end__ - (uint32_t)__interrupts_ram_start__;
+
+    if (__interrupts_ram_start__ != __vectors_start__) {
+        uint32_t n;
+
+        // Copy the vector table from ROM to RAM
+        for (n = 0; n < __interrupts_ram_size__ / sizeof(uint32_t); n++)
+        {
+            __interrupts_ram_start__[n] = __vectors_start__[n];
+        }
+
+        // Interrupt vectors are re-mapped to Static RAM
+        Chip_SYSCTL_Map(REMAP_USER_RAM_MODE);
+    }
+#endif
 
 #if defined (__cplusplus)
 	//

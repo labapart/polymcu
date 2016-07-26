@@ -52,6 +52,10 @@ if(NOT FIRMWARE_STACK)
 endif()
 set(MCU_EXE_LINKER_FLAGS "${MCU_EXE_LINKER_FLAGS} -Xlinker --defsym=__StackSize=${FIRMWARE_STACK}")
 
+if(SUPPORT_RAM_VECTOR_TABLE)
+  set(MCU_EXE_LINKER_FLAGS "${MCU_EXE_LINKER_FLAGS} -Xlinker --defsym=__ram_vector_table__=1")
+endif()
+
 include_directories(${CMAKE_CURRENT_LIST_DIR}/${MCU_DEVICE}/inc ${CMAKE_CURRENT_LIST_DIR}/Include)
 set(NXP_LIBRARIES device_nxp)
 
