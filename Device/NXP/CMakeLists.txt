@@ -121,6 +121,22 @@ endif()
 if(SUPPORT_DEVICE_USB)
   list(APPEND nxp_SRCS Library/USBD_ROM/USBD_ROM.c)
 
+  if(SUPPORT_DEVICE_USB_DFU)
+    add_definitions(-DSUPPORT_DEVICE_USB_DFU)
+  endif()
+
+  if(SUPPORT_DEVICE_USB_HID)
+    add_definitions(-DSUPPORT_DEVICE_USB_HID)
+  endif()
+
+  if(SUPPORT_DEVICE_USB_MSC)
+    add_definitions(-DSUPPORT_DEVICE_USB_MSC)
+  endif()
+
+  if(SUPPORT_DEVICE_USB_CDC)
+    add_definitions(-DSUPPORT_DEVICE_USB_CDC)
+  endif()
+
   # This driver is in conflict with 'uart_debug' - you cannot have both
   if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
     # USB UART Support

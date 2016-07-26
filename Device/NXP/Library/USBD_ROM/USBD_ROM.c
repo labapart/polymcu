@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,14 +36,33 @@ USBD_HANDLE_T g_hUsb;
 extern const  USBD_HW_API_T hw_api;
 extern const  USBD_CORE_API_T core_api;
 extern const  USBD_HID_API_T hid_api;
-/* Since this example only uses HID class link functions for that class only */
+extern const  USBD_MSC_API_T msc_api;
+extern const  USBD_DFU_API_T dfu_api;
+extern const  USBD_CDC_API_T cdc_api;
+
 static const  USBD_API_T g_usbApi = {
 	&hw_api,
 	&core_api,
+#ifdef SUPPORT_DEVICE_USB_MSC
+	&msc_api,
+#else
 	0,
+#endif
+#ifdef SUPPORT_DEVICE_USB_DFU
+	&dfu_api,
+#else
 	0,
+#endif
+#ifdef SUPPORT_DEVICE_USB_HID
 	&hid_api,
+#else
 	0,
+#endif
+#ifdef SUPPORT_DEVICE_USB_CDC
+	&cdc_api,
+#else
+	0,
+#endif
 	0,
 	0x02221101,
 };

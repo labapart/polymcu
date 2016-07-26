@@ -177,6 +177,8 @@ Device variables
 | SUPPORT_DEVICE_USB              | (0\|1)      | Add USB Device support                            |
 | SUPPORT_DEVICE_USB_SERIAL       | (0\|1)      | Add Serial USB Device support                     |
 | SUPPORT_DEVICE_USB_HID          | (0\|1)      | Add HID USB Device support                        |
+| SUPPORT_DEVICE_USB_DFU          | (0\|1)      | Add DFU USB Device support                        |
+| SUPPORT_DEVICE_USB_MSC          | (0\|1)      | Add MSC USB Device support                        |
 | SUPPORT_BLE_CENTRAL             | (0\|1)      | Add Bluetooth Low Energy (BLE) Central support    |
 | SUPPORT_BLE_PERIPHERAL          | (0\|1)      | Add Bluetooth Low Energy (BLE) Peripheral support |
 
