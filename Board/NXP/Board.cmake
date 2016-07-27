@@ -50,5 +50,7 @@ list(APPEND LIST_MODULES Device/NXP
 #
 set(CPU "ARM Cortex-M3")
 set(MCU_DEVICE lpc_chip_175x_6x)
+# NXP LPC1768mbed contains a ARM Cortex-M3 r2p0
+add_definitions(-D__CM3_REV=0x0200)
 
 set(POST_BUILD_COMMANDS lpcrc $<TARGET_PROPERTY:Firmware,OUTPUT_NAME>.bin)
