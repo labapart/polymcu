@@ -74,6 +74,49 @@ if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
       list(APPEND nxp_SRCS Driver/uart_debug/Driver_USART.c)
     endif()
   endif()
+elseif(MCU_DEVICE STREQUAL lpc_chip_11u6x)
+  # Add support for MCU romdivide library
+  #add_definitions(-D__USE_ROMDIVIDE)
+
+  # LPC11U6x has USB API ROM
+  add_definitions(-DSUPPORT_NXP_ROMAPI_USB)
+
+  # Use main oscillator instead of the internal one
+  add_definitions(-DSUPPORT_NXP_MAIN_OSC)
+
+  set(nxp_SRCS ${MCU_DEVICE}/src/adc_11u6x.c
+               ${MCU_DEVICE}/src/chip_11u6x.c
+               ${MCU_DEVICE}/src/clock_11u6x.c
+               ${MCU_DEVICE}/src/crc_11u6x.c
+               ${MCU_DEVICE}/src/cr_startup_lpc11u6x.c
+               ${MCU_DEVICE}/src/dma_11u6x.c
+               ${MCU_DEVICE}/src/gpio_11u6x.c
+               ${MCU_DEVICE}/src/gpiogroup_11u6x.c
+               ${MCU_DEVICE}/src/i2c_11u6x.c
+               ${MCU_DEVICE}/src/i2cm_11u6x.c
+               ${MCU_DEVICE}/src/iocon_11u6x.c
+               ${MCU_DEVICE}/src/pinint_11u6x.c
+               ${MCU_DEVICE}/src/pmu_11u6x.c
+               ${MCU_DEVICE}/src/ring_buffer.c
+               ${MCU_DEVICE}/src/romdiv_11u6x.c
+               ${MCU_DEVICE}/src/rtc_11u6x.c
+               ${MCU_DEVICE}/src/sct_11u6x.c
+               ${MCU_DEVICE}/src/ssp_11u6x.c
+               ${MCU_DEVICE}/src/stopwatch_11u6.c
+               ${MCU_DEVICE}/src/syscon_11u6x.c
+               ${MCU_DEVICE}/src/sysinit_11u6x.c
+               ${MCU_DEVICE}/src/sysinit.c
+               ${MCU_DEVICE}/src/timer_11u6x.c
+               ${MCU_DEVICE}/src/uart_0_11u6x.c
+               ${MCU_DEVICE}/src/uart_n_11u6x.c
+               ${MCU_DEVICE}/src/wwdt_11u6x.c)
+
+  # Add UART support over the UART port if it is not over USB
+  if(NOT SUPPORT_DEBUG_UART STREQUAL "none")
+    if(NOT SUPPORT_DEBUG_UART STREQUAL "usb")
+      list(APPEND nxp_SRCS Driver/uart_debug/Driver_USART.c)
+    endif()
+  endif()
 elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
   set(nxp_SRCS ${MCU_DEVICE}/src/adc_17xx_40xx.c
                ${MCU_DEVICE}/src/can_17xx_40xx.c
@@ -143,7 +186,7 @@ if(SUPPORT_DEVICE_USB)
   endif()
 
   # This driver is in conflict with 'uart_debug' - you cannot have both
-  if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
+  if((MCU_DEVICE STREQUAL lpc_chip_11uxx) OR (MCU_DEVICE STREQUAL lpc_chip_11u6x))
     # USB UART Support
     if(SUPPORT_DEBUG_UART STREQUAL "usb")
       list(APPEND nxp_SRCS Driver/LPC_VCOM/Driver_USART.c)
@@ -157,6 +200,8 @@ endif()
 if(SUPPORT_WATCHDOG)
   if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
     list(APPEND nxp_SRCS Library/PolyMCU/lpc_chip_11uxx/watchdog.c)
+  elseif(MCU_DEVICE STREQUAL lpc_chip_11u6x)
+    list(APPEND nxp_SRCS Library/PolyMCU/lpc_chip_11u6x/watchdog.c)
   elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
     list(APPEND nxp_SRCS Library/PolyMCU/lpc_chip_175x_6x/watchdog.c)
   endif()

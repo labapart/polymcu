@@ -110,6 +110,13 @@ void Chip_SetupXtalClocking(void)
 	uint32_t cmd[4], resp[2];
 #endif
 
+	// Enable IOCON clock
+	Chip_Clock_EnablePeriphClock(SYSCTL_CLOCK_IOCON);
+
+	// Select XTAL
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 2, 0, (IOCON_FUNC1 | IOCON_MODE_INACT)); // XTALIN
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 2, 1, (IOCON_FUNC1 | IOCON_MODE_INACT)); // XTALOUT
+
 	/* Powerup main oscillator */
 	Chip_SYSCTL_PowerUp(SYSCTL_POWERDOWN_SYSOSC_PD);
 
@@ -160,6 +167,11 @@ void Chip_SetupXtalClocking(void)
 /* Set up and initialize hardware prior to call to main */
 void Chip_SystemInit(void)
 {
+#ifdef SUPPORT_NXP_MAIN_OSC
+	/* Initial external clocking */
+	Chip_SetupXtalClocking();
+#else
 	/* Initial internal clocking */
 	Chip_SetupIrcClocking();
+#endif
 }

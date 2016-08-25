@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,14 @@ if(MCU_DEVICE STREQUAL lpc_chip_11uxx)
   add_definitions(-DCORE_M0 -DCHIP_LPC11UXX)
 
   set(LINKER_SCRIPT lpc11uxx.ld)
+elseif(MCU_DEVICE STREQUAL lpc_chip_11u6x)
+  add_definitions(-DCORE_M0PLUS -DCHIP_LPC11U6X)
+
+  if(SUPPORT_RUN_FROM_RAM)
+    set(LINKER_SCRIPT ${MCU_DEVICE_ROOT}/linker/lpc11u6x_ram.ld)
+  else()
+    set(LINKER_SCRIPT ${MCU_DEVICE_ROOT}/linker/lpc11u6x.ld)
+  endif()
 elseif(MCU_DEVICE STREQUAL lpc_chip_175x_6x)
   add_definitions(-DCORE_M3 -DCHIP_LPC175X_6X)
 

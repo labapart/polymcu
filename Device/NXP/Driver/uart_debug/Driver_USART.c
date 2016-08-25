@@ -30,6 +30,8 @@
 #include "Driver_USART.h"
 #ifdef CHIP_LPC11UXX
   #include "uart_11xx.h"
+#elif CHIP_LPC11U6X
+  #include "uart_0_11u6x.h"
 #elif CHIP_LPC175X_6X
   #include "uart_17xx_40xx.h"
 #else
@@ -39,9 +41,41 @@
 #define ARM_USART_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)  /* driver version */
 
 #ifdef CHIP_LPC11UXX
-	#define LPC_UART		LPC_USART
+  #define LPC_UART      LPC_USART
+#elif CHIP_LPC11U6X
+  #define LPC_UART      LPC_USART0
+
+  #define Chip_UART_Init           Chip_UART0_Init
+  #define Chip_UART_ConfigData     Chip_UART0_ConfigData
+  #define Chip_UART_SetBaud        Chip_UART0_SetBaud
+  #define Chip_UART_TXEnable       Chip_UART0_TXEnable
+  #define Chip_UART_SendBlocking   Chip_UART0_SendBlocking
+  #define Chip_UART_Read           Chip_UART0_Read
+  #define Chip_UART_ReadLineStatus Chip_UART0_ReadLineStatus
+  #define Chip_UART_DeInit         Chip_UART0_DeInit
+
+  #define UART_LCR_WLEN8           UART0_LCR_WLEN8
+  #define UART_LCR_SBS_1BIT        UART0_LCR_SBS_1BIT
+  #define UART_LCR_PARITY_DIS      UART0_LCR_PARITY_DIS
+  #define UART_LCR_WLEN5           UART0_LCR_WLEN5
+  #define UART_LCR_WLEN6           UART0_LCR_WLEN6
+  #define UART_LCR_WLEN7           UART0_LCR_WLEN7
+  #define UART_LCR_WLEN8           UART0_LCR_WLEN8
+  #define UART_LCR_PARITY_DIS      UART0_LCR_PARITY_DIS
+  #define UART_LCR_PARITY_EN       UART0_LCR_PARITY_EN
+  #define UART_LCR_PARITY_EVEN     UART0_LCR_PARITY_EVEN
+  #define UART_LCR_PARITY_ODD      UART0_LCR_PARITY_ODD
+  #define UART_LCR_SBS_1BIT        UART0_LCR_SBS_1BIT
+  #define UART_LCR_SBS_2BIT        UART0_LCR_SBS_2BIT
+  #define UART_LSR_TEMT            UART0_LSR_TEMT
+  #define UART_LSR_RDR             UART0_LSR_RDR
+  #define UART_LSR_OE              UART0_LSR_OE
+  #define UART_LSR_BI              UART0_LSR_BI
+  #define UART_LSR_FE              UART0_LSR_FE
+  #define UART_LSR_PE              UART0_LSR_PE
+
 #elif CHIP_LPC175X_6X
-	#define LPC_UART		LPC_UART0
+  #define LPC_UART      LPC_UART0
 #endif
 
 void _ttywrch(int ch);
@@ -96,6 +130,10 @@ int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 	// PinMux
 	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 18, IOCON_FUNC1 | IOCON_MODE_INACT);	/* PIO0_18 used for RXD */
 	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 19, IOCON_FUNC1 | IOCON_MODE_INACT);	/* PIO0_19 used for TXD */
+#elif CHIP_LPC11U6X
+	// PinMux
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 13, IOCON_FUNC5 | IOCON_MODE_INACT);	/* PIO0_13 used for RXD */
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 14, IOCON_FUNC5 | IOCON_MODE_INACT);	/* PIO0_14 used for TXD */
 #endif
 
 	Chip_UART_Init(LPC_UART);

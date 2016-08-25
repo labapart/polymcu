@@ -33,7 +33,6 @@
 #define __CMSIS_11U6X_H_
 
 #include "lpc_types.h"
-#include "sys_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -105,6 +104,7 @@ typedef enum {
 	SSP0_IRQn                     = 20,		/*!< SSP0 Interrupt                                   */
 	USART0_IRQn                   = 21,		/*!< USART0 interrupt                                 */
 	USB0_IRQn                     = 22,		/*!< USB IRQ interrupt                                */
+	USB_IRQn                      = 22,		/*!< USB IRQ interrupt                                */
 	USB0_FIQ_IRQn                 = 23,		/*!< USB FIQ interrupt                                */
 	ADC_A_IRQn                    = 24,		/*!< ADC_A Converter Interrupt                        */
 	RTC_IRQn                      = 25,		/*!< RTC Interrupt                                    */

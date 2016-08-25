@@ -40,3 +40,11 @@ MEMORY
   __base_RAM = 0x10000000 ; /* RAM */  
   __top_Ram0_32 = 0x10000000 + 0x8000 ; /* 32K bytes */  
   __top_RAM = 0x10000000 + 0x8000 ; /* 32K bytes */  
+
+  /* NewLib support*/
+  __bss_start__ = _bss;
+  __bss_end__ = _ebss;
+  __stack = _vStackTop;
+
+  __HeapBase = _pvHeapStart;
+  __StackLimit = _vStackTop - __StackSize;

@@ -118,6 +118,11 @@ static void usb_pin_clk_init(void) {
 #endif
 #endif
 
+#ifdef CHIP_LPC11U6X
+	// Enable USB PLL and clocks
+	Chip_USB_Init();
+#endif
+
 #ifdef CHIP_LPC175X_6X
 	// Enable USB PLL and clocks
 	Chip_USB_Init();
