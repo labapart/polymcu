@@ -36,8 +36,14 @@ const uint32_t ExtRateIn = 0;
 
 #define LED_COUNT  2
 
-static const int g_led_gpio_port_num[LED_COUNT] = { 0,   0 };
-static const int g_led_gpio_bit_num[LED_COUNT]  = { 11, 12 };
+static const struct {
+	int port;
+	int bit;
+	int func;
+} g_leds[LED_COUNT] = {
+	{ 0, 11, IOCON_FUNC1 }, // LED1
+	{ 0, 12, IOCON_FUNC1 }, // LED2
+};
 
 void __libc_init_array(void) {
 	// Do nothing. NXP LPCOpen already initialized the .data and .bss segments
@@ -46,13 +52,10 @@ void __libc_init_array(void) {
 void hardware_init_hook(void) {
 	int i;
 
-	// Setup pin muxings
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 11, IOCON_MODE_PULLUP | IOCON_FUNC1); /* P0.11: GPIO/LED1 */
-	Chip_IOCON_PinMuxSet(LPC_IOCON, 0, 12, IOCON_MODE_PULLUP | IOCON_FUNC1); /* P0.12: GPIO/LED2 */
-
 	// Initialize Board LEDs
 	for (i = 0; i < LED_COUNT; i++) {
-		Chip_GPIO_WriteDirBit(LPC_GPIO, g_led_gpio_port_num[i], g_led_gpio_bit_num[i], true);
+		Chip_IOCON_PinMuxSet(LPC_IOCON, g_leds[i].port, g_leds[i].bit, g_leds[i].func);
+		Chip_GPIO_WriteDirBit(LPC_GPIO, g_leds[i].port, g_leds[i].bit, true);
 	}
 
 #ifdef SUPPORT_DEVICE_USB
@@ -85,6 +88,6 @@ void hardware_init_hook(void) {
 
 void set_led(int led, int value) {
 	if(led < LED_COUNT) {
-		Chip_GPIO_WritePortBit(LPC_GPIO, g_led_gpio_port_num[led], g_led_gpio_bit_num[led], value);
+		Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, value);
 	}
 }
