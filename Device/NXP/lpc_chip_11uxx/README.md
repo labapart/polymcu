@@ -1,6 +1,6 @@
 ### Version
 
-The current LPC 11uxx SDK is based on LPCOpen v2.03 that can be downloaded at http://www.lpcware.com/system/files/lpcopen_v2_03_lpcxpresso_nxp_lpcxpresso_11u37h.zip
+- The current LPC 11uxx SDK is based on LPCOpen v2.03 that can be downloaded at http://www.lpcware.com/system/files/lpcopen_v2_03_lpcxpresso_nxp_lpcxpresso_11u37h.zip
 
 ### Instructions to explain how LPC 11uxx SDK has been installed
 
