@@ -246,17 +246,17 @@ void FLEXIO_CommonIRQHandler(void)
     }
 }
 
-void FLEXIO_DriverIRQHandler(void)
+__attribute__((weak)) void FLEXIO_DriverIRQHandler(void)
 {
     FLEXIO_CommonIRQHandler();
 }
 
-void FLEXIO0_DriverIRQHandler(void)
+__attribute__((weak)) void FLEXIO0_DriverIRQHandler(void)
 {
     FLEXIO_CommonIRQHandler();
 }
 
-void UART2_FLEXIO_DriverIRQHandler(void)
+__attribute__((weak)) void UART2_FLEXIO_DriverIRQHandler(void)
 {
     FLEXIO_CommonIRQHandler();
 }

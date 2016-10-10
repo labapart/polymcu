@@ -1069,7 +1069,7 @@ usb_status_t USB_DeviceSetStatus(usb_device_handle handle, usb_device_status_t t
  * @brief Device task function.
  *
  * The function is used to handle controller message.
- * This function should not be called in applicartion directly.
+ * This function should not be called in application directly.
  *
  * @param handle The device handle got from USB_DeviceInit.
  */

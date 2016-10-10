@@ -80,6 +80,10 @@ typedef enum _usb_osa_event_mode
 
 #include "usb_osa_bm.h"
 
+#elif defined(USB_STACK_CMSIS)
+
+#include "usb_osa_cmsis.h"
+
 #elif defined(USB_STACK_FREERTOS)
 
 #include "usb_osa_freertos.h"

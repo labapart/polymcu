@@ -80,7 +80,7 @@ static void SPI_RxDMACallback(dma_handle_t *handle, void *userData);
  ******************************************************************************/
 
 /* Dummy data used to send */
-const uint8_t s_dummyData = SPI_DUMMYDATA;
+static const uint8_t s_dummyData = SPI_DUMMYDATA;
 
 /*******************************************************************************
 * Code

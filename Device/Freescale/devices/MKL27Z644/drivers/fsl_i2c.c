@@ -1510,26 +1510,26 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
     }
 }
 
-void I2C0_DriverIRQHandler(void)
+__attribute__((weak)) void I2C0_DriverIRQHandler(void)
 {
     I2C_TransferCommonIRQHandler(I2C0, s_i2cHandle[0]);
 }
 
 #if (FSL_FEATURE_SOC_I2C_COUNT > 1)
-void I2C1_DriverIRQHandler(void)
+__attribute__((weak)) void I2C1_DriverIRQHandler(void)
 {
     I2C_TransferCommonIRQHandler(I2C1, s_i2cHandle[1]);
 }
 #endif /* I2C COUNT > 1 */
 
 #if (FSL_FEATURE_SOC_I2C_COUNT > 2)
-void I2C2_DriverIRQHandler(void)
+__attribute__((weak)) void I2C2_DriverIRQHandler(void)
 {
     I2C_TransferCommonIRQHandler(I2C2, s_i2cHandle[2]);
 }
 #endif /* I2C COUNT > 2 */
 #if (FSL_FEATURE_SOC_I2C_COUNT > 3)
-void I2C3_DriverIRQHandler(void)
+__attribute__((weak)) void I2C3_DriverIRQHandler(void)
 {
     I2C_TransferCommonIRQHandler(I2C3, s_i2cHandle[3]);
 }

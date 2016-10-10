@@ -31,6 +31,7 @@
 #include "fsl_common.h"
 #include "fsl_debug_console.h"
 
+#if 0 // PolyMCU already defines `__aeabi_assert()`
 #ifndef NDEBUG
 #if (defined(__CC_ARM)) || (defined(__ICCARM__))
 void __aeabi_assert(const char *failedExpr, const char *file, int line)
@@ -52,6 +53,7 @@ void __assert_func(const char *file, int line, const char *func, const char *fai
 }
 #endif /* (defined(__CC_ARM)) ||  (defined (__ICCARM__)) */
 #endif /* NDEBUG */
+#endif
 
 void InstallIRQHandler(IRQn_Type irq, uint32_t irqHandler)
 {

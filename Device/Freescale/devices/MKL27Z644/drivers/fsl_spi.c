@@ -849,7 +849,7 @@ static void SPI_TransferCommonIRQHandler(SPI_Type *base, void *handle)
 }
 
 #if defined(SPI0)
-void SPI0_DriverIRQHandler(void)
+__attribute__((weak)) void SPI0_DriverIRQHandler(void)
 {
     assert(s_spiHandle[0]);
     SPI_TransferCommonIRQHandler(SPI0, s_spiHandle[0]);
@@ -857,7 +857,7 @@ void SPI0_DriverIRQHandler(void)
 #endif
 
 #if defined(SPI1)
-void SPI1_DriverIRQHandler(void)
+__attribute__((weak)) void SPI1_DriverIRQHandler(void)
 {
     assert(s_spiHandle[1]);
     SPI_TransferCommonIRQHandler(SPI1, s_spiHandle[1]);
@@ -865,7 +865,7 @@ void SPI1_DriverIRQHandler(void)
 #endif
 
 #if defined(SPI2)
-void SPI2_DriverIRQHandler(void)
+__attribute__((weak)) void SPI2_DriverIRQHandler(void)
 {
     assert(s_spiHandle[2]);
     SPI_TransferCommonIRQHandler(SPI0, s_spiHandle[2]);

@@ -939,7 +939,7 @@ usb_status_t USB_DeviceKhciSend(usb_device_controller_handle khciHandle,
     uint32_t index = ((endpointAddress & USB_ENDPOINT_NUMBER_MASK) << 1U) | USB_IN;
     usb_status_t error = kStatus_USB_Error;
 
-    /* Save the tansfer information */
+    /* Save the transfer information */
     if (0U == khciState->endpointState[index].stateUnion.stateBitField.transferring)
     {
         khciState->endpointState[index].transferDone = 0U;
@@ -963,7 +963,7 @@ usb_status_t USB_DeviceKhciSend(usb_device_controller_handle khciHandle,
                                                length);
     }
 
-    /* Prime a transfer to receive next setup packet if the dat length is zero in a control in endpoint. */
+    /* Prime a transfer to receive next setup packet if the data length is zero in a control in endpoint. */
     if ((0U == khciState->endpointState[index].transferDone) && (0U == length) &&
         (USB_CONTROL_ENDPOINT == (endpointAddress & USB_ENDPOINT_NUMBER_MASK)))
     {

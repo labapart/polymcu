@@ -284,22 +284,22 @@ void DMA_HandleIRQ(dma_handle_t *handle)
 }
 
 #if defined(FSL_FEATURE_DMAMUX_MODULE_CHANNEL) && (FSL_FEATURE_DMAMUX_MODULE_CHANNEL == 4U)
-void DMA0_DriverIRQHandler(void)
+__attribute__((weak)) void DMA0_DriverIRQHandler(void)
 {
     DMA_HandleIRQ(s_DMAHandle[0]);
 }
 
-void DMA1_DriverIRQHandler(void)
+__attribute__((weak)) void DMA1_DriverIRQHandler(void)
 {
     DMA_HandleIRQ(s_DMAHandle[1]);
 }
 
-void DMA2_DriverIRQHandler(void)
+__attribute__((weak)) void DMA2_DriverIRQHandler(void)
 {
     DMA_HandleIRQ(s_DMAHandle[2]);
 }
 
-void DMA3_DriverIRQHandler(void)
+__attribute__((weak)) void DMA3_DriverIRQHandler(void)
 {
     DMA_HandleIRQ(s_DMAHandle[3]);
 }

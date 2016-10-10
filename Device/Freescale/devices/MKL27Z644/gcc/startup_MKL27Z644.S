@@ -102,7 +102,7 @@ __isr_vector:
     .long 0xFFFFFFFF
     .long 0xFFFFFFFF
     .long 0xFFFFFFFF
-    .long 0xFFFF3DFE
+    .long 0xFFFF3DFE /* Boot according to PTA4 level (0 = boot to ROM, 1 = boot to Flash) */
 
     .text
     .thumb
