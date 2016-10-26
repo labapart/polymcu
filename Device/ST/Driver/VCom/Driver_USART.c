@@ -25,9 +25,17 @@
  */
 
 #include "Driver_USART.h"
-#include "stm32l4xx_hal_conf.h"
-#include "stm32l4xx_hal.h"
 #include "PolyMCU.h"
+
+#ifdef STM32L476xx
+  #include "stm32l4xx_hal.h"
+  #include "stm32l4xx_hal_conf.h"
+#elif STM32F767xx
+  #include "stm32f7xx_hal_conf.h"
+  #include "stm32f7xx_hal.h"
+#else
+  #error Unsupport device
+#endif
 
 #ifdef __CMSIS_RTOS
   #include "cmsis_os.h"
