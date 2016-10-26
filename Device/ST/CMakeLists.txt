@@ -29,7 +29,8 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Board)
 find_package(PolyMCU)
 
-set(st_SRCS ${MCU_ROOT}/Source/gcc/startup_stm32l476xx.s
+if (BOARD STREQUAL "ST/STM32L4xx_Nucleo")
+  set(st_SRCS ${MCU_ROOT}/Source/gcc/startup_stm32l476xx.s
             ${MCU_ROOT}/Source/system_stm32l4xx.c
             ${MCU_HAL_ROOT}/Src/stm32l4xx_hal.c
             ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_cortex.c
@@ -38,7 +39,19 @@ set(st_SRCS ${MCU_ROOT}/Source/gcc/startup_stm32l476xx.s
             ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_rcc.c
             ${MCU_HAL_ROOT}/Src/stm32l4xx_hal_uart.c)
 
-list(APPEND st_SRCS Driver/VCom/Driver_USART.c)
+  list(APPEND st_SRCS Driver/VCom/L4xx/Driver_USART.c)
+else()
+  set(st_SRCS ${MCU_ROOT}/Source/gcc/startup_stm32f767xx.s
+      ${MCU_ROOT}/Source/system_stm32f7xx.c
+      ${MCU_HAL_ROOT}/Src/stm32f7xx_hal.c
+      ${MCU_HAL_ROOT}/Src/stm32f7xx_hal_cortex.c
+      ${MCU_HAL_ROOT}/Src/stm32f7xx_hal_gpio.c
+      ${MCU_HAL_ROOT}/Src/stm32f7xx_hal_pwr_ex.c
+      ${MCU_HAL_ROOT}/Src/stm32f7xx_hal_rcc.c
+      ${MCU_HAL_ROOT}/Src/stm32f7xx_hal_uart.c)
+
+  list(APPEND st_SRCS Driver/VCom/F7xx/Driver_USART.c)
+endif()
 
 # Define 'device_st' as the static library for Device/ST
 add_library(device_st STATIC ${st_SRCS})

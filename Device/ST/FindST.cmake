@@ -27,12 +27,23 @@
 find_package(CMSIS)
 
 # MCU specific paths
-set(MCU_ROOT ${CMAKE_CURRENT_LIST_DIR}/STM32L4xx)
-set(MCU_HAL_ROOT ${CMAKE_CURRENT_LIST_DIR}/STM32L4xx_HAL_Driver)
+if (BOARD STREQUAL "ST/STM32L4xx_Nucleo")
+  set(MCU_ROOT ${CMAKE_CURRENT_LIST_DIR}/STM32L4xx)
+  set(MCU_HAL_ROOT ${CMAKE_CURRENT_LIST_DIR}/STM32L4xx_HAL_Driver)
+else()
+  set(MCU_ROOT ${CMAKE_CURRENT_LIST_DIR}/STM32F7xx)
+  set(MCU_HAL_ROOT ${CMAKE_CURRENT_LIST_DIR}/STM32F7xx_HAL_Driver)
+endif()
+
 include_directories(${MCU_ROOT}/Include ${MCU_HAL_ROOT}/Inc)
 
 # MCU specific definitions
-add_definitions(-DSTM32L476xx)
-set(MCU_EXE_LINKER_FLAGS "-T ${MCU_ROOT}/Linker/STM32L476RGTx_FLASH.ld")
+if (BOARD STREQUAL "ST/STM32L4xx_Nucleo")
+  add_definitions(-DSTM32L476xx)
+  set(MCU_EXE_LINKER_FLAGS "-T ${MCU_ROOT}/Linker/STM32L476RGTx_FLASH.ld")
+else()
+  add_definitions(-DSTM32F767xx)
+  set(MCU_EXE_LINKER_FLAGS "-T ${MCU_ROOT}/Linker/STM32F767ZITx_FLASH.ld")
+endif()
 
 set(ST_LIBRARIES device_st)

@@ -28,7 +28,13 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Board)
 
-set(board_st_SRCS STM32L4xx_Nucleo/board.c
+if (BOARD STREQUAL "ST/STM32L4xx_Nucleo")
+  set(board_st_SRCS STM32L4xx_Nucleo/board.c
                   STM32L4xx_Nucleo/stm32l4xx_nucleo.c)
+else ()
+  set(board_st_SRCS
+      STM32F7xx_Nucleo/board.c
+      STM32F7xx_Nucleo/stm32f7xx_nucleo.c)
+endif()
 
 add_library(board_st STATIC ${board_st_SRCS})

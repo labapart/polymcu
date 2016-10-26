@@ -27,7 +27,9 @@
 cmake_minimum_required(VERSION 2.6)
 
 enable_language(ASM)
-
+#set(APPLICATION Examples/ST)
+#set(BOARD ST/STM32F7xx_Nucleo)
+set(CMSIS_ROOT ${CMAKE_CURRENT_LIST_DIR}/CMSIS})
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
@@ -290,6 +292,7 @@ GET_BOARD_LIST(BOARD_LIST)
 if (NOT BOARD)
   message(FATAL_ERROR "Define BOARD variable with one of these available boards: ${BOARD_LIST}")
 else()
+  message(STATUS "${BOARD_LIST}")
   list (FIND BOARD_LIST ${BOARD} _index)
   if (NOT ${_index} GREATER -1)
     message(FATAL_ERROR "Board '${BOARD}' is not supported. Here is the list of available boards: ${BOARD_LIST}")
