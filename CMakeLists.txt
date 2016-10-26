@@ -27,8 +27,6 @@
 cmake_minimum_required(VERSION 2.6)
 
 enable_language(ASM)
-#set(APPLICATION Examples/ST)
-#set(BOARD ST/STM32F7xx_Nucleo)
 set(CMSIS_ROOT ${CMAKE_CURRENT_LIST_DIR}/CMSIS})
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
