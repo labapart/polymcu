@@ -24,15 +24,24 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Tell RTOS we are running at 80Mhz
-set(RTOS_CLOCK 80000000)
+if (BOARD STREQUAL "ST/STM32L4xx_Nucleo")
+  # Tell RTOS we are running at 80Mhz
+  set(RTOS_CLOCK 80000000)
+else ()
+  # Tell RTOS we are running at 216Mhz
+  set(RTOS_CLOCK 216000000)
+endif ()
 
 # List of HW modules
 list(APPEND LIST_MODULES Device/ST
-                         Board/ST
-                         Lib/PolyMCU)
+    Board/ST
+    Lib/PolyMCU)
 
 #
 # Build options
 #
-set(CPU "ARM Cortex-M4F")
+if (BOARD STREQUAL "ST/STM32L4xx_Nucleo")
+  set(CPU "ARM Cortex-M4F")
+else()
+  set(CPU "ARM Cortex-M7")
+endif ()

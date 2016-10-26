@@ -26,7 +26,11 @@
 
 find_package(ST)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/STM32L4xx_Nucleo)
+if (BOARD STREQUAL "ST/STM32L4xx_Nucleo")
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/STM32L4xx_Nucleo)
+else()
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/STM32F7xx_Nucleo)
+endif()
 
 set(Board_LIBRARIES board_st ${ST_LIBRARIES})
 
