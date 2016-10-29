@@ -45,13 +45,15 @@ typedef struct {
 
 #define POLYMCU_MAILBOX_DEFINE(name, type, count) \
   struct { \
+	  uint32_t fifo[count]; \
 	  type entries[count]; \
   	  uint8_t status[count]; \
-	  uint32_t fifo[count]; \
   } polymcu_mailbox_##name; \
-  polymcu_mailbox_t polymcu_mailbox_##name##_def = { sizeof(type), count, (uint8_t*)&polymcu_mailbox_##name, \
-	  	  (uint8_t*)&polymcu_mailbox_##name + (sizeof(type) * count), \
-		  (uint32_t**)((uint8_t*)&polymcu_mailbox_##name + ((sizeof(type) + sizeof(uint8_t)) * count))};
+  polymcu_mailbox_t polymcu_mailbox_##name##_def = { sizeof(type), count, \
+		  (uint8_t*)&polymcu_mailbox_##name + (sizeof(uint32_t) * count), \
+		  (uint8_t*)&polymcu_mailbox_##name + ((sizeof(uint32_t) + sizeof(type)) * count), \
+		  (uint32_t**)((uint8_t*)&polymcu_mailbox_##name), \
+		  0};
 
 #define POLYMCU_MAILBOX_DECLARE_EXTERN(name)	extern polymcu_mailbox_t polymcu_mailbox_##name##_def
 #define POLYMCU_MAILBOX_NAME(name)				&polymcu_mailbox_##name##_def
