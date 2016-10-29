@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2016, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,13 +69,13 @@ caddr_t _sbrk_r(void *reent, size_t incr) {
 	return (caddr_t) prev_heap_end;
 }
 
-void print_hex(uint8_t* ptr, unsigned size) {
+void print_buffer_hex(uint8_t* ptr, unsigned size) {
 	for (unsigned i = 0; i < size; i++) {
 		printf("%02x", *(ptr + i));
 	}
 }
 
-void print_int(int i) {
+static void print_int(int i) {
     unsigned digit_count = 0;
     char c;
     if (i < 0) {
@@ -101,8 +101,35 @@ void print_int(int i) {
     write(1, &c, 1);
 }
 
+static void print_hex(uint32_t i) {
+	unsigned digit_count = 0;
+	char c;
+
+	write(1, "0x", 2);
+
+	// Count number of digit
+	int j = i, k;
+	do {
+		j = j / 0x10;
+		digit_count++;
+	} while (j > 0x10);
+
+	// Print digit
+	for (; digit_count > 0; digit_count--) {
+		for (j = 1, k = 0x10; j < digit_count; j++) k = k * 0x10;
+		j = (i / k);
+		if (j < 10) c = '0' + j;
+		else        c = 'a' + (j - 10);
+		i = i % k;
+		write(1, &c, 1);
+	}
+	if (i < 10) c = '0' + i;
+	else        c = 'a' + (i - 10);
+	write(1, &c, 1);
+}
+
 void __assert_func(const char *filename, int line, const char *function, const char *txt) {
-	set_led(1, 1);
+#ifndef NDEBUG
 	PRINT_DEBUG("ASSERT: '");
 	if (txt) PRINT_DEBUG(txt);
 	PRINT_DEBUG("' in ");
@@ -112,6 +139,8 @@ void __assert_func(const char *filename, int line, const char *function, const c
 	PRINT_DEBUG(":");
 	print_int(line);
 	PRINT_DEBUG("\n");
+#endif
+
 #ifdef SUPPORT_WATCHDOG
 	polymcu_watchdog_trigger();
 #else
@@ -149,7 +178,15 @@ void prvGetRegistersFromStack(uint32_t *pulFaultStackAddress) {
 	psr = pulFaultStackAddress[ 7 ];
 
 	/* When the following line is hit, the variables contain the register values. */
-	set_led(0, 1);
+#ifndef NDEBUG
+	PRINT_DEBUG("Exception Error: PC:");
+	print_hex(pc);
+	PRINT_DEBUG(" ");
+	PRINT_DEBUG("LR:");
+	print_hex(lr);
+	PRINT_DEBUG("\r\n");
+#endif
+
 	__BKPT(0);
 	for( ;; );
 }
