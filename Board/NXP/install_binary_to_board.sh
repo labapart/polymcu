@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -37,4 +37,4 @@ if [ ! -f "$1" ]; then
 fi
 
 # The mass-storage copy does not work well on LPC1768. We use pyocd-flashtool instead
-pyocd-flashtool --chip_erase -t lpc1768 "$1"
+pyocd-flashtool --chip_erase -b 101030cf6fd400ae795d2bba5413a147da5d -t lpc1768 "$1"
