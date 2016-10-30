@@ -95,7 +95,38 @@ static const ARM_USART_CAPABILITIES DriverCapabilities = {
 };
 
 #if FREESCALE_DEBUG_UART
-  #error UART not supported yet
+/* Array of UART peripheral base address. */
+static UART_Type *const g_uart_bases[] = UART_BASE_PTRS;
+
+// The data section is not initialized when retarget_init() is called.
+// That's why this structure must be declared as 'static const'
+static const uart_config_t m_uartInitialConfig = {
+	DEBUG_UART_BAUDRATE,         /*!< UART baud rate  */
+	kUART_ParityDisabled,        /*!< Parity mode, disabled (default), even, odd */
+#if defined(FSL_FEATURE_UART_HAS_STOP_BIT_CONFIG_SUPPORT) && FSL_FEATURE_UART_HAS_STOP_BIT_CONFIG_SUPPORT
+	kUART_OneStopBit,            /*!< Number of stop bits, 1 stop bit (default) or 2 stop bits  */
+#endif
+#if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
+	0,                           /*!< TX FIFO watermark */
+	0,                           /*!< RX FIFO watermark */
+#endif
+	1,                           /*!< Enable TX */
+	1,                           /*!< Enable RX */
+};
+
+static uart_config_t m_uartConfig = {
+	DEBUG_UART_BAUDRATE,         /*!< UART baud rate  */
+	kUART_ParityDisabled,        /*!< Parity mode, disabled (default), even, odd */
+#if defined(FSL_FEATURE_UART_HAS_STOP_BIT_CONFIG_SUPPORT) && FSL_FEATURE_UART_HAS_STOP_BIT_CONFIG_SUPPORT
+	kUART_OneStopBit,            /*!< Number of stop bits, 1 stop bit (default) or 2 stop bits  */
+#endif
+#if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
+	0,                           /*!< TX FIFO watermark */
+	0,                           /*!< RX FIFO watermark */
+#endif
+	1,                           /*!< Enable TX */
+	1,                           /*!< Enable RX */
+};
 #endif
 
 #if FREESCALE_DEBUG_LPSCI
@@ -126,7 +157,7 @@ static lpsci_config_t m_lpsciUserConfig = {
 #endif
 
 #if FREESCALE_DEBUG_LPUART
-/* Array of LPSCI peripheral base address. */
+/* Array of LPUART peripheral base address. */
 static LPUART_Type *const g_lpuart_bases[] = LPUART_BASE_PTRS;
 
 // The data section is not initialized when retarget_init() is called.
@@ -175,16 +206,25 @@ ARM_USART_CAPABILITIES ARM_USART_GetCapabilities(void) {
 }
 
 int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
+	m_SignalEvent = cb_event;
+
 #if FREESCALE_DEBUG_UART
-	#error UART not supported yet
+	status_t status;
+
+	assert(BOARD_DEBUG_UART_INSTANCE < FSL_FEATURE_SOC_UART_COUNT);
+
+    /* Enable clock and initial UART module follow user configure structure. */
+	status = UART_Init(g_uart_bases[BOARD_DEBUG_UART_INSTANCE], &m_uartInitialConfig, BOARD_DEBUG_UART_FREQUENCY);
+    if (status == kStatus_Success) {
+    	UART_EnableTx(g_uart_bases[BOARD_DEBUG_UART_INSTANCE], true);
+    	UART_EnableRx(g_uart_bases[BOARD_DEBUG_UART_INSTANCE], true);
+    }
 #endif
 
 #if FREESCALE_DEBUG_LPSCI
 	status_t status;
 
 	assert(BOARD_DEBUG_UART_INSTANCE < FSL_FEATURE_SOC_LPSCI_COUNT);
-
-	m_SignalEvent = cb_event;
 
 	/* SIM_SOPT2[27:26]:
 	 *  00: Clock Disabled
@@ -209,8 +249,6 @@ int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 #if FREESCALE_DEBUG_LPUART
 	assert(BOARD_DEBUG_UART_INSTANCE < FSL_FEATURE_SOC_LPUART_COUNT);
 
-	m_SignalEvent = cb_event;
-
 	/* SIM_SOPT2[27:26]:
 	 *  00: Clock Disabled
 	 *  01: IRC48M
@@ -233,7 +271,7 @@ int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 
 int32_t ARM_USART_Uninitialize(void) {
 #if FREESCALE_DEBUG_UART
-	#error UART not supported yet
+	UART_Deinit(g_uart_bases[BOARD_DEBUG_UART_INSTANCE]);
 #endif
 
 #if FREESCALE_DEBUG_LPSCI
@@ -255,7 +293,7 @@ int32_t ARM_USART_Send(const void *data, uint32_t num) {
 	const char *ptr = data;
 
 #if FREESCALE_DEBUG_UART
-	#error UART not supported yet
+	UART_WriteBlocking(g_uart_bases[BOARD_DEBUG_UART_INSTANCE], data, num);
 #endif
 
 #if FREESCALE_DEBUG_LPSCI
@@ -281,7 +319,7 @@ int32_t ARM_USART_Receive(void *data, uint32_t num) {
 	status_t status;
 
 #if FREESCALE_DEBUG_UART
-	#error UART not supported yet
+	status = UART_ReadBlocking(g_uart_bases[BOARD_DEBUG_UART_INSTANCE], data, num);
 #endif
 
 #if FREESCALE_DEBUG_LPSCI
