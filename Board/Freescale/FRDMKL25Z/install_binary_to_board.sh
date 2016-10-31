@@ -40,7 +40,7 @@ fi
 export USB_SERIAL=`lsusb -v -d 0d28: | grep iSerial | awk '{print $3}'`
 
 # Find the associated USB disk
-export USB_DISK=`ls /dev/disk/by-id/usb-* | grep ${USB_SERIAL}`
+export USB_DISK=`ls /dev/disk/by-id/usb-* | grep "${USB_SERIAL}"`
 
 # Retrieve the device node
 export USB_DEV=`readlink -e ${USB_DISK}`
