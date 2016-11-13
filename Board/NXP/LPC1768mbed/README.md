@@ -5,5 +5,7 @@ Mbed pins
 |------------|------------------------------|
 | 9          | LPC_UART3 - TX / I2C1 SDA    |
 | 10         | LPC_UART3 - RX / I2C1 SCL    |
+| 13         | LPC_UART1 - TX               |
+| 14         | LPC_UART1 - RX               |
 | 28         | LPC_UART2 - TX / I2C2 SDA    |
 | 27         | LPC_UART2 - RX / I2C2 SCL    |
