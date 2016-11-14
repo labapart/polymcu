@@ -34,10 +34,6 @@
 #include "fsl_port.h"
 #include "fsl_smc.h"
 
-//OM:#ifdef SUPPORT_FOTA_APPLICATION
-//OM:  #include "fota.h"
-//OM:#endif
-
 extern const ARM_DRIVER_USART Driver_UART_DEBUG;
 
 #define LED_COUNT  3
@@ -182,11 +178,6 @@ void hardware_init_hook(void) {
 	ret = Driver_UART_DEBUG.Initialize(NULL);
 	assert(ret == ARM_DRIVER_OK);
 #endif
-
-//OM:#ifdef SUPPORT_FOTA_APPLICATION
-//OM:	ret = fota_init();
-//OM:	assert(ret == 0);
-//OM:#endif
 }
 
 void set_led(int led, int value) {

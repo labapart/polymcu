@@ -328,12 +328,6 @@ int32_t ARM_USART_Control(uint32_t control, uint32_t arg) {
 	m_lpsciUserConfig.baudRate_Bps = arg;
 
 	switch (control & ARM_USART_DATA_BITS_Msk) {
-	//OM:case ARM_USART_DATA_BITS_8:
-	//OM:	m_lpsciUserConfig.bitCountPerChar = kLPSCI_8BitsPerChar;
-	//OM:	break;
-	//OM:case ARM_USART_DATA_BITS_9:
-	//OM:	m_lpsciUserConfig.bitCountPerChar = kLPSCI_9BitsPerChar;
-	//OM:	break;
 	default:
 		status = ARM_DRIVER_ERROR_UNSUPPORTED;
 		DEBUG_NOT_SUPPORTED();
@@ -383,12 +377,6 @@ int32_t ARM_USART_Control(uint32_t control, uint32_t arg) {
 	m_lpuartUserConfig.baudRate_Bps = arg;
 
 	switch (control & ARM_USART_DATA_BITS_Msk) {
-	//OM:case ARM_USART_DATA_BITS_8:
-	//OM:	m_lpuartUserConfig.bitCountPerChar = kLPUART_8BitsPerChar;
-	//OM:	break;
-	//OM:case ARM_USART_DATA_BITS_9:
-	//OM:	m_lpuartUserConfig.bitCountPerChar = kLPUART_9BitsPerChar;
-	//OM:	break;
 	default:
 		status = ARM_DRIVER_ERROR_UNSUPPORTED;
 		DEBUG_NOT_SUPPORTED();

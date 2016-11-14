@@ -40,11 +40,4 @@ if(SUPPORT_DEBUG_UART STREQUAL "none")
   add_definitions(-DSUPPORT_DEBUG_UART_NONE)
 endif()
 
-# Add USB support
-#OM:if(SUPPORT_DEVICE_USB)
-#OM:  if(SUPPORT_DEVICE_USB_DFU)
-#OM:    list(APPEND board_freescale_SRCS ${FREESCALE_BOARD}/dfu/usb_descriptor.c)
-#OM:  endif()
-#OM:endif(SUPPORT_DEVICE_USB)
-
 add_library(board_freescale STATIC ${board_freescale_SRCS})

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,24 +27,6 @@
 find_package(Freescale)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/FRDMKL25Z)
-
-# If USB support
-if(SUPPORT_DEVICE_USB)
-  if(SUPPORT_DEVICE_USB_DFU)
-    #TODO: Check where it is needed
-    add_definitions(-DSUPPORT_DEVICE_USB_DFU)
-  endif()
-
-  #OM:if(SUPPORT_DEVICE_USB_DFU)
-  #OM:  include_directories(${CMAKE_CURRENT_LIST_DIR}/FRDMKL25Z/dfu)
-  #OM:endif()
-endif()
-
-# Build the firmware as FOTA application
-#OM:if(SUPPORT_FOTA_APPLICATION)
-#OM:  include_directories(${CMAKE_SOURCE_DIR}/Application/LabAPart/fota_boot)
-#OM:  add_definitions(-DSUPPORT_FOTA_APPLICATION)
-#OM:endif()
 
 set(Board_LIBRARIES board_freescale ${Freescale_LIBRARIES})
 set(Board_INSTALL_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/FRDMKL25Z/install_binary_to_board.sh)
