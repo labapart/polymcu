@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2016, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/Include
-                    ${CMAKE_CURRENT_LIST_DIR}/Driver/Include)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/Core/Include
+                    ${CMAKE_CURRENT_LIST_DIR}/DAP/Firmware/Include
+                    ${CMAKE_CURRENT_LIST_DIR}/Driver/Include
+                    ${CMAKE_CURRENT_LIST_DIR}/DSP/Include)
 
 set(CMSIS_LIBRARIES)
