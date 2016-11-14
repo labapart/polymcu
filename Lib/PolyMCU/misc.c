@@ -75,6 +75,7 @@ void print_buffer_hex(uint8_t* ptr, unsigned size) {
 	}
 }
 
+#ifndef NDEBUG
 static void print_int(int i) {
     unsigned digit_count = 0;
     char c;
@@ -100,7 +101,9 @@ static void print_int(int i) {
     c = '0' + (i % 10);
     write(1, &c, 1);
 }
+#endif
 
+#ifndef NDEBUG
 static void print_hex(uint32_t i) {
 	unsigned digit_count = 0;
 	char c;
@@ -127,6 +130,7 @@ static void print_hex(uint32_t i) {
 	else        c = 'a' + (i - 10);
 	write(1, &c, 1);
 }
+#endif
 
 void __assert_func(const char *filename, int line, const char *function, const char *txt) {
 #ifndef NDEBUG
