@@ -69,8 +69,6 @@ uint32_t polymcu_mailbox_length(polymcu_mailbox_t *mail);
 void critical_section_enter(void);
 void critical_section_exit(void);
 
-typedef int status_t;
-
 #ifdef SUPPORT_TIMER
 
 #define TIMER_PERIOD_MILLISECOND    1000
