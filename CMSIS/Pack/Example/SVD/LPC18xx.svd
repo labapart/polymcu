@@ -4,7 +4,7 @@
 <device schemaVersion="1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
 	xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
 	<name>LPC18xx</name>
-	<version>1.0</version>
+	<version>0.23</version>
 	<description>Register cmsis file for LPC18xx parts</description>
 	<cpu>
 		<name>CM3</name>
@@ -18640,6 +18640,7 @@
 		<access>read-write</access>									
 		<resetValue>0x20</resetValue>									
 		<resetMask>0xFFFFFFFF</resetMask>									
+		<readAction>modify</readAction>
 		<fields>									
 			<field>								
 				<name>FLTV</name>							
@@ -22794,7 +22795,265 @@
 											
 		</field>													
 	</fields>														
-</register>															
+</register>		
+				<register>															
+					<name>IDIVC_CTRL</name>														
+					<description>Integer divider C control register</description>														
+					<addressOffset>0x050</addressOffset>														
+					<access>read-write</access>														
+					<resetValue>0x01000000</resetValue>														
+					<resetMask>0xFFFFFFFF</resetMask>														
+					<fields>														
+						<field>													
+							<name>PD</name>												
+							<description>Integer divider power down</description>												
+							<bitRange>[0:0]</bitRange>												
+							<enumeratedValues>												
+								<name>ENUM</name>												
+								<enumeratedValue>											
+									<name>ENABLED</name>										
+									<description>Enabled. IDIV enabled (default)</description>										
+									<value>0</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>POWER_DOWN</name>										
+									<description>Power-down</description>										
+									<value>1</value>										
+								</enumeratedValue>											
+							</enumeratedValues>												
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[1:1]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>IDIV</name>												
+							<description>Integer divider B, C, D divider values (1/(IDIV + 1)) 0000 = 1 (default) 0001 = 2  ... 1111 = 16</description>												
+							<bitRange>[5:2]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[10:6]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>AUTOBLOCK</name>												
+							<description>Block clock automatically during frequency change</description>												
+							<bitRange>[11:11]</bitRange>												
+							<enumeratedValues>												
+								<name>ENUM</name>												
+								<enumeratedValue>											
+									<name>DISABLED</name>										
+									<description>Disabled. Autoblocking disabled</description>										
+									<value>0</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>ENABLED</name>										
+									<description>Enabled. Autoblocking enabled</description>										
+									<value>1</value>										
+								</enumeratedValue>											
+							</enumeratedValues>												
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[23:12]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>CLK_SEL</name>												
+							<description>Clock-source selection. All other values are reserved.</description>												
+							<bitRange>[28:24]</bitRange>												
+							<enumeratedValues>												
+								<name>ENUM</name>												
+								<enumeratedValue>											
+									<name>32_KHZ_OSCILLATOR</name>										
+									<description>32 kHz oscillator</description>										
+									<value>0x00</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>IRC_DEFAULT</name>										
+									<description>IRC (default)</description>										
+									<value>0x01</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>ENET_RX_CLK</name>										
+									<description>ENET_RX_CLK</description>										
+									<value>0x02</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>ENET_TX_CLK</name>										
+									<description>ENET_TX_CLK</description>										
+									<value>0x03</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>GP_CLKIN</name>										
+									<description>GP_CLKIN</description>										
+									<value>0x04</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>CRYSTAL_OSCILLATOR</name>										
+									<description>Crystal oscillator</description>										
+									<value>0x06</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>PLL0AUDIO</name>										
+									<description>PLL0AUDIO</description>										
+									<value>0x08</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>PLL1</name>										
+									<description>PLL1</description>										
+									<value>0x09</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>IDIVA</name>										
+									<description>IDIVA</description>										
+									<value>0x0C</value>										
+								</enumeratedValue>											
+							</enumeratedValues>												
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[31:29]</bitRange>												
+							
+						</field>													
+					</fields>														
+				</register>
+				<register>															
+					<name>IDIVD_CTRL</name>														
+					<description>Integer divider D control register</description>														
+					<addressOffset>0x054</addressOffset>														
+					<access>read-write</access>														
+					<resetValue>0x01000000</resetValue>														
+					<resetMask>0xFFFFFFFF</resetMask>														
+					<fields>														
+						<field>													
+							<name>PD</name>												
+							<description>Integer divider power down</description>												
+							<bitRange>[0:0]</bitRange>												
+							<enumeratedValues>												
+								<name>ENUM</name>												
+								<enumeratedValue>											
+									<name>ENABLED</name>										
+									<description>Enabled. IDIV enabled (default)</description>										
+									<value>0</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>POWER_DOWN</name>										
+									<description>Power-down</description>										
+									<value>1</value>										
+								</enumeratedValue>											
+							</enumeratedValues>												
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[1:1]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>IDIV</name>												
+							<description>Integer divider B, C, D divider values (1/(IDIV + 1)) 0000 = 1 (default) 0001 = 2  ... 1111 = 16</description>												
+							<bitRange>[5:2]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[10:6]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>AUTOBLOCK</name>												
+							<description>Block clock automatically during frequency change</description>												
+							<bitRange>[11:11]</bitRange>												
+							<enumeratedValues>												
+								<name>ENUM</name>												
+								<enumeratedValue>											
+									<name>DISABLED</name>										
+									<description>Disabled. Autoblocking disabled</description>										
+									<value>0</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>ENABLED</name>										
+									<description>Enabled. Autoblocking enabled</description>										
+									<value>1</value>										
+								</enumeratedValue>											
+							</enumeratedValues>												
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[23:12]</bitRange>												
+							
+						</field>													
+						<field>													
+							<name>CLK_SEL</name>												
+							<description>Clock-source selection. All other values are reserved.</description>												
+							<bitRange>[28:24]</bitRange>												
+							<enumeratedValues>												
+								<name>ENUM</name>												
+								<enumeratedValue>											
+									<name>32_KHZ_OSCILLATOR</name>										
+									<description>32 kHz oscillator</description>										
+									<value>0x00</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>IRC_DEFAULT</name>										
+									<description>IRC (default)</description>										
+									<value>0x01</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>ENET_RX_CLK</name>										
+									<description>ENET_RX_CLK</description>										
+									<value>0x02</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>ENET_TX_CLK</name>										
+									<description>ENET_TX_CLK</description>										
+									<value>0x03</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>GP_CLKIN</name>										
+									<description>GP_CLKIN</description>										
+									<value>0x04</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>CRYSTAL_OSCILLATOR</name>										
+									<description>Crystal oscillator</description>										
+									<value>0x06</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>PLL0AUDIO</name>										
+									<description>PLL0AUDIO</description>										
+									<value>0x08</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>PLL1</name>										
+									<description>PLL1</description>										
+									<value>0x09</value>										
+								</enumeratedValue>											
+								<enumeratedValue>											
+									<name>IDIVA</name>										
+									<description>IDIVA</description>										
+									<value>0x0C</value>										
+								</enumeratedValue>											
+							</enumeratedValues>												
+						</field>													
+						<field>													
+							<name>RESERVED</name>												
+							<description>Reserved</description>												
+							<bitRange>[31:29]</bitRange>												
+							
+						</field>													
+					</fields>														
+				</register>
 <register>															
 	<name>IDIVE_CTRL</name>														
 	<description>Integer divider E control register</description>														
@@ -27732,7 +27991,30 @@
 						<field>
 							<name>RESERVED</name>
 							<description>Reserved</description>
-							<bitRange>[31:3]</bitRange>
+							<bitRange>[4:3]</bitRange>
+							
+						</field>
+						<field>
+							<name>DIV</name>
+							<description>Clock divider value</description>
+							<bitRange>[7:5]</bitRange>
+							<enumeratedValues>
+								<enumeratedValue>
+									<name>DIVIDEBY1</name>
+									<description>No division. Divide by 1.</description>
+									<value>0x0</value>
+								</enumeratedValue>
+								<enumeratedValue>
+									<name>DIVIDEBY2</name>
+									<description>Divide by 2.</description>
+									<value>0x1</value>
+								</enumeratedValue>
+							</enumeratedValues>
+						</field>
+						<field>
+							<name>RESERVED</name>
+							<description>Reserved</description>
+							<bitRange>[31:8]</bitRange>
 							
 						</field>
 					</fields>
@@ -30002,8 +30284,31 @@
 						<field>
 							<name>RESERVED</name>
 							<description>Reserved</description>
-							<bitRange>[31:3]</bitRange>
+							<bitRange>[4:3]</bitRange>
 
+						</field>
+						<field>
+							<name>DIV</name>
+							<description>Clock divider value</description>
+							<bitRange>[7:5]</bitRange>
+							<enumeratedValues>
+								<enumeratedValue>
+									<name>DIVIDEBY1</name>
+									<description>No division. Divide by 1.</description>
+									<value>0x0</value>
+								</enumeratedValue>
+								<enumeratedValue>
+									<name>DIVIDEBY2</name>
+									<description>Divide by 2.</description>
+									<value>0x1</value>
+								</enumeratedValue>
+							</enumeratedValues>
+						</field>
+						<field>
+							<name>RESERVED</name>
+							<description>Reserved</description>
+							<bitRange>[31:8]</bitRange>
+							
 						</field>
 					</fields>
 				</register>
@@ -49533,7 +49838,18 @@
 					<fields>
 						<field>
 							<name>CLKDIVVAL</name>
-							<description>Clock divider value  CAN_CLK = PCLK/(2CLKDIVVAL  -1+1)  0000: CAN_CLK = PCLK divided by 1.  0001: CAN_CLK = PCLK divided by 2.  0010: CAN_CLK = PCLK divided by 3.  0010: CAN_CLK = PCLK divided by 4.  0011: CAN_CLK = PCLK divided by 5. 0100: CAN_CLK = PCLK divided by 9. 0101: CAN_CLK = PCLK divided by 17. ...  1111: CAN_CLK = PCLK divided by 16385.</description>
+							<description>
+								Clock divider value 
+								CAN_CLK = PCLK/(CLKDIVVAL +1)
+								
+								0000: CAN_CLK = PCLK divided by 1.
+								0001: CAN_CLK = PCLK divided by 2.
+								0010: CAN_CLK = PCLK divided by 3.
+								0011: CAN_CLK = PCLK divided by 4.
+								0100: CAN_CLK = PCLK divided by 5.
+								...
+								1111: CAN_CLK = PCLK divided by 16.
+							</description>
 							<bitRange>[3:0]</bitRange>
 						</field>
 						<field>

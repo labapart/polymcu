@@ -3,7 +3,7 @@
  *----------------------------------------------------------------------------
  *      Name:    RT_MAILBOX.C
  *      Purpose: Implements waits and wake-ups for mailbox messages
- *      Rev.:    V4.79
+ *      Rev.:    V4.81
  *----------------------------------------------------------------------------
  *
  * Copyright (c) 1999-2009 KEIL, 2009-2015 ARM Germany GmbH
@@ -206,7 +206,7 @@ OS_RESULT isr_mbx_receive (OS_ID mailbox, void **message) {
   if (p_MCB->count) {
     /* A message is available in the fifo buffer. */
     *message = p_MCB->msg[p_MCB->last];
-    if (p_MCB->state == 2U) {
+    if ((p_MCB->p_lnk != NULL) && (p_MCB->state == 2U)) {
       /* A task is locked waiting to send message */
       rt_psq_enq (p_MCB, 0U);
       rt_psh_req ();

@@ -1,25 +1,22 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2013-2015 ARM Ltd.
+/* -------------------------------------------------------------------------- 
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * SPDX-License-Identifier: Apache-2.0
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * 3. This notice may not be removed or altered from any source distribution.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *
- * $Date:        02. June 2015
- * $Revision:    V2.4
+ * $Date:        02. March 2016
+ * $Revision:    V2.5
  *
  * Driver:       Driver_MCI0
  * Configured:   via RTE_Device.h configuration file
@@ -40,6 +37,8 @@
  */
 
 /* History:
+ *  Version 2.5
+ *    - Corrected PowerControl function for conditional Power full (driver must be initialized)
  *  Version 2.4
  *    - Updated initialization, uninitialization and power procedures
  *    - IRQ processing optimized
@@ -65,7 +64,7 @@
 
 #include "MCI_LPC18xx.h"
 
-#define ARM_MCI_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,4)  /* driver version */
+#define ARM_MCI_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,5)  /* driver version */
 
 /* External function (system_LPC18xx.c) used to get SDMMC peripheral clock */
 extern uint32_t GetClockFreq (uint32_t clk_src);
@@ -362,7 +361,7 @@ static int32_t PowerControl (ARM_POWER_STATE state) {
       /* Disable SDIO interrupts */
       NVIC_DisableIRQ(SDIO_IRQn);
 
-      MCI.flags = MCI_INIT;
+      MCI.flags &= ~MCI_POWER;
 
       /* Clear status */
       MCI.status.command_active   = 0U;
@@ -384,63 +383,63 @@ static int32_t PowerControl (ARM_POWER_STATE state) {
       break;
 
     case ARM_POWER_FULL:
-      if (!(MCI.flags & MCI_POWER)) {
-        /* Clear response and transfer variables */
-        MCI.response = NULL;
-        MCI.xfer.cnt = NULL;
+      if ((MCI.flags & MCI_INIT)  == 0U) { return ARM_DRIVER_ERROR; }
+      if ((MCI.flags & MCI_POWER) != 0U) { return ARM_DRIVER_OK; }
 
-        /* Enable SDIO clocks */
-        LPC_CCU1->CLK_M3_SDIO_CFG |= CCU_CLK_CFG_AUTO | CCU_CLK_CFG_RUN;
-        while (!(LPC_CCU1->CLK_M3_SDIO_CFG & CCU_CLK_STAT_RUN));
+      /* Clear response and transfer variables */
+      MCI.response = NULL;
+      MCI.xfer.cnt = NULL;
 
-        LPC_CCU2->CLK_SDIO_CFG |= CCU_CLK_CFG_AUTO | CCU_CLK_CFG_RUN;
-        while (!(LPC_CCU2->CLK_SDIO_CFG & CCU_CLK_STAT_RUN));
+      /* Enable SDIO clocks */
+      LPC_CCU1->CLK_M3_SDIO_CFG |= CCU_CLK_CFG_AUTO | CCU_CLK_CFG_RUN;
+      while (!(LPC_CCU1->CLK_M3_SDIO_CFG & CCU_CLK_STAT_RUN));
 
-        /* Reset controller, FIFO and DMA and wait until reset done */
-        LPC_SDMMC->CTRL = SDMMC_CTRL_RESET_BITMASK;
-        while (LPC_SDMMC->CTRL & SDMMC_CTRL_RESET_BITMASK);
+      LPC_CCU2->CLK_SDIO_CFG |= CCU_CLK_CFG_AUTO | CCU_CLK_CFG_RUN;
+      while (!(LPC_CCU2->CLK_SDIO_CFG & CCU_CLK_STAT_RUN));
 
-        LPC_SDMMC->BMOD = SDMMC_BMOD_SWR;
-        while (LPC_SDMMC->BMOD & SDMMC_BMOD_SWR);
+      /* Reset controller, FIFO and DMA and wait until reset done */
+      LPC_SDMMC->CTRL = SDMMC_CTRL_RESET_BITMASK;
+      while (LPC_SDMMC->CTRL & SDMMC_CTRL_RESET_BITMASK);
 
-        /* Enable internal DMAC interrupts */
-        LPC_SDMMC->IDINTEN = SDMMC_IDINTEN_FBE |
-                             SDMMC_IDINTEN_DU  ;
+      LPC_SDMMC->BMOD = SDMMC_BMOD_SWR;
+      while (LPC_SDMMC->BMOD & SDMMC_BMOD_SWR);
 
-        /* Enable SD/MMC peripheral interrupts */
-        LPC_SDMMC->INTMASK = SDMMC_INTMASK_RE    |
-                             #if (RTE_SD_CD_PIN_EN)
-                             SDMMC_INTMASK_CDET  |
-                             #endif
-                             SDMMC_INTMASK_CDONE |
-                             SDMMC_INTMASK_DTO   |
-                             SDMMC_INTMASK_RCRC  |
-                             SDMMC_INTMASK_DCRC  |
-                             SDMMC_INTMASK_RTO   |
-                             SDMMC_INTMASK_DRTO  |
-                             SDMMC_INTMASK_SBE   |
-                             SDMMC_INTMASK_EBE   ;
+      /* Enable internal DMAC interrupts */
+      LPC_SDMMC->IDINTEN = SDMMC_IDINTEN_FBE |
+                           SDMMC_IDINTEN_DU  ;
 
-        /* Enable Global Interrupt and select internal DMA for data transfer */
-        LPC_SDMMC->CTRL = SDMMC_CTRL_INT_ENABLE | SDMMC_CTRL_USE_INTERNAL_DMAC;
+      /* Enable SD/MMC peripheral interrupts */
+      LPC_SDMMC->INTMASK = SDMMC_INTMASK_RE    |
+                           #if (RTE_SD_CD_PIN_EN)
+                           SDMMC_INTMASK_CDET  |
+                           #endif
+                           SDMMC_INTMASK_CDONE |
+                           SDMMC_INTMASK_DTO   |
+                           SDMMC_INTMASK_RCRC  |
+                           SDMMC_INTMASK_DCRC  |
+                           SDMMC_INTMASK_RTO   |
+                           SDMMC_INTMASK_DRTO  |
+                           SDMMC_INTMASK_SBE   |
+                           SDMMC_INTMASK_EBE   ;
+      /* Enable Global Interrupt and select internal DMA for data transfer */
+      LPC_SDMMC->CTRL = SDMMC_CTRL_INT_ENABLE | SDMMC_CTRL_USE_INTERNAL_DMAC;
 
-        /* Set FIFO Threshold watermark */
-        LPC_SDMMC->FIFOTH = SDMMC_FIFOTH_DMA_MTS(0)   |
-                            SDMMC_FIFOTH_RX_WMARK(14) |
-                            SDMMC_FIFOTH_TX_WMARK(15) ;
+      /* Set FIFO Threshold watermark */
+      LPC_SDMMC->FIFOTH = SDMMC_FIFOTH_DMA_MTS(0)   |
+                          SDMMC_FIFOTH_RX_WMARK(14) |
+                          SDMMC_FIFOTH_TX_WMARK(15) ;
 
-        /* Set Bus Mode */
-        LPC_SDMMC->BMOD = SDMMC_BMOD_DE;
+      /* Set Bus Mode */
+      LPC_SDMMC->BMOD = SDMMC_BMOD_DE;
 
-        /* Set descriptor address */
-        LPC_SDMMC->DBADDR = (uint32_t)&SDMMC_DMA_Descriptor;
+      /* Set descriptor address */
+      LPC_SDMMC->DBADDR = (uint32_t)&SDMMC_DMA_Descriptor;
 
-        /* Enable SDMMC peripheral interrupts in NVIC */
-        NVIC_ClearPendingIRQ(SDIO_IRQn);
-        NVIC_EnableIRQ(SDIO_IRQn);
+      /* Enable SDMMC peripheral interrupts in NVIC */
+      NVIC_ClearPendingIRQ(SDIO_IRQn);
+      NVIC_EnableIRQ(SDIO_IRQn);
 
-        MCI.flags |= MCI_POWER;
-      }
+      MCI.flags |= MCI_POWER;
       break;
 
     default:

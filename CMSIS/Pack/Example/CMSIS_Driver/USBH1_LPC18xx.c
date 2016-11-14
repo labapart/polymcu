@@ -1,25 +1,22 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2013-2015 ARM Ltd.
+/* -------------------------------------------------------------------------- /*
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * SPDX-License-Identifier: Apache-2.0
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * 3. This notice may not be removed or altered from any source distribution.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *
- * $Date:        17. June 2015
- * $Revision:    V2.3
+ * $Date:        02. March 2016
+ * $Revision:    V2.4
  *
  * Driver:       Driver_USBH1_HCI
  * Configured:   via RTE_Device.h configuration file
@@ -35,6 +32,8 @@
  * -------------------------------------------------------------------------- */
 
 /* History:
+ *  Version 2.4
+ *    Corrected PowerControl function for conditional Power full (driver must be initialized)
  *  Version 2.3
  *    PowerControl for Power OFF and Uninitialize functions made unconditional
  *  Version 2.2
@@ -75,7 +74,7 @@ extern void USB1_PinsUnconfigure (void);
 
 // USBH EHCI Driver ************************************************************
 
-#define ARM_USBH_EHCI_DRIVER_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,3)
+#define ARM_USBH_EHCI_DRIVER_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,4)
 
 // Driver Version
 static const ARM_DRIVER_VERSION usbh_ehci_driver_version = { ARM_USBH_API_VERSION, ARM_USBH_EHCI_DRIVER_VERSION };
@@ -154,15 +153,19 @@ static int32_t USBH_HCI_PowerControl (ARM_POWER_STATE state) {
 #if (!RTE_USB_USB1_HS_PHY_EN)
       SCU_USB1_PinConfigure (SCU_USB1_PIN_CFG_ESEA);    // Reset SCU Register
 #endif
-      LPC_CCU1->CLK_USB1_CFG    &= ~1U;                 // Disable USB1 Base Clock
-      while (LPC_CCU1->CLK_USB1_STAT    & 1U);
-      LPC_CCU1->CLK_M3_USB1_CFG &= ~1U;                 // Disable USB1 Register Interface Clock
-      while (LPC_CCU1->CLK_M3_USB1_STAT & 1U);
-      LPC_CGU->BASE_USB1_CLK     =  0U;                 // Disable Base Clock
+    
+      if ((LPC_CGU->BASE_USB1_CLK & 1U) == 0U) {
+        LPC_CCU1->CLK_USB1_CFG    &= ~1U;               // Disable USB1 Base Clock
+        while (LPC_CCU1->CLK_USB1_STAT    & 1U);
+        LPC_CCU1->CLK_M3_USB1_CFG &= ~1U;               // Disable USB1 Register Interface Clock
+        while (LPC_CCU1->CLK_M3_USB1_STAT & 1U);
+        LPC_CGU->BASE_USB1_CLK     =  1U;               // Disable Base Clock
+      }
       break;
 
     case ARM_POWER_FULL:
-      if ((USB1_state & USBH_DRIVER_POWERED) != 0U) { return ARM_DRIVER_OK; }
+      if ((USB1_state & USBH_DRIVER_INITIALIZED) == 0U) { return ARM_DRIVER_ERROR; }
+      if ((USB1_state & USBH_DRIVER_POWERED)     != 0U) { return ARM_DRIVER_OK; }
 
       LPC_CGU->BASE_USB1_CLK     = (0x01U << 11) |      // Auto-block Enable
                                    (0x0CU << 24) ;      // Clock source: IDIVA

@@ -95,7 +95,7 @@ typedef struct OS_PSQ {           /* Post Service Queue                      */
 
 typedef struct OS_TSK {
   P_TCB  run;                     /* Current running task                    */
-  P_TCB  new;                     /* Scheduled task to run                   */
+  P_TCB  next;                    /* Scheduled task to run                   */
 } *P_TSK;
 
 typedef struct OS_ROBIN {         /* Round Robin Control                     */
@@ -130,7 +130,6 @@ typedef struct OS_SCB {
   U8     mask;                    /* Semaphore token mask                    */
   U16    tokens;                  /* Semaphore tokens                        */
   struct OS_TCB *p_lnk;           /* Chain of tasks waiting for tokens       */
-  U16    max_tokens;              /* Maximum number of Semaphore tokens      */
 } *P_SCB;
 
 typedef struct OS_MUCB {

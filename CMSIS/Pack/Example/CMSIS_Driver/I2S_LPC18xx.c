@@ -1,25 +1,22 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2013-2015 ARM Ltd.
+/* -------------------------------------------------------------------------- 
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * SPDX-License-Identifier: Apache-2.0
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * 3. This notice may not be removed or altered from any source distribution.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *
- * $Date:        15. June 2015
- * $Revision:    V1.2
+ * $Date:        02. March 2016
+ * $Revision:    V1.4
  *
  * Driver:       Driver_SAI0, Driver_SAI1
  * Configured:   via RTE_Device.h configuration file
@@ -35,6 +32,10 @@
  * -------------------------------------------------------------------------- */
 
 /* History:
+ *  Version 1.4
+ *    - Driver update to work with GPDMA_LPC18xx ver.: 1.3
+ *  Version 1.3
+ *    - Corrected PowerControl function for conditional Power full (driver must be initialized)
  *  Version 1.2
  *    - PowerControl for Power OFF and Uninitialize functions made unconditional.
  *    - Corrected status bit-field handling, to prevent race conditions.
@@ -105,7 +106,7 @@
 #endif
 
 
-#define ARM_SAI_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1,2)   // driver version
+#define ARM_SAI_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1,4)   // driver version
 // Driver Version
 static const ARM_DRIVER_VERSION DriverVersion = {
   ARM_SAI_API_VERSION,
@@ -718,16 +719,15 @@ static int32_t I2S_PowerControl (ARM_POWER_STATE state, I2S_RESOURCES *i2s) {
       i2s->info->status.tx_busy       = 0U;
       i2s->info->status.tx_underflow  = 0U;
 
-      i2s->info->flags = I2S_FLAG_INITIALIZED;
+      i2s->info->flags &= ~I2S_FLAG_POWERED;
       break;
 
     case ARM_POWER_LOW:
       return ARM_DRIVER_ERROR_UNSUPPORTED;
 
     case ARM_POWER_FULL:
-      if (i2s->info->flags & I2S_FLAG_POWERED) {
-        return ARM_DRIVER_OK;
-      }
+      if ((i2s->info->flags & I2S_FLAG_INITIALIZED) == 0U) { return ARM_DRIVER_ERROR; }
+      if ((i2s->info->flags & I2S_FLAG_POWERED)     != 0U) { return ARM_DRIVER_OK; }
 
       // Select PLL1 for APB1 clk source and enable autoblock
       LPC_CGU->BASE_APB1_CLK = (9U << 24) | (1U << 11);
@@ -851,7 +851,7 @@ static int32_t I2S_Send (const void *data, uint32_t num, I2S_RESOURCES *i2s) {
       stat = GPDMA_ChannelConfigure (i2s->dma_tx->channel,
                                      (uint32_t)i2s->info->tx.buf + i2s->info->tx.cnt,
                                      (uint32_t)(&(i2s->reg->TXFIFO)),
-                                     GPDMA_CH_CONTROL_TRANSFERSIZE(num / 4U)                  |
+                                     num / 4U,
                                      GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                   |
                                      GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                   |
                                      GPDMA_CH_CONTROL_SWIDTH(GPDMA_WIDTH_WORD)                |
@@ -957,7 +957,7 @@ static int32_t I2S_Receive (void *data, uint32_t num, I2S_RESOURCES *i2s) {
     stat = GPDMA_ChannelConfigure (i2s->dma_rx->channel,
                                    (uint32_t)(&(i2s->reg->RXFIFO)),
                                    (uint32_t)i2s->info->rx.buf + offset,
-                                   GPDMA_CH_CONTROL_TRANSFERSIZE(num)                       |
+                                   num,
                                    GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                   |
                                    GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                   |
                                    GPDMA_CH_CONTROL_SWIDTH(GPDMA_WIDTH_WORD)                |

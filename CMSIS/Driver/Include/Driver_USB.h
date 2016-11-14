@@ -1,28 +1,25 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2013-2014 ARM Ltd.
+/*
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * SPDX-License-Identifier: Apache-2.0
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * 3. This notice may not be removed or altered from any source distribution.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  * $Date:        20. May 2014
  * $Revision:    V2.00
  *
  * Project:      USB Driver common definitions
- * -------------------------------------------------------------------------- */
+ */
 
 /* History:
  *  Version 2.00
@@ -34,8 +31,8 @@
  *    Initial release
  */
 
-#ifndef __DRIVER_USB_H
-#define __DRIVER_USB_H
+#ifndef DRIVER_USB_H_
+#define DRIVER_USB_H_
 
 #include "Driver_Common.h"
 
@@ -92,4 +89,4 @@
 #define ARM_USB_ENDPOINT_MICROFRAME_TRANSACTIONS_2      0x0800
 #define ARM_USB_ENDPOINT_MICROFRAME_TRANSACTIONS_3      0x1000
 
-#endif /* __DRIVER_USB_H */
+#endif /* DRIVER_USB_H_ */

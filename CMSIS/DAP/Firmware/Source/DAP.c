@@ -1,24 +1,29 @@
-/******************************************************************************
- * @file     DAP.c
- * @brief    CMSIS-DAP Commands
- * @version  V1.10
- * @date     20. May 2015
+/*
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * @note
- * Copyright (C) 2012-2015 ARM Limited. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
  *
- * @par
- * ARM Limited (ARM) is supplying this software for use with Cortex-M
- * processor based microcontrollers.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * @par
- * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
- * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- * ARM SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR
- * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- ******************************************************************************/
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * ----------------------------------------------------------------------
+ *
+ * $Date:        20. May 2015
+ * $Revision:    V1.10
+ *
+ * Project:      CMSIS-DAP Source
+ * Title:        DAP.c CMSIS-DAP Commands
+ *
+ *---------------------------------------------------------------------------*/
 
 #include <string.h>
 #ifdef RTE_CMSIS_RTOS

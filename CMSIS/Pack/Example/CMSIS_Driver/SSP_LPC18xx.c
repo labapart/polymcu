@@ -1,25 +1,22 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2013-2015 ARM Ltd.
+/* -------------------------------------------------------------------------- 
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * SPDX-License-Identifier: Apache-2.0
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * 3. This notice may not be removed or altered from any source distribution.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *
- * $Date:        15. June 2015
- * $Revision:    V2.5
+ * $Date:        13. March 2016
+ * $Revision:    V2.8
  *
  * Driver:       Driver_SPI0, Driver_SPI1
  * Configured:   via RTE_Device.h configuration file
@@ -35,6 +32,13 @@
  * -------------------------------------------------------------------------- */
 
 /* History:
+ *  Version 2.8
+ *    - Corrected Pin Configuration and Unconfiguration
+ *  Version 2.7
+ *    - Driver update to work with GPDMA_LPC18xx ver.: 1.3
+ *  Version 2.6
+ *    - Corrected Bus Speed configuration
+ *    - Corrected PowerControl function for conditional Power full (driver must be initialized)
  *  Version 2.5
  *    - PowerControl for Power OFF and Uninitialize functions made unconditional.
  *    - Corrected status bit-field handling, to prevent race conditions.
@@ -70,7 +74,7 @@ void SSP0_GPDMA_Rx_SignalEvent (uint32_t event);
 void SSP1_GPDMA_Tx_SignalEvent (uint32_t event);
 void SSP1_GPDMA_Rx_SignalEvent (uint32_t event);
 
-#define ARM_SPI_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,5)   // driver version
+#define ARM_SPI_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,8)   // driver version
 
 #if ((defined(RTE_Drivers_SPI0) || defined(RTE_Drivers_SPI1)) && (!RTE_SSP0) && (!RTE_SSP1))
 #error "SSP not configured in RTE_Device.h!"
@@ -237,30 +241,30 @@ static ARM_SPI_CAPABILITIES SSP_GetCapabilities (void) {
 static int32_t SSPx_Initialize (ARM_SPI_SignalEvent_t cb_event, SSP_RESOURCES *ssp) {
   uint32_t val;
 
-  if (ssp->info->state & SSP_INITIALIZED) return ARM_DRIVER_OK;
+  if (ssp->info->state & SSP_INITIALIZED) { return ARM_DRIVER_OK; }
 
   // Initialize SSP Run-Time Resources
   ssp->info->cb_event          = cb_event;
-  ssp->info->status.busy       = 0;
-  ssp->info->status.data_lost  = 0;
-  ssp->info->status.mode_fault = 0;
+  ssp->info->status.busy       = 0U;
+  ssp->info->status.data_lost  = 0U;
+  ssp->info->status.mode_fault = 0U;
 
   // Clear transfer information
   memset(ssp->xfer, 0, sizeof(SSP_TRANSFER_INFO));
 
   // Configure pins
-  val = SCU_PIN_CFG_PULLUP_DIS | SCU_PIN_CFG_HIGH_SPEED_SLEW_RATE_EN | SCU_PIN_CFG_INPUT_BUFFER_EN | SCU_PIN_CFG_INPUT_FILTER_DIS;
-                                SCU_PinConfigure     (ssp->pin.sck->port,  ssp->pin.sck->num,  ssp->pin.sck->config_val  | val);
-  if (ssp->pin.sck->port == 16) SCU_CLK_PinConfigure (ssp->pin.sck->num,                       ssp->pin.sck->config_val  | val);
-  else                          SCU_PinConfigure     (ssp->pin.sck->port,  ssp->pin.sck->num,  ssp->pin.sck->config_val  | val);
-                                SCU_PinConfigure     (ssp->pin.miso->port, ssp->pin.miso->num, ssp->pin.miso->config_val | val);
-                                SCU_PinConfigure     (ssp->pin.mosi->port, ssp->pin.mosi->num, ssp->pin.mosi->config_val | val);
+  val = SCU_PIN_CFG_PULLUP_DIS |   SCU_PIN_CFG_HIGH_SPEED_SLEW_RATE_EN | SCU_PIN_CFG_INPUT_BUFFER_EN | SCU_PIN_CFG_INPUT_FILTER_DIS;
+                                   SCU_PinConfigure     (ssp->pin.sck->port,  ssp->pin.sck->num,  ssp->pin.sck->config_val  | val);
+  if (ssp->pin.sck->port == 16U) { SCU_CLK_PinConfigure (ssp->pin.sck->num,                       ssp->pin.sck->config_val  | val); }
+  else                           { SCU_PinConfigure     (ssp->pin.sck->port,  ssp->pin.sck->num,  ssp->pin.sck->config_val  | val); }
+                                   SCU_PinConfigure     (ssp->pin.miso->port, ssp->pin.miso->num, ssp->pin.miso->config_val | val);
+                                   SCU_PinConfigure     (ssp->pin.mosi->port, ssp->pin.mosi->num, ssp->pin.mosi->config_val | val);
 
   // Configure DMA if it will be used
-  if (ssp->dma.tx_en || ssp->dma.rx_en) GPDMA_Initialize ();
+  if (ssp->dma.tx_en || ssp->dma.rx_en) { GPDMA_Initialize (); }
 
-  if (ssp->dma.tx_en) GPDMA_PeripheralSelect (ssp->dma.tx_peri, ssp->dma.tx_peri_sel);
-  if (ssp->dma.rx_en) GPDMA_PeripheralSelect (ssp->dma.rx_peri, ssp->dma.rx_peri_sel);
+  if (ssp->dma.tx_en) { GPDMA_PeripheralSelect (ssp->dma.tx_peri, ssp->dma.tx_peri_sel); }
+  if (ssp->dma.rx_en) { GPDMA_PeripheralSelect (ssp->dma.rx_peri, ssp->dma.rx_peri_sel); }
 
   ssp->info->state = SSP_INITIALIZED;   // SSP is initialized
 
@@ -276,16 +280,16 @@ static int32_t SSPx_Initialize (ARM_SPI_SignalEvent_t cb_event, SSP_RESOURCES *s
 static int32_t SSPx_Uninitialize (SSP_RESOURCES *ssp) {
 
   // Unconfigure pins
-  if (ssp->pin.ssel != NULL)    SCU_PinConfigure     (ssp->pin.ssel->port, ssp->pin.ssel->num, 0);
-  if (ssp->pin.sck->port == 16) SCU_CLK_PinConfigure (ssp->pin.sck->num,                       0);
-  else                          SCU_PinConfigure     (ssp->pin.sck->port,  ssp->pin.sck->num,  0);
-                                SCU_PinConfigure     (ssp->pin.miso->port, ssp->pin.miso->num, 0);
-                                SCU_PinConfigure     (ssp->pin.mosi->port, ssp->pin.mosi->num, 0);
+  if (ssp->pin.ssel != NULL)     { SCU_PinConfigure     (ssp->pin.ssel->port, ssp->pin.ssel->num, 0U); }
+  if (ssp->pin.sck->port == 16U) { SCU_CLK_PinConfigure (ssp->pin.sck->num,                       0U); }
+  else                           { SCU_PinConfigure     (ssp->pin.sck->port,  ssp->pin.sck->num,  0U); }
+                                   SCU_PinConfigure     (ssp->pin.miso->port, ssp->pin.miso->num, 0U);
+                                   SCU_PinConfigure     (ssp->pin.mosi->port, ssp->pin.mosi->num, 0U);
 
   // Uninitialize DMA
-  if (ssp->dma.tx_en || ssp->dma.rx_en) GPDMA_Uninitialize ();
+  if (ssp->dma.tx_en || ssp->dma.rx_en) { GPDMA_Uninitialize (); }
 
-  ssp->info->state = 0;                 // SSP is uninitialized
+  ssp->info->state = 0U;                // SSP is uninitialized
 
   return ARM_DRIVER_OK;
 }
@@ -312,19 +316,20 @@ static int32_t SSPx_PowerControl (ARM_POWER_STATE state, SSP_RESOURCES *ssp) {
 
       // Reset SSP peripheral
       *(ssp->rst.reg_cfg)  = ssp->rst.reg_cfg_val;
-        while (!(*(ssp->rst.reg_stat) & ssp->rst.reg_stat_val));
+       while (!(*(ssp->rst.reg_stat) & ssp->rst.reg_stat_val));
 
-      // Deactivate SSP peripheral clock
-      *(ssp->clk.peri_cfg) &= ~(ssp->clk.peri_cfg_val);
-      while (*(ssp->clk.peri_stat) & ssp->clk.peri_stat_val);
+      if (*(ssp->clk.reg_cfg) == 0U) {
+         *(ssp->clk.peri_cfg) = ~1U;
+        while ( *(ssp->clk.peri_cfg) & 1U);
 
-      // De-initialize SSP register clock
-      *(ssp->clk.reg_cfg) = ~ssp->clk.reg_cfg_val;
+        // Power down, clock source set to IRC
+        *(ssp->clk.reg_cfg) =  1U | (1U << 24) | (1U << 11);
+      }
 
       // Reset SSP Run-Time Resources
-      ssp->info->status.busy       = 0;
-      ssp->info->status.data_lost  = 0;
-      ssp->info->status.mode_fault = 0;
+      ssp->info->status.busy       = 0U;
+      ssp->info->status.data_lost  = 0U;
+      ssp->info->status.mode_fault = 0U;
 
       // Clear transfer information
       memset(ssp->xfer, 0, sizeof(SSP_TRANSFER_INFO));
@@ -333,36 +338,36 @@ static int32_t SSPx_PowerControl (ARM_POWER_STATE state, SSP_RESOURCES *ssp) {
       break;
 
     case ARM_POWER_FULL:
-      if (!(ssp->info->state & SSP_POWERED)) {
+      if ((ssp->info->state & SSP_INITIALIZED) == 0U) { return ARM_DRIVER_ERROR; }
+      if ((ssp->info->state & SSP_POWERED)     != 0U) { return ARM_DRIVER_OK; }
 
-        // Initialize SSP register clock
-        *(ssp->clk.reg_cfg) = ssp->clk.reg_cfg_val;
+      // Initialize SSP register clock
+      *(ssp->clk.reg_cfg) = ssp->clk.reg_cfg_val;
 
-        // Activate SSP peripheral clock
-        *(ssp->clk.peri_cfg) = ssp->clk.peri_cfg_val;
-        while (!(*(ssp->clk.peri_stat) & ssp->clk.peri_stat_val));
+      // Activate SSP peripheral clock
+      *(ssp->clk.peri_cfg) = ssp->clk.peri_cfg_val;
+      while (!(*(ssp->clk.peri_stat) & ssp->clk.peri_stat_val));
 
-        // Reset SSP peripheral
-        *(ssp->rst.reg_cfg)  = ssp->rst.reg_cfg_val;
-        while (!(*(ssp->rst.reg_stat) & ssp->rst.reg_stat_val));
+      // Reset SSP peripheral
+      *(ssp->rst.reg_cfg)  = ssp->rst.reg_cfg_val;
+      while (!(*(ssp->rst.reg_stat) & ssp->rst.reg_stat_val));
 
-        ssp->reg->IMSC  = 0;              // Disable SSP interrupts
-        ssp->reg->ICR   = 3;              // Clear SSP interrupts
+      ssp->reg->IMSC  = 0U;             // Disable SSP interrupts
+      ssp->reg->ICR   = 3U;             // Clear SSP interrupts
 
-        // Reset SSP Run-Time Resources
-        ssp->info->status.busy       = 0;
-        ssp->info->status.data_lost  = 0;
-        ssp->info->status.mode_fault = 0;
+      // Reset SSP Run-Time Resources
+      ssp->info->status.busy       = 0U;
+      ssp->info->status.data_lost  = 0U;
+      ssp->info->status.mode_fault = 0U;
 
-        ssp->info->state |=  SSP_POWERED; // SSP is powered
+      ssp->info->state |=  SSP_POWERED; // SSP is powered
 
-        // Enable DMA
-        if (ssp->dma.tx_en) ssp->reg->DMACR |= SSPx_DMACR_TXDMAE;
-        if (ssp->dma.rx_en) ssp->reg->DMACR |= SSPx_DMACR_RXDMAE;
+      // Enable DMA
+      if (ssp->dma.tx_en) { ssp->reg->DMACR |= SSPx_DMACR_TXDMAE; }
+      if (ssp->dma.rx_en) { ssp->reg->DMACR |= SSPx_DMACR_RXDMAE; }
 
-        NVIC_ClearPendingIRQ (ssp->irq_num);
-        NVIC_EnableIRQ (ssp->irq_num);    // Enable SSP IRQ in NVIC
-      }
+      NVIC_ClearPendingIRQ (ssp->irq_num);
+      NVIC_EnableIRQ (ssp->irq_num);    // Enable SSP IRQ in NVIC
       break;
 
     default:
@@ -383,25 +388,25 @@ static int32_t SSPx_PowerControl (ARM_POWER_STATE state, SSP_RESOURCES *ssp) {
 static int32_t SSPx_Send (const void *data, uint32_t num, SSP_RESOURCES *ssp) {
   static uint32_t dummy_data;
 
-  if ((data == NULL) || (num == 0))         return ARM_DRIVER_ERROR_PARAMETER;
-  if (!(ssp->info->state & SSP_CONFIGURED)) return ARM_DRIVER_ERROR;
-  if (  ssp->info->status.busy)             return ARM_DRIVER_ERROR_BUSY;
-  ssp->info->status.busy       = 1;
-  ssp->info->status.data_lost  = 0;
-  ssp->info->status.mode_fault = 0;
+  if ((data == NULL) || (num == 0U))        { return ARM_DRIVER_ERROR_PARAMETER; }
+  if (!(ssp->info->state & SSP_CONFIGURED)) { return ARM_DRIVER_ERROR; }
+  if (  ssp->info->status.busy)             { return ARM_DRIVER_ERROR_BUSY; }
+  ssp->info->status.busy       = 1U;
+  ssp->info->status.data_lost  = 0U;
+  ssp->info->status.mode_fault = 0U;
 
   ssp->xfer->rx_buf = NULL;
   ssp->xfer->tx_buf = (uint8_t *)data;
 
   ssp->xfer->num    = num;
-  ssp->xfer->rx_cnt = 0;
-  ssp->xfer->tx_cnt = 0;
+  ssp->xfer->rx_cnt = 0U;
+  ssp->xfer->tx_cnt = 0U;
 
   if (ssp->dma.tx_en && ssp->dma.rx_en) {
     if (GPDMA_ChannelConfigure (ssp->dma.rx_ch,
                                (uint32_t)&ssp->reg->DR,
                                (uint32_t)&dummy_data,
-                                GPDMA_CH_CONTROL_TRANSFERSIZE(num)                                |
+                                num,
                                 GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_SWIDTH((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)       |
@@ -414,12 +419,13 @@ static int32_t SSPx_Send (const void *data, uint32_t num, SSP_RESOURCES *ssp) {
                                 GPDMA_CH_CONFIG_IE                                                |
                                 GPDMA_CH_CONFIG_ITC                                               |
                                 GPDMA_CH_CONFIG_E,
-                                ssp->dma.rx_callback) == -1)
+                                ssp->dma.rx_callback) == -1) {
       return ARM_DRIVER_ERROR;
+    }
     if (GPDMA_ChannelConfigure (ssp->dma.tx_ch,
                                (uint32_t)data,
                                (uint32_t)&ssp->reg->DR,
-                                GPDMA_CH_CONTROL_TRANSFERSIZE(num)                                |
+                                num,
                                 GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_SWIDTH((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)       |
@@ -433,8 +439,9 @@ static int32_t SSPx_Send (const void *data, uint32_t num, SSP_RESOURCES *ssp) {
                                 GPDMA_CH_CONFIG_IE                                                |
                                 GPDMA_CH_CONFIG_ITC                                               |
                                 GPDMA_CH_CONFIG_E,
-                                ssp->dma.tx_callback) == -1)
+                                ssp->dma.tx_callback) == -1) {
       return ARM_DRIVER_ERROR;
+    }
   } else {
     ssp->reg->IMSC = SSPx_IMSC_TXIM | SSPx_IMSC_RXIM | SSPx_IMSC_RTIM | SSPx_IMSC_RORIM;
   }
@@ -453,12 +460,12 @@ static int32_t SSPx_Send (const void *data, uint32_t num, SSP_RESOURCES *ssp) {
 static int32_t SSPx_Receive (void *data, uint32_t num, SSP_RESOURCES *ssp) {
   static uint32_t dummy_data;
 
-  if ((data == NULL) || (num == 0))         return ARM_DRIVER_ERROR_PARAMETER;
-  if (!(ssp->info->state & SSP_CONFIGURED)) return ARM_DRIVER_ERROR;
-  if (  ssp->info->status.busy)             return ARM_DRIVER_ERROR_BUSY;
-  ssp->info->status.busy       = 1;
-  ssp->info->status.data_lost  = 0;
-  ssp->info->status.mode_fault = 0;
+  if ((data == NULL) || (num == 0U))        { return ARM_DRIVER_ERROR_PARAMETER; }
+  if (!(ssp->info->state & SSP_CONFIGURED)) { return ARM_DRIVER_ERROR; }
+  if (  ssp->info->status.busy)             { return ARM_DRIVER_ERROR_BUSY; }
+  ssp->info->status.busy       = 1U;
+  ssp->info->status.data_lost  = 0U;
+  ssp->info->status.mode_fault = 0U;
 
   dummy_data        = ssp->xfer->def_val;
 
@@ -466,14 +473,14 @@ static int32_t SSPx_Receive (void *data, uint32_t num, SSP_RESOURCES *ssp) {
   ssp->xfer->tx_buf = NULL;
 
   ssp->xfer->num    = num;
-  ssp->xfer->rx_cnt = 0;
-  ssp->xfer->tx_cnt = 0;
+  ssp->xfer->rx_cnt = 0U;
+  ssp->xfer->tx_cnt = 0U;
 
   if (ssp->dma.tx_en && ssp->dma.rx_en) {
     if (GPDMA_ChannelConfigure (ssp->dma.rx_ch,
                                (uint32_t)&ssp->reg->DR,
                                (uint32_t)data,
-                                GPDMA_CH_CONTROL_TRANSFERSIZE(num)                                |
+                                num,
                                 GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_SWIDTH((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)       |
@@ -487,12 +494,13 @@ static int32_t SSPx_Receive (void *data, uint32_t num, SSP_RESOURCES *ssp) {
                                 GPDMA_CH_CONFIG_IE                                                |
                                 GPDMA_CH_CONFIG_ITC                                               |
                                 GPDMA_CH_CONFIG_E,
-                                ssp->dma.rx_callback) == -1)
+                                ssp->dma.rx_callback) == -1) {
       return ARM_DRIVER_ERROR;
+    }
     if (GPDMA_ChannelConfigure (ssp->dma.tx_ch,
                                (uint32_t)&dummy_data,
                                (uint32_t)&ssp->reg->DR,
-                                GPDMA_CH_CONTROL_TRANSFERSIZE(num)                                |
+                                num,
                                 GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_SWIDTH((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)       |
@@ -505,8 +513,9 @@ static int32_t SSPx_Receive (void *data, uint32_t num, SSP_RESOURCES *ssp) {
                                 GPDMA_CH_CONFIG_IE                                                |
                                 GPDMA_CH_CONFIG_ITC                                               |
                                 GPDMA_CH_CONFIG_E,
-                                ssp->dma.tx_callback) == -1)
+                                ssp->dma.tx_callback) == -1) {
       return ARM_DRIVER_ERROR;
+    }
   } else {
     ssp->reg->IMSC = SSPx_IMSC_TXIM | SSPx_IMSC_RXIM | SSPx_IMSC_RTIM | SSPx_IMSC_RORIM;
   }
@@ -528,25 +537,25 @@ static int32_t SSPx_Receive (void *data, uint32_t num, SSP_RESOURCES *ssp) {
 */
 static int32_t SSPx_Transfer (const void *data_out, void *data_in, uint32_t num, SSP_RESOURCES *ssp) {
 
-  if ((data_out == NULL) || (data_in == NULL) || (num == 0)) return ARM_DRIVER_ERROR_PARAMETER;
-  if (!(ssp->info->state & SSP_CONFIGURED))                  return ARM_DRIVER_ERROR;
-  if (  ssp->info->status.busy)                              return ARM_DRIVER_ERROR_BUSY;
-  ssp->info->status.busy       = 1;
-  ssp->info->status.data_lost  = 0;
-  ssp->info->status.mode_fault = 0;
+  if ((data_out == NULL) || (data_in == NULL) || (num == 0U)) { return ARM_DRIVER_ERROR_PARAMETER; }
+  if (!(ssp->info->state & SSP_CONFIGURED))                   { return ARM_DRIVER_ERROR; }
+  if (  ssp->info->status.busy)                               { return ARM_DRIVER_ERROR_BUSY; }
+  ssp->info->status.busy       = 1U;
+  ssp->info->status.data_lost  = 0U;
+  ssp->info->status.mode_fault = 0U;
 
   ssp->xfer->rx_buf = (uint8_t *)data_in;
   ssp->xfer->tx_buf = (uint8_t *)data_out;
 
   ssp->xfer->num    = num;
-  ssp->xfer->rx_cnt = 0;
-  ssp->xfer->tx_cnt = 0;
+  ssp->xfer->rx_cnt = 0U;
+  ssp->xfer->tx_cnt = 0U;
 
   if (ssp->dma.tx_en && ssp->dma.rx_en) {
     if (GPDMA_ChannelConfigure (ssp->dma.rx_ch,
                                (uint32_t)&ssp->reg->DR,
                                (uint32_t)data_in,
-                                GPDMA_CH_CONTROL_TRANSFERSIZE(num)                                |
+                                num,
                                 GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_SWIDTH((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)       |
@@ -560,12 +569,13 @@ static int32_t SSPx_Transfer (const void *data_out, void *data_in, uint32_t num,
                                 GPDMA_CH_CONFIG_IE                                                |
                                 GPDMA_CH_CONFIG_ITC                                               |
                                 GPDMA_CH_CONFIG_E,
-                                ssp->dma.rx_callback) == -1) 
+                                ssp->dma.rx_callback) == -1) {
       return ARM_DRIVER_ERROR;
+    }
     if (GPDMA_ChannelConfigure (ssp->dma.tx_ch,
                                (uint32_t)data_out,
                                (uint32_t)&ssp->reg->DR,
-                                GPDMA_CH_CONTROL_TRANSFERSIZE(num)                                |
+                                num,
                                 GPDMA_CH_CONTROL_SBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_DBSIZE(GPDMA_BSIZE_1)                            |
                                 GPDMA_CH_CONTROL_SWIDTH((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)       |
@@ -579,8 +589,9 @@ static int32_t SSPx_Transfer (const void *data_out, void *data_in, uint32_t num,
                                 GPDMA_CH_CONFIG_IE                                                |
                                 GPDMA_CH_CONFIG_ITC                                               |
                                 GPDMA_CH_CONFIG_E,
-                                ssp->dma.tx_callback) == -1) 
+                                ssp->dma.tx_callback) == -1) { 
       return ARM_DRIVER_ERROR;
+    }
   } else {
     ssp->reg->IMSC = SSPx_IMSC_TXIM | SSPx_IMSC_RXIM | SSPx_IMSC_RTIM | SSPx_IMSC_RORIM;
   }
@@ -597,20 +608,12 @@ static int32_t SSPx_Transfer (const void *data_out, void *data_in, uint32_t num,
 static uint32_t SSPx_GetDataCount (SSP_RESOURCES *ssp) {
   uint32_t cnt;
 
-  if (!(ssp->info->state & SSP_CONFIGURED)) return 0;
+  if (!(ssp->info->state & SSP_CONFIGURED)) { return 0U; }
 
-  if (ssp->xfer->rx_buf == NULL) {      // If send operation
-    if (ssp->dma.tx_en) {
-      cnt = GPDMA_ChannelGetCount (ssp->dma.tx_ch);
-    } else {
-      cnt = ssp->xfer->tx_cnt;
-    }
-  } else {                              // If receive or Transfer operation
-    if (ssp->dma.rx_en) {
-      cnt = GPDMA_ChannelGetCount (ssp->dma.rx_ch);
-    } else {
-      cnt = ssp->xfer->rx_cnt;
-    }
+  if (ssp->dma.rx_en) {
+    cnt = GPDMA_ChannelGetCount (ssp->dma.rx_ch);
+  } else {
+    cnt = ssp->xfer->rx_cnt;
   }
 
   return cnt;
@@ -625,14 +628,14 @@ static uint32_t SSPx_GetDataCount (SSP_RESOURCES *ssp) {
   \return      common \ref execution_status and driver specific \ref spi_execution_status
 */
 static int32_t SSPx_Control (uint32_t control, uint32_t arg, SSP_RESOURCES *ssp) {
-  uint32_t cpsr, scr, clk, data_bits;
-  uint32_t best_cpsr = 2, best_scr = 0;
+  uint32_t cpsr, scr, bps = 0U, clk, data_bits;
+  uint32_t best_cpsr = 2U, best_scr = 0U, best_bps = 0U;
 
-  if (!(ssp->info->state & SSP_POWERED))     return ARM_DRIVER_ERROR;
+  if (!(ssp->info->state & SSP_POWERED)) { return ARM_DRIVER_ERROR; }
 
   if ((control & ARM_SPI_CONTROL_Msk) == ARM_SPI_ABORT_TRANSFER) {
     ssp->reg->CR1 &= ~SSPx_CR1_SSE;         // Disable SSP
-    ssp->reg->IMSC =  0;                    // Disable interrupts
+    ssp->reg->IMSC =  0U;                   // Disable interrupts
     if (ssp->info->status.busy) {
       // If DMA mode - disable DMA channel
       if (ssp->dma.tx_en) { GPDMA_ChannelDisable (ssp->dma.tx_ch); }
@@ -640,12 +643,12 @@ static int32_t SSPx_Control (uint32_t control, uint32_t arg, SSP_RESOURCES *ssp)
       if (ssp->dma.rx_en) { GPDMA_ChannelDisable (ssp->dma.rx_ch); }
     }
     memset(ssp->xfer, 0, sizeof(SSP_TRANSFER_INFO));
-    ssp->info->status.busy = 0;
+    ssp->info->status.busy = 0U;
     ssp->reg->CR1 |=  SSPx_CR1_SSE;         // Enable  SSP
     return ARM_DRIVER_OK;
   }  
 
-  if (ssp->info->status.busy)                return ARM_DRIVER_ERROR_BUSY;
+  if (ssp->info->status.busy)            { return ARM_DRIVER_ERROR_BUSY; }
 
   switch (control & ARM_SPI_CONTROL_Msk) {
     default:
@@ -653,7 +656,7 @@ static int32_t SSPx_Control (uint32_t control, uint32_t arg, SSP_RESOURCES *ssp)
 
     case ARM_SPI_MODE_INACTIVE:             // SPI Inactive
       ssp->reg->CR1    &= ~SSPx_CR1_SSE;    // Disable SSP
-      ssp->reg->IMSC    =  0;               // Disable interrupts
+      ssp->reg->IMSC    =  0U;              // Disable interrupts
       ssp->info->mode  &= ~ARM_SPI_CONTROL_Msk;
       ssp->info->mode  |=  ARM_SPI_MODE_INACTIVE;
       ssp->info->state &= ~SSP_CONFIGURED;
@@ -661,7 +664,7 @@ static int32_t SSPx_Control (uint32_t control, uint32_t arg, SSP_RESOURCES *ssp)
 
     case ARM_SPI_MODE_MASTER:               // SPI Master (Output on MOSI, Input on MISO); arg = Bus Speed in bps
       ssp->reg->CR1    &= ~SSPx_CR1_SSE;    // Disable SSP
-      ssp->reg->IMSC    =  0;               // Disable interrupts
+      ssp->reg->IMSC    =  0U;              // Disable interrupts
       ssp->reg->CR1    &= ~SSPx_CR1_MS;     // Set master mode
       ssp->info->mode  &= ~ARM_SPI_CONTROL_Msk;
       ssp->info->mode  |=  ARM_SPI_MODE_MASTER;
@@ -685,31 +688,45 @@ static int32_t SSPx_Control (uint32_t control, uint32_t arg, SSP_RESOURCES *ssp)
 
     case ARM_SPI_SET_BUS_SPEED:             // Set Bus Speed in bps; arg = value
 set_speed:
-      clk = GetClockFreq(CLK_SRC_PLL1);
-      for (cpsr = 2; cpsr < 255; cpsr+= 2) {// Loop through clock prescaler
-        for (scr = 0; scr < 256; scr++) {   // Loop through bit prescaler
-          if (clk == (arg * cpsr * (scr + 1))) {
+      if (arg == 0U) {
+        return ARM_DRIVER_ERROR;
+      }
+
+      clk = GetClockFreq(CLK_SRC_PLL1) << 4;
+      arg = (arg << 4);
+      for (cpsr = 2U; cpsr < 255U; cpsr+= 2U) {// Loop through clock prescaler
+        for (scr = 0U; scr < 256U; scr++) {    // Loop through bit prescaler
+          bps = clk  / (cpsr * (scr + 1U));
+          if (arg == bps) {
+            best_bps  = bps;
             best_cpsr = cpsr;
             best_scr  = scr;
             goto found_best;
-          } else if ((((clk % (best_cpsr * (best_scr + 1))) * 1024) / (best_cpsr * (best_scr + 1))) > 
-                     (((clk % (     cpsr * (     scr + 1))) * 1024) / (     cpsr * (     scr + 1)))) {
-            best_cpsr = cpsr;
-            best_scr  = scr;
+          } else {
+            if (arg > bps) {
+              if ((arg - best_bps) > (arg - bps)) {
+                best_bps  = bps;
+                best_cpsr = cpsr;
+                best_scr  = scr;
+              }
+            }
           }
         }
+      }
+      if (best_bps == 0U) {
+        return ARM_DRIVER_ERROR;
       }
 found_best:
       ssp->reg->CPSR =  best_cpsr & SSPx_CPSR_CPSDVSR;
       ssp->reg->CR0 &= ~SSPx_CR0_SCR;
-      ssp->reg->CR0 |= ((scr << 8) & SSPx_CR0_SCR);
+      ssp->reg->CR0 |= ((best_scr << 8) & SSPx_CR0_SCR);
       if ((control & ARM_SPI_CONTROL_Msk) == ARM_SPI_SET_BUS_SPEED) {
         return ARM_DRIVER_OK;
       }
       break;
 
     case ARM_SPI_GET_BUS_SPEED:             // Get Bus Speed in bps
-      return (GetClockFreq(CLK_SRC_PLL1) / ((ssp->reg->CPSR & SSPx_CPSR_CPSDVSR) * ((ssp->reg->CR0 & SSPx_CR0_SCR) + 1)));
+      return (GetClockFreq(CLK_SRC_PLL1) / ((ssp->reg->CPSR & SSPx_CPSR_CPSDVSR) * (((ssp->reg->CR0 & SSPx_CR0_SCR) >> 8) + 1U)));
 
     case ARM_SPI_SET_DEFAULT_TX_VALUE:      // Set default Transmit value; arg = value
       ssp->xfer->def_val = (uint16_t)(arg & 0xFFFF);
@@ -723,17 +740,18 @@ found_best:
       if (ssp->pin.ssel == NULL) {
         return ARM_DRIVER_ERROR;
       }
-      if (arg == ARM_SPI_SS_INACTIVE)
-        GPIO_PinWrite  (ssp->pin.gpio_ssel->port, ssp->pin.gpio_ssel->num, 1);
-      else
-        GPIO_PinWrite  (ssp->pin.gpio_ssel->port, ssp->pin.gpio_ssel->num, 0);
+      if (arg == ARM_SPI_SS_INACTIVE) {
+        GPIO_PinWrite  (ssp->pin.gpio_ssel->port, ssp->pin.gpio_ssel->num, 1U);
+      } else {
+        GPIO_PinWrite  (ssp->pin.gpio_ssel->port, ssp->pin.gpio_ssel->num, 0U);
+      }
       return ARM_DRIVER_OK;
   }
 
   if ((ssp->info->mode & ARM_SPI_CONTROL_Msk) == ARM_SPI_MODE_MASTER) {
     switch (control & ARM_SPI_SS_MASTER_MODE_Msk) {
       case ARM_SPI_SS_MASTER_UNUSED:        // SPI Slave Select when Master: Not used (default)
-        if (ssp->pin.ssel != NULL) SCU_PinConfigure (ssp->pin.ssel->port, ssp->pin.ssel->num, 0);
+        if (ssp->pin.ssel != NULL) { SCU_PinConfigure (ssp->pin.ssel->port, ssp->pin.ssel->num, 0U); }
         ssp->info->mode  &= ~ARM_SPI_SS_MASTER_MODE_Msk;
         ssp->info->mode  |=  ARM_SPI_SS_MASTER_UNUSED;
         break;
@@ -766,6 +784,7 @@ found_best:
         } else {
           return ARM_SPI_ERROR_SS_MODE;
         }
+      default:
         break;
     }
   }
@@ -789,6 +808,7 @@ found_best:
       case ARM_SPI_SS_SLAVE_SW:             // SPI Slave Select when Slave: Software controlled
         ssp->info->mode  &= ~ARM_SPI_SS_SLAVE_MODE_Msk;
         return ARM_SPI_ERROR_SS_MODE;
+      default: return ARM_SPI_ERROR_SS_MODE;
     }
   }
 
@@ -817,11 +837,11 @@ found_best:
       break;
 
     case ARM_SPI_TI_SSI:
-      ssp->reg->CR0  =  (ssp->reg->CR0 & (~SSPx_CR0_FRF)) | (1 << 4);
+      ssp->reg->CR0  =  (ssp->reg->CR0 & (~SSPx_CR0_FRF)) | (1U << 4);
       break;
 
     case ARM_SPI_MICROWIRE:
-      ssp->reg->CR0  =  (ssp->reg->CR0 & (~SSPx_CR0_FRF)) | (2 << 4);
+      ssp->reg->CR0  =  (ssp->reg->CR0 & (~SSPx_CR0_FRF)) | (2U << 4);
       break;
 
     default:
@@ -830,8 +850,8 @@ found_best:
 
   // Configure Number of Data Bits
   data_bits = ((control & ARM_SPI_DATA_BITS_Msk) >> ARM_SPI_DATA_BITS_Pos);
-  if ((data_bits >= 4) && (data_bits <= 16)) {
-    ssp->reg->CR0 = (ssp->reg->CR0 & (~SSPx_CR0_DSS)) | ((data_bits - 1) << 0);
+  if ((data_bits >= 4U) && (data_bits <= 16U)) {
+    ssp->reg->CR0 = (ssp->reg->CR0 & (~SSPx_CR0_DSS)) | ((data_bits - 1U) << 0);
   } else {
     return ARM_SPI_ERROR_DATA_BITS;
   }
@@ -873,6 +893,7 @@ void SSPx_GPDMA_Tx_SignalEvent (uint32_t event, SSP_RESOURCES *ssp) {
       ssp->xfer->tx_cnt = ssp->xfer->num;
       break;
     case GPDMA_EVENT_ERROR:
+    default:
       break;
   }
 }
@@ -888,10 +909,13 @@ void SSPx_GPDMA_Rx_SignalEvent (uint32_t event, SSP_RESOURCES *ssp) {
   switch (event) {
     case GPDMA_EVENT_TERMINAL_COUNT_REQUEST:
       ssp->xfer->rx_cnt = ssp->xfer->num;
-      ssp->info->status.busy = 0;
-      if (ssp->info->cb_event) ssp->info->cb_event(ARM_SPI_EVENT_TRANSFER_COMPLETE);
+      ssp->info->status.busy = 0U;
+      if (ssp->info->cb_event) {
+        ssp->info->cb_event(ARM_SPI_EVENT_TRANSFER_COMPLETE);
+      }
       break;
     case GPDMA_EVENT_ERROR:
+    default:
       break;
   }
 }
@@ -906,14 +930,15 @@ static void SSPx_IRQHandler (SSP_RESOURCES *ssp) {
   uint32_t mis;
 
   mis = ssp->reg->MIS;
-  ssp->reg->ICR = mis & 3;
+  ssp->reg->ICR = mis & 3U;
 
                                                   // Handle transfer
   if ((ssp->reg->SR & SSPx_SR_TNF) && (ssp->xfer->num > ssp->xfer->tx_cnt)) {
     if (ssp->xfer->tx_buf) {                      // If data available
       data = *(ssp->xfer->tx_buf++);
-      if ((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)     // If 9..16-bit data frame format
+      if ((ssp->reg->CR0 & SSPx_CR0_DSS) > 7U) {  // If 9..16-bit data frame format
         data |= *(ssp->xfer->tx_buf++) << 8;
+      }
     } else {                                      // If default data send
       data = ssp->xfer->def_val;
     }
@@ -925,23 +950,24 @@ static void SSPx_IRQHandler (SSP_RESOURCES *ssp) {
     data = ssp->reg->DR;                          // Read data
     if (ssp->xfer->num > ssp->xfer->rx_cnt) {
       if (ssp->xfer->rx_buf) {
-        *(ssp->xfer->rx_buf++) = (uint8_t)data;   // Put data into buffer
-        if ((ssp->reg->CR0 & SSPx_CR0_DSS) > 7)   // If 9..16-bit data frame format
+        *(ssp->xfer->rx_buf++) = (uint8_t)data;    // Put data into buffer
+        if ((ssp->reg->CR0 & SSPx_CR0_DSS) > 7U) { // If 9..16-bit data frame format
           *(ssp->xfer->rx_buf++) = (uint8_t)(data >> 8);
+        }
       }
       ssp->xfer->rx_cnt++;
       if (ssp->xfer->rx_cnt == ssp->xfer->num) {  // If all data received
         ssp->reg->IMSC   &= ~(SSPx_IMSC_TXIM | SSPx_IMSC_RXIM | SSPx_IMSC_RTIM | SSPx_IMSC_RORIM);
-        ssp->info->status.busy = 0;
-        if (ssp->info->cb_event) ssp->info->cb_event(ARM_SPI_EVENT_TRANSFER_COMPLETE);
+        ssp->info->status.busy = 0U;
+        if (ssp->info->cb_event) { ssp->info->cb_event(ARM_SPI_EVENT_TRANSFER_COMPLETE); }
       }
     }
   }
 
   if (mis & SSPx_MIS_RORMIS) {                    // Handle errors
     // Overrun flag is set
-    ssp->info->status.data_lost = 1;
-    if (ssp->info->cb_event) ssp->info->cb_event(ARM_SPI_EVENT_DATA_LOST);
+    ssp->info->status.data_lost = 1U;
+    if (ssp->info->cb_event) { ssp->info->cb_event(ARM_SPI_EVENT_DATA_LOST); }
   }
 }
 

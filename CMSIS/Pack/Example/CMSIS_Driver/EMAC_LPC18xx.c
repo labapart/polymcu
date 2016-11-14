@@ -1,25 +1,22 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2013-2015 ARM Ltd.
+/* -------------------------------------------------------------------------- 
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * SPDX-License-Identifier: Apache-2.0
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * 3. This notice may not be removed or altered from any source distribution.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *
- * $Date:        02. October 2015
- * $Revision:    V2.5
+ * $Date:        02. March 2016
+ * $Revision:    V2.6
  *
  * Driver:       Driver_ETH_MAC0
  * Configured:   via RTE_Device.h configuration file
@@ -34,8 +31,10 @@
  * -------------------------------------------------------------------------- */
 
 /* History:
+ *  Version 2.6
+ *    - Corrected PowerControl function for conditional Power full (driver must be initialized)
  *  Version 2.5
- *    Corrected return value of the ReadFrame function
+ *    - Corrected return value of the ReadFrame function
  *  Version 2.4
  *    - Updated initialization, uninitialization and power procedures
  *  Version 2.3
@@ -62,7 +61,7 @@
 
 #include "EMAC_LPC18xx.h"
 
-#define ARM_ETH_MAC_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,5) /* driver version */
+#define ARM_ETH_MAC_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,6) /* driver version */
 
 /* Timeouts */
 #define PHY_TIMEOUT         200         /* PHY Register access timeout in us  */
@@ -317,34 +316,22 @@ static int32_t PowerControl (ARM_POWER_STATE state) {
       /* Disable EMAC interrupts */
       NVIC_DisableIRQ(ETHERNET_IRQn);
 
-      ENET->DMA_INT_EN       = 0x00000000;
-      ENET->MAC_TIMESTP_CTRL = 0x00000000;
-
-      /* Disable DMA Tx and Rx */
-      ENET->DMA_OP_MODE &= ~(EMAC_DOMR_ST | EMAC_DOMR_SR);
-
-      /* Flush transmit FIFO */
-      ENET->DMA_OP_MODE |= EMAC_DOMR_FTF;
-      __NOP ();
-
-      /* Disable EMAC Tx and Rx */
-      ENET->MAC_CONFIG  = 0x00000000;
-      ENET->DMA_OP_MODE = 0x00000000;
+      /* Reset EMAC peripheral */
+      LPC_RGU->RESET_CTRL0 = RGU_RESET_EMAC;
+      while (!(LPC_RGU->RESET_ACTIVE_STATUS0 & RGU_RESET_EMAC));
 
       /* Disable EMAC peripheral clock */
       LPC_CCU1->CLK_M3_ETHERNET_CFG &= ~CCU_CLK_CFG_RUN;
 
-      emac.flags = EMAC_FLAG_INIT;
+      emac.flags &= ~EMAC_FLAG_POWER;
       break;
 
     case ARM_POWER_LOW:
       return ARM_DRIVER_ERROR_UNSUPPORTED;
 
     case ARM_POWER_FULL:
-      if (emac.flags & EMAC_FLAG_POWER) {
-        /* Driver already powered */
-        break;
-      }
+      if ((emac.flags & EMAC_FLAG_INIT)  == 0) { return ARM_DRIVER_ERROR; }
+      if ((emac.flags & EMAC_FLAG_POWER) != 0) { return ARM_DRIVER_OK; }
 
       /* Enable EMAC peripheral clock */
       LPC_CCU1->CLK_M3_ETHERNET_CFG |=  CCU_CLK_CFG_AUTO | CCU_CLK_CFG_RUN;

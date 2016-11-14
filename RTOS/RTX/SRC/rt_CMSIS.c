@@ -3,10 +3,10 @@
  *----------------------------------------------------------------------------
  *      Name:    rt_CMSIS.c
  *      Purpose: CMSIS RTOS API
- *      Rev.:    V4.80
+ *      Rev.:    V4.82
  *----------------------------------------------------------------------------
  *
- * Copyright (c) 1999-2009 KEIL, 2009-2015 ARM Germany GmbH
+ * Copyright (c) 1999-2009 KEIL, 2009-2016 ARM Germany GmbH
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -531,9 +531,9 @@ osStatus svcKernelStart (void) {
   if (os_tsk.run->task_id == 0xFFU) {           // Idle Thread
     __set_PSP(os_tsk.run->tsk_stack + (8U*4U)); // Setup PSP
   }
-  if (os_tsk.new == NULL) {                     // Force context switch
-    os_tsk.new = os_tsk.run;
-    os_tsk.run = NULL;
+  if (os_tsk.next == NULL) {                    // Force context switch
+    os_tsk.next = os_tsk.run;
+    os_tsk.run  = NULL;
   }
 
   rt_sys_start();
@@ -1426,6 +1426,9 @@ osStatus svcMutexWait (osMutexId mutex_id, uint32_t millisec) {
   if (res == OS_R_TMO) {
     return ((millisec != 0U) ? osErrorTimeoutResource : osErrorResource);
   }
+  if (res == OS_R_NOK) {
+    return osErrorResource;
+  }
 
   return osOK;
 }
@@ -1590,12 +1593,9 @@ osStatus svcSemaphoreRelease (osSemaphoreId semaphore_id) {
     return osErrorResource;
   }
   
-  // Release Semaphore
-  if (rt_sem_send(sem) == OS_R_OK) {
-    return osOK;
-  } else {
-    return osErrorResource;
-  }
+  rt_sem_send(sem);                             // Release Semaphore
+
+  return osOK;
 }
 
 /// Delete a Semaphore that was created by osSemaphoreCreate
@@ -2144,20 +2144,12 @@ osStatus osMailFree (osMailQId queue_id, void *mail) {
 
 /// Put a mail to a queue
 osStatus osMailPut (osMailQId queue_id, void *mail) {
-  void *pool;
-
   if (queue_id == NULL) {
     return osErrorParameter;
   }
   if (mail == NULL) {
     return osErrorValue;
   }
-
-  pool = *(((void **)queue_id) + 1);
-  if (rt_check_box (pool, mail) == 0) {
-    return osErrorValue;
-  }
-
   return osMessagePut(*((void **)queue_id), (uint32_t)mail, 0U);
 }
 

@@ -3,7 +3,7 @@
  *----------------------------------------------------------------------------
  *      Name:    RTX_CM_LIB.H
  *      Purpose: RTX Kernel System Configuration
- *      Rev.:    V4.79
+ *      Rev.:    V4.81
  *----------------------------------------------------------------------------
  *
  * Copyright (c) 1999-2009 KEIL, 2009-2015 ARM Germany GmbH
@@ -35,10 +35,10 @@
 #if   defined (__CC_ARM)
 #pragma O3
 #define __USED __attribute__((used))
+#elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+#define __USED __attribute__((used))
 #elif defined (__GNUC__)
-#if !defined(__clang__)
 #pragma GCC optimize ("O3")
-#endif
 #define __USED __attribute__((used))
 #elif defined (__ICCARM__)
 #define __USED __root
@@ -55,7 +55,9 @@
 #define OS_TCB_SIZE     52
 #define OS_TMR_SIZE     8
 
-#if defined (__CC_ARM) && !defined (__MICROLIB)
+#if (( defined(__CC_ARM)                                          || \
+      (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))) && \
+      !defined(__MICROLIB))
 
 typedef void    *OS_ID;
 typedef uint32_t OS_TID;
@@ -73,11 +75,45 @@ extern void      rt_mut_init    (OS_ID mutex);
 extern OS_RESULT rt_mut_release (OS_ID mutex);
 extern OS_RESULT rt_mut_wait    (OS_ID mutex, uint16_t timeout);
 
+#if defined(__CC_ARM)
 #define os_mut_wait(mutex,timeout) _os_mut_wait((uint32_t)rt_mut_wait,mutex,timeout)
 #define os_mut_release(mutex)      _os_mut_release((uint32_t)rt_mut_release,mutex)
-
 OS_RESULT _os_mut_release (uint32_t p, OS_ID mutex)                   __svc_indirect(0);
 OS_RESULT _os_mut_wait    (uint32_t p, OS_ID mutex, uint16_t timeout) __svc_indirect(0);
+#else
+__attribute__((always_inline))
+static __inline OS_RESULT os_mut_release (OS_ID mutex) {
+  register uint32_t __r0 __asm("r0") = (uint32_t)mutex;
+  register uint32_t __r1 __asm("r1");
+  register uint32_t __r2 __asm("r2");
+  register uint32_t __r3 __asm("r3");
+  __asm volatile                                                               \
+  (                                                                            \
+    "ldr r12,=rt_mut_release\n"                                                \
+    "svc 0"                                                                    \
+    :               "=r" (__r0), "=r" (__r1), "=r" (__r2), "=r" (__r3)         \
+    :                "r" (__r0),  "r" (__r1),  "r" (__r2),  "r" (__r3)         \
+    : "r12", "lr", "cc"                                                        \
+  );
+  return (OS_RESULT)__r0;
+}
+__attribute__((always_inline))
+static __inline OS_RESULT os_mut_wait (OS_ID mutex, uint16_t timeout) {
+  register uint32_t __r0 __asm("r0") = (uint32_t)mutex;
+  register uint32_t __r1 __asm("r1") = (uint32_t)timeout;
+  register uint32_t __r2 __asm("r2");
+  register uint32_t __r3 __asm("r3");
+  __asm volatile                                                               \
+  (                                                                            \
+    "ldr r12,=rt_mut_wait\n"                                                   \
+    "svc 0"                                                                    \
+    :               "=r" (__r0), "=r" (__r1), "=r" (__r2), "=r" (__r3)         \
+    :                "r" (__r0),  "r" (__r1),  "r" (__r2),  "r" (__r3)         \
+    : "r12", "lr", "cc"                                                        \
+  );
+  return (OS_RESULT)__r0;
+}
+#endif
 
 #endif
 
@@ -108,6 +144,12 @@ OS_RESULT _os_mut_wait    (uint32_t p, OS_ID mutex, uint16_t timeout) __svc_indi
 #define OS_STKINIT  0
 #endif
 
+extern uint16_t const os_maxtaskrun;
+extern uint32_t const os_stackinfo;
+extern uint32_t const os_rrobin;
+extern uint32_t const os_trv;
+extern uint8_t  const os_flags;
+
 uint16_t const os_maxtaskrun = OS_TASK_CNT;
 uint32_t const os_stackinfo  = (OS_STKINIT<<28) | (OS_STKCHECK<<24) | (OS_PRIV_CNT<<16) | (OS_STKSIZE*4);
 uint32_t const os_rrobin     = (OS_ROBIN << 16) | OS_ROBINTOUT;
@@ -118,59 +160,104 @@ uint32_t const os_trv        = OS_TRV;
 uint8_t  const os_flags      = OS_RUNPRIV;
 
 /* Export following defines to uVision debugger. */
+extern uint32_t const CMSIS_RTOS_API_Version;
 __USED uint32_t const CMSIS_RTOS_API_Version = osCMSIS;
+extern uint32_t const CMSIS_RTOS_RTX_Version;
 __USED uint32_t const CMSIS_RTOS_RTX_Version = osCMSIS_RTX;
+extern uint32_t const os_clockrate;
 __USED uint32_t const os_clockrate = OS_TICK;
+extern uint32_t const os_timernum;
 __USED uint32_t const os_timernum  = 0U;
 
 /* Memory pool for TCB allocation    */
+extern
+uint32_t       mp_tcb[];
 _declare_box  (mp_tcb, OS_TCB_SIZE, OS_TASK_CNT);
+extern
+uint16_t const mp_tcb_size;
 uint16_t const mp_tcb_size = sizeof(mp_tcb);
 
 /* Memory pool for System stack allocation (+os_idle_demon). */
+extern
+uint64_t       mp_stk[];
 _declare_box8 (mp_stk, OS_STKSIZE*4, OS_TASK_CNT-OS_PRIV_CNT+1);
+extern
+uint32_t const mp_stk_size;
 uint32_t const mp_stk_size = sizeof(mp_stk);
 
 /* Memory pool for user specified stack allocation (+main, +timer) */
+extern
+uint64_t       os_stack_mem[];
 uint64_t       os_stack_mem[2+OS_PRIV_CNT+(OS_STACK_SZ/8)];
+extern
+uint32_t const os_stack_sz;
 uint32_t const os_stack_sz = sizeof(os_stack_mem);
 
 #ifndef OS_FIFOSZ
- #define OS_FIFOSZ      16
+#define OS_FIFOSZ       16
 #endif
 
 /* Fifo Queue buffer for ISR requests.*/
+extern
+uint32_t       os_fifo[];
 uint32_t       os_fifo[OS_FIFOSZ*2+1];
+extern
+uint8_t  const os_fifo_size;
 uint8_t  const os_fifo_size = OS_FIFOSZ;
 
 /* An array of Active task pointers. */
+extern
+void *os_active_TCB[];
 void *os_active_TCB[OS_TASK_CNT];
 
 /* User Timers Resources */
 #if (OS_TIMERS != 0)
 extern void osTimerThread (void const *argument);
+extern const osThreadDef_t os_thread_def_osTimerThread;
 osThreadDef(osTimerThread, (osPriority)(OS_TIMERPRIO-3), 1, 4*OS_TIMERSTKSZ);
+extern
 osThreadId osThreadId_osTimerThread;
+osThreadId osThreadId_osTimerThread;
+extern uint32_t os_messageQ_q_osTimerMessageQ[];
+extern const osMessageQDef_t os_messageQ_def_osTimerMessageQ;
 osMessageQDef(osTimerMessageQ, OS_TIMERCBQS, void *);
+extern
+osMessageQId osMessageQId_osTimerMessageQ;
 osMessageQId osMessageQId_osTimerMessageQ;
 #else
-osThreadDef_t os_thread_def_osTimerThread = { NULL };
+extern
+const osThreadDef_t os_thread_def_osTimerThread;
+const osThreadDef_t os_thread_def_osTimerThread = { NULL, osPriorityNormal, 0U, 0U };
+extern
 osThreadId osThreadId_osTimerThread;
+osThreadId osThreadId_osTimerThread;
+extern uint32_t os_messageQ_q_osTimerMessageQ[];
+extern const osMessageQDef_t os_messageQ_def_osTimerMessageQ;
 osMessageQDef(osTimerMessageQ, 0U, void *);
+extern
+osMessageQId osMessageQId_osTimerMessageQ;
 osMessageQId osMessageQId_osTimerMessageQ;
 #endif
 
 /* Legacy RTX User Timers not used */
+extern
+uint32_t       os_tmr; 
 uint32_t       os_tmr = 0U; 
+extern
+uint32_t const *m_tmr;
 uint32_t const *m_tmr = NULL;
+extern
+uint16_t const mp_tmr_size;
 uint16_t const mp_tmr_size = 0U;
 
-#if defined (__CC_ARM) && !defined (__MICROLIB)
- /* A memory space for arm standard library. */
- static uint32_t std_libspace[OS_TASK_CNT][96/4];
- static OS_MUT   std_libmutex[OS_MUTEXCNT];
- static uint32_t nr_mutex;
- extern void  *__libspace_start;
+#if (( defined(__CC_ARM)                                          || \
+      (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))) && \
+      !defined(__MICROLIB))
+/* A memory space for arm standard library. */
+static uint32_t std_libspace[OS_TASK_CNT][96/4];
+static OS_MUT   std_libmutex[OS_MUTEXCNT];
+static uint32_t nr_mutex;
+extern void  *__libspace_start;
 #endif
 
 
@@ -179,12 +266,18 @@ uint16_t const mp_tmr_size = 0U;
  *---------------------------------------------------------------------------*/
 
 #if OS_ROBIN == 0
- void rt_init_robin (void) {;}
- void rt_chk_robin  (void) {;}
+extern
+void rt_init_robin (void);
+void rt_init_robin (void) {;}
+extern
+void rt_chk_robin  (void);
+void rt_chk_robin  (void) {;}
 #endif
 
 #if OS_STKCHECK == 0
- void rt_stk_check  (void) {;}
+extern
+void rt_stk_check  (void);
+void rt_stk_check  (void) {;}
 #endif
 
 
@@ -192,10 +285,13 @@ uint16_t const mp_tmr_size = 0U;
  *      Standard Library multithreading interface
  *---------------------------------------------------------------------------*/
 
-#if defined (__CC_ARM) && !defined (__MICROLIB)
+#if (( defined(__CC_ARM)                                          || \
+      (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))) && \
+      !defined(__MICROLIB))
 
 /*--------------------------- __user_perthread_libspace ---------------------*/
 
+void *__user_perthread_libspace (void);
 void *__user_perthread_libspace (void) {
   /* Provide a separate libspace for each task. */
   uint32_t idx;
@@ -210,6 +306,7 @@ void *__user_perthread_libspace (void) {
 
 /*--------------------------- _mutex_initialize -----------------------------*/
 
+int _mutex_initialize (OS_ID *mutex);
 int _mutex_initialize (OS_ID *mutex) {
   /* Allocate and initialize a system mutex. */
 
@@ -225,7 +322,9 @@ int _mutex_initialize (OS_ID *mutex) {
 
 /*--------------------------- _mutex_acquire --------------------------------*/
 
-__attribute__((used)) void _mutex_acquire (OS_ID *mutex) {
+__attribute__((used))
+void _mutex_acquire (OS_ID *mutex);
+void _mutex_acquire (OS_ID *mutex) {
   /* Acquire a system mutex, lock stdlib resources. */
   if (os_running) {
     /* RTX running, acquire a mutex. */
@@ -236,7 +335,9 @@ __attribute__((used)) void _mutex_acquire (OS_ID *mutex) {
 
 /*--------------------------- _mutex_release --------------------------------*/
 
-__attribute__((used)) void _mutex_release (OS_ID *mutex) {
+__attribute__((used))
+void _mutex_release (OS_ID *mutex);
+void _mutex_release (OS_ID *mutex) {
   /* Release a system mutex, unlock stdlib resources. */
   if (os_running) {
     /* RTX running, release a mutex. */
@@ -248,18 +349,79 @@ __attribute__((used)) void _mutex_release (OS_ID *mutex) {
 
 
 /*----------------------------------------------------------------------------
+ *      ARMCC6 Wrappers for ARMCC5 Binary
+ *---------------------------------------------------------------------------*/
+
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+
+typedef uint32_t __attribute__((vector_size(8)))  vect64_t;
+
+#undef osSignalWait
+
+__attribute__((pcs("aapcs")))
+vect64_t  osSignalWait (int32_t signals, uint32_t millisec);
+
+osEvent __osSignalWait (int32_t signals, uint32_t millisec) {
+  vect64_t v;
+  osEvent  e;
+  
+  v = osSignalWait(signals, millisec);
+  e.status  = v[0];
+  e.value.v = v[1];
+
+  return e;
+}
+
+#undef osMessageGet
+
+__attribute__((pcs("aapcs")))
+vect64_t  osMessageGet (osMessageQId queue_id, uint32_t millisec);
+
+osEvent __osMessageGet (osMessageQId queue_id, uint32_t millisec) {
+  vect64_t v;
+  osEvent  e;
+  
+  v = osMessageGet(queue_id, millisec);
+  e.status  = v[0];
+  e.value.v = v[1];
+
+  return e;
+}
+
+#undef osMailGet
+
+__attribute__((pcs("aapcs")))
+vect64_t  osMailGet (osMailQId queue_id, uint32_t millisec);
+
+osEvent __osMailGet (osMailQId queue_id, uint32_t millisec) {
+  vect64_t v;
+  osEvent  e;
+  
+  v = osMailGet(queue_id, millisec);
+  e.status  = v[0];
+  e.value.v = v[1];
+
+  return e;
+}
+
+#endif
+
+/*----------------------------------------------------------------------------
  *      RTX Startup
  *---------------------------------------------------------------------------*/
 
 /* Main Thread definition */
 extern int main (void);
-osThreadDef_t os_thread_def_main = {(os_pthread)main, osPriorityNormal, 1U, 4*OS_MAINSTKSIZE };
+extern
+const osThreadDef_t os_thread_def_main;
+const osThreadDef_t os_thread_def_main = {(os_pthread)main, osPriorityNormal, 1U, 4*OS_MAINSTKSIZE };
 
 
 #if defined (__CC_ARM)
 
 #ifdef __MICROLIB
-void _main_init (void) __attribute__((section(".ARM.Collect$$$$000000FF")));
+__attribute__((section(".ARM.Collect$$$$000000FF")))
+void _main_init (void);
 void _main_init (void) {
   osKernelInitialize();
   osThreadCreate(&os_thread_def_main, NULL);
@@ -286,6 +448,24 @@ __asm void _platform_post_lib_init (void) {
   ALIGN
 }
 #endif
+
+#elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+
+#ifdef __MICROLIB
+__attribute__((noreturn, section(".ARM.Collect$$$$000000FF")))
+void _main_init (void);
+void _main_init (void) {
+#else
+__asm(" .global __ARM_use_no_argv\n");
+__attribute__((noreturn))
+void _platform_post_lib_init (void);
+void _platform_post_lib_init (void) {
+#endif
+  osKernelInitialize();
+  osThreadCreate(&os_thread_def_main, NULL);
+  osKernelStart();
+  for (;;);
+}
 
 #elif defined (__GNUC__)
 

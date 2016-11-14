@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
- * Copyright (c) 2014 ARM Ltd.
+ * Copyright (c) 2004 - 2014 ARM Ltd.
  *
  * This software is provided 'as-is', without any express or implied warranty. 
  * In no event will the authors be held liable for any damages arising from 
@@ -16,14 +16,13 @@
  *    misrepresented as being the original software. 
  * 
  * 3. This notice may not be removed or altered from any source distribution.
- */
- 
-/***********************************************************************/
-/*                                                                     */
-/*  FlashDev.c:  Device Description adapted for                        */
-/*               NXP LPC18xx/43xx Flash using IAP                      */
-/*                                                                     */
-/***********************************************************************/
+ *   
+ *
+ * $Date:        30. May 2014
+ * $Revision:    V1.00
+ *  
+ * Project:      Flash Device Description for NXP LPC18xx/43xx Flash using IAP
+ * --------------------------------------------------------------------------- */
 
 #include "..\FlashOS.H"        // FlashOS Structures
 

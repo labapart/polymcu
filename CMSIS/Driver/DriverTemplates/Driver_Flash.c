@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 #include "Driver_Flash.h"
 
 #define ARM_FLASH_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0) /* driver version */
@@ -102,3 +120,18 @@ ARM_FLASH_INFO * ARM_Flash_GetInfo(void)
 void ARM_Flash_SignalEvent(uint32_t event)
 {
 }
+// End Flash Interface
+
+ARM_DRIVER_FLASH Driver_FLASH = {
+    ARM_Flash_GetVersion,
+    ARM_Flash_GetCapabilities,
+    ARM_Flash_Initialize,
+    ARM_Flash_Uninitialize,
+    ARM_Flash_PowerControl,
+    ARM_Flash_ReadData,
+    ARM_Flash_ProgramData,
+    ARM_Flash_EraseSector,
+    ARM_Flash_EraseChip,
+    ARM_Flash_GetStatus,
+    ARM_Flash_GetInfo
+};

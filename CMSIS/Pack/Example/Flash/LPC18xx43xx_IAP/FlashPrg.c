@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
- * Copyright (c) 2014 ARM Ltd.
+ * Copyright (c) 2004 - 2014 ARM Ltd.
  *
  * This software is provided 'as-is', without any express or implied warranty. 
  * In no event will the authors be held liable for any damages arising from 
@@ -16,15 +16,14 @@
  *    misrepresented as being the original software. 
  * 
  * 3. This notice may not be removed or altered from any source distribution.
- */
+ *   
+ *
+ * $Date:        17. June 2014
+ * $Revision:    V1.01
+ *  
+ * Project:      Flash Device Description for NXP LPC18xx/43xx Flash using IAP
+ * --------------------------------------------------------------------------- */
  
-/***********************************************************************/
-/*                                                                     */
-/*  FlashPrg.c:  Flash Programming Functions adapted for               */
-/*               NXP LPC18xx/43xx Flash using IAP                      */
-/*                                                                     */
-/***********************************************************************/
-
 #include "..\FlashOS.H"        // FlashOS Structures
 
 // Memory Mapping Control
@@ -220,6 +219,10 @@ int ProgramPage (unsigned long adr, unsigned long sz, unsigned char *buf) {
 //    IAP_Call (&IAP.cmd, &IAP.stat);            // Call IAP Command
 //    if (IAP.stat) return (1);                  // Command Failed
 //  }
+#if 0
+  we also removed all special handling about the vector checksum because
+	it causes more trouble than solving problems. The user must now take 
+	care that only on valid checksum is in the application.
 
   if (adr == BANK_B) {
     sig = *((unsigned long *)(BANK_B + 0x00)) +
@@ -283,6 +286,6 @@ int ProgramPage (unsigned long adr, unsigned long sz, unsigned char *buf) {
       }
     }
   }
-
+#endif
   return (0);                                          // Finished without Errors
 }

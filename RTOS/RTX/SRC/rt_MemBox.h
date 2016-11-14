@@ -39,7 +39,6 @@ extern U32     _init_box   (void *box_mem, U32 box_size, U32 blk_size);
 extern void *rt_alloc_box  (void *box_mem);
 extern void *  _calloc_box (void *box_mem);
 extern U32   rt_free_box   (void *box_mem, void *box);
-extern U32    rt_check_box (void *box_mem, void *box);
 
 /*----------------------------------------------------------------------------
  * end of file

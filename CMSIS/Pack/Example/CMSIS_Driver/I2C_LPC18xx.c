@@ -1,25 +1,22 @@
-/* -----------------------------------------------------------------------------
- * Copyright (c) 2013-2014 ARM Ltd.
+/* -------------------------------------------------------------------------- 
+ * Copyright (c) 2013-2016 ARM Limited. All rights reserved.
  *
- * This software is provided 'as-is', without any express or implied warranty.
- * In no event will the authors be held liable for any damages arising from
- * the use of this software. Permission is granted to anyone to use this
- * software for any purpose, including commercial applications, and to alter
- * it and redistribute it freely, subject to the following restrictions:
+ * SPDX-License-Identifier: Apache-2.0
  *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software in
- *    a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * 3. This notice may not be removed or altered from any source distribution.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
- *
- * $Date:        24. August 2015
- * $Revision:    V2.5
+ * $Date:        02. March 2016
+ * $Revision:    V2.4
  *
  * Driver:       Driver_I2C0, Driver_I2C1
  * Configured:   via RTE_Device.h configuration file
@@ -35,6 +32,9 @@
  * -------------------------------------------------------------------------- */
 
 /* History:
+ *  Version 2.4
+ *   - Added Bus Clear Control 
+ *   - Corrected PowerControl function for conditional Power full (driver must be initialized)
  *  Version 2.3
  *    - Pending IRQ flag cleared after aborted transfer
  *  Version 2.2
@@ -60,7 +60,7 @@
 #include "RTE_Device.h"
 #include "RTE_Components.h"
 
-#define ARM_I2C_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,3) /* driver version */
+#define ARM_I2C_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2,4) /* driver version */
 
 #if ((defined(RTE_Drivers_I2C0) || \
       defined(RTE_Drivers_I2C1))   \
@@ -223,42 +223,44 @@ static int32_t I2Cx_PowerControl (ARM_POWER_STATE state, I2C_RESOURCES *i2c) {
       i2c->ctrl->stalled = 0U;
       i2c->ctrl->snum    = 0U;
 
-      i2c->ctrl->flags   = I2C_FLAG_INIT;
+      i2c->ctrl->flags  &= ~I2C_FLAG_POWER;
 
-      /* Disable I2C Operation */
-      i2c->reg->CONCLR = I2C_CON_AA | I2C_CON_SI | I2C_CON_STA | I2C_CON_I2EN;
+      /* Reset I2C peripheral */
+      LPC_RGU->RESET_CTRL1 = i2c->rgu_val;
+      while (!(LPC_RGU->RESET_ACTIVE_STATUS1 & i2c->rgu_val));
 
       /* Disable I2C peripheral clock */
       *i2c->pclk_cfg_reg &= ~CCU_CLK_CFG_RUN;
       break;
 
     case ARM_POWER_FULL:
-      if ((i2c->ctrl->flags & I2C_FLAG_POWER) == 0U) {
-        /* Connect base clock */
-        *i2c->base_clk_reg = (1    << 11) |   /* Autoblock En               */
-                             (0x09 << 24) ;   /* PLL1 is APB  clock source  */
+      if ((i2c->ctrl->flags & I2C_FLAG_INIT)  == 0U) { return ARM_DRIVER_ERROR; }
+      if ((i2c->ctrl->flags & I2C_FLAG_POWER) != 0U) { return ARM_DRIVER_OK; }
 
-        /* Enable I2C peripheral clock */
-        *i2c->pclk_cfg_reg = CCU_CLK_CFG_AUTO | CCU_CLK_CFG_RUN;
-        while (!((*i2c->pclk_stat_reg) & CCU_CLK_STAT_RUN));
+      /* Connect base clock */
+      *i2c->base_clk_reg = (1    << 11) |     /* Autoblock En               */
+                           (0x09 << 24) ;     /* PLL1 is APB  clock source  */
 
-        /* Reset I2C peripheral */
-        LPC_RGU->RESET_CTRL1 = i2c->rgu_val;
-        while (!(LPC_RGU->RESET_ACTIVE_STATUS1 & i2c->rgu_val));
+      /* Enable I2C peripheral clock */
+      *i2c->pclk_cfg_reg = CCU_CLK_CFG_AUTO | CCU_CLK_CFG_RUN;
+      while (!((*i2c->pclk_stat_reg) & CCU_CLK_STAT_RUN));
 
-        /* Enable I2C Operation */
-        i2c->reg->CONCLR = I2C_CON_FLAGS;
-        i2c->reg->CONSET = I2C_CON_I2EN;
+      /* Reset I2C peripheral */
+      LPC_RGU->RESET_CTRL1 = i2c->rgu_val;
+      while (!(LPC_RGU->RESET_ACTIVE_STATUS1 & i2c->rgu_val));
 
-        i2c->ctrl->stalled = 0;
-        i2c->ctrl->con_aa  = 0;
+      /* Enable I2C Operation */
+      i2c->reg->CONCLR = I2C_CON_FLAGS;
+      i2c->reg->CONSET = I2C_CON_I2EN;
 
-        /* Enable I2C interrupts */
-        NVIC_ClearPendingIRQ (i2c->i2c_ev_irq);
-        NVIC_EnableIRQ (i2c->i2c_ev_irq);
+      i2c->ctrl->stalled = 0;
+      i2c->ctrl->con_aa  = 0;
 
-        i2c->ctrl->flags |= I2C_FLAG_POWER;
-      }
+      /* Enable I2C interrupts */
+      NVIC_ClearPendingIRQ (i2c->i2c_ev_irq);
+      NVIC_EnableIRQ (i2c->i2c_ev_irq);
+
+      i2c->ctrl->flags |= I2C_FLAG_POWER;
       break;
 
     default:
@@ -541,7 +543,21 @@ static int32_t I2Cx_Control (uint32_t control, uint32_t arg, I2C_RESOURCES *i2c)
 
     case ARM_I2C_BUS_CLEAR:
       /* Execute Bus clear */
-      return ARM_DRIVER_ERROR_UNSUPPORTED;
+      NVIC_DisableIRQ (i2c->i2c_ev_irq);
+
+      i2c->reg->CONSET = I2C_CON_STA;
+      __NOP(); __NOP(); __NOP();
+      if ((i2c->reg->CONSET & I2C_CON_SI) == 0) {
+        for (val = 0; val < 2048; val++);
+      }
+      /* Clear start and interrupt flag */
+      i2c->reg->CONCLR = I2C_CON_STA | I2C_CON_SI;
+      /* Send STOP to end the transaction */
+      i2c->reg->CONSET = I2C_CON_STO;
+
+      NVIC_ClearPendingIRQ (i2c->i2c_ev_irq);
+      NVIC_EnableIRQ (i2c->i2c_ev_irq);
+      return ARM_DRIVER_OK;
 
     case ARM_I2C_ABORT_TRANSFER:
       /* Abort Master/Slave transfer */

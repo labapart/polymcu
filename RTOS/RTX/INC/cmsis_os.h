@@ -56,9 +56,9 @@
 
 #define osCMSIS           0x10002U     ///< CMSIS-RTOS API version (main [31:16] .sub [15:0])
 
-#define osCMSIS_RTX     ((4<<16)|80)   ///< RTOS identification and version (main [31:16] .sub [15:0])
+#define osCMSIS_RTX     ((4<<16)|82)   ///< RTOS identification and version (main [31:16] .sub [15:0])
 
-#define osKernelSystemId "RTX V4.80"   ///< RTOS identification string
+#define osKernelSystemId "RTX V4.82"   ///< RTOS identification string
 
 
 #define osFeature_MainThread   1       ///< main can be thread
@@ -70,10 +70,22 @@
 #define osFeature_Wait         0       ///< osWait not available
 #define osFeature_SysTick      1       ///< osKernelSysTick functions available
 
-#if defined (__CC_ARM)
+#if defined(__CC_ARM)
 #define os_InRegs __value_in_regs      // Compiler specific: force struct in registers
 #else
 #define os_InRegs
+#endif
+
+#if   defined(__CC_ARM)
+#define __NO_RETURN __declspec(noreturn)
+#elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+#define __NO_RETURN __attribute__((noreturn))
+#elif defined(__GNUC__)
+#define __NO_RETURN __attribute__((noreturn))
+#elif defined(__ICCARM__)
+#define __NO_RETURN __noreturn
+#else
+#define __NO_RETURN
 #endif
 
 #include <stdint.h>
@@ -96,7 +108,8 @@ typedef enum  {
   osPriorityAboveNormal   = +1,          ///< priority: above normal
   osPriorityHigh          = +2,          ///< priority: high
   osPriorityRealtime      = +3,          ///< priority: realtime (highest)
-  osPriorityError         =  0x84        ///< system cannot determine priority or thread has illegal priority
+  osPriorityError         =  0x84,       ///< system cannot determine priority or thread has illegal priority
+  os_priority_reserved    =  0x7FFFFFFF  ///< prevent from enum down-size compiler optimization.
 } osPriority;
 
 /// Timeout value.
@@ -385,11 +398,16 @@ int32_t osSignalSet (osThreadId thread_id, int32_t signals);
 /// \return previous signal flags of the specified thread or 0x80000000 in case of incorrect parameters or call from ISR.
 int32_t osSignalClear (osThreadId thread_id, int32_t signals);
 
-/// Wait and clear one or more Signal Flags to become signaled for the current \b RUNNING thread.
+/// Wait for one or more Signal Flags to become signaled for the current \b RUNNING thread.
 /// \param[in]     signals       wait until all specified signal flags set or 0 for any single signal flag.
 /// \param[in]     millisec      \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out.
 /// \return event flag information or error code.
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+#define   osSignalWait __osSignalWait
+osEvent __osSignalWait (int32_t signals, uint32_t millisec);
+#else
 os_InRegs osEvent osSignalWait (int32_t signals, uint32_t millisec);
+#endif
 
 
 //  ==== Mutex Management ====
@@ -443,7 +461,7 @@ osStatus osMutexDelete (osMutexId mutex_id);
 extern const osSemaphoreDef_t os_semaphore_def_##name
 #else                            // define the object
 #define osSemaphoreDef(name)  \
-uint32_t os_semaphore_cb_##name[3] = { 0 }; \
+uint32_t os_semaphore_cb_##name[2] = { 0 }; \
 const osSemaphoreDef_t os_semaphore_def_##name = { (os_semaphore_cb_##name) }
 #endif
 
@@ -564,7 +582,12 @@ osStatus osMessagePut (osMessageQId queue_id, uint32_t info, uint32_t millisec);
 /// \param[in]     queue_id      message queue ID obtained with \ref osMessageCreate.
 /// \param[in]     millisec      \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out.
 /// \return event information that includes status code.
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+#define   osMessageGet __osMessageGet
+osEvent __osMessageGet (osMessageQId queue_id, uint32_t millisec);
+#else
 os_InRegs osEvent osMessageGet (osMessageQId queue_id, uint32_t millisec);
+#endif
 
 #endif     // Message Queues available
 
@@ -622,7 +645,12 @@ osStatus osMailPut (osMailQId queue_id, void *mail);
 /// \param[in]     queue_id      mail queue ID obtained with \ref osMailCreate.
 /// \param[in]     millisec      \ref CMSIS_RTOS_TimeOutValue or 0 in case of no time-out
 /// \return event that contains mail information or error code.
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+#define   osMailGet __osMailGet
+osEvent __osMailGet (osMailQId queue_id, uint32_t millisec);
+#else
 os_InRegs osEvent osMailGet (osMailQId queue_id, uint32_t millisec);
+#endif
 
 /// Free a memory block from a mail.
 /// \param[in]     queue_id      mail queue ID obtained with \ref osMailCreate.
@@ -639,9 +667,16 @@ osStatus osMailFree (osMailQId queue_id, void *mail);
 /// \return number of ticks, for how long the system can sleep or power-down.
 uint32_t os_suspend (void);
 
-/// Resume the RTX task scheduler
+/// Resume the RTX task scheduler.
 /// \param[in]     sleep_time    specifies how long the system was in sleep or power-down mode.
 void os_resume (uint32_t sleep_time);
+
+/// OS idle demon (running when no other thread is ready to run).
+__NO_RETURN void os_idle_demon (void);
+
+/// OS error callback (called when a runtime error is detected).
+/// \param[in]     error_code    actual error code that has been detected.
+__NO_RETURN void os_error (uint32_t error_code);
 
 
 #ifdef  __cplusplus
