@@ -207,7 +207,7 @@ if (NOT APPLICATION)
   message(FATAL_ERROR "Define APPLICATION variable with one of these available applications: ${APPLICATION_LIST}")
 else()
   # Check if the application is defined outside of the PolyMCU tree
-  if (IS_ABSOLUTE ${APPLICATION})
+  if (IS_ABSOLUTE "${APPLICATION}")
     if (NOT EXISTS ${APPLICATION})
       message(FATAL_ERROR "The external application '${APPLICATION}' does not exist.")
     endif()
@@ -279,7 +279,7 @@ MACRO(BUILD_FIRMWARE Target Name SourceList LibraryList)
 ENDMACRO(BUILD_FIRMWARE)
 
 # Include application & middleware configurations
-if(IS_ABSOLUTE ${APPLICATION})
+if(IS_ABSOLUTE "${APPLICATION}")
   include(${APPLICATION}/Application.cmake)
 else()
   include(Application/${APPLICATION}/Application.cmake)
@@ -290,15 +290,21 @@ GET_BOARD_LIST(BOARD_LIST)
 if (NOT BOARD)
   message(FATAL_ERROR "Define BOARD variable with one of these available boards: ${BOARD_LIST}")
 else()
-  list (FIND BOARD_LIST ${BOARD} _index)
-  if (NOT ${_index} GREATER -1)
-    message(FATAL_ERROR "Board '${BOARD}' is not supported. Here is the list of available boards: ${BOARD_LIST}")
+  if(NOT IS_ABSOLUTE "${BOARD}")
+    list (FIND BOARD_LIST ${BOARD} _index)
+    if (NOT ${_index} GREATER -1)
+      message(FATAL_ERROR "Board '${BOARD}' is not supported. Here is the list of available boards: ${BOARD_LIST}")
+    endif()
   endif()
 endif()
 
 # Include board & HW configurations
 string(REGEX REPLACE "/.*" "" BOARD_VENDOR ${BOARD})
-include(Board/${BOARD_VENDOR}/Board.cmake)
+if(IS_ABSOLUTE "${BOARD}")
+  include(${BOARD}/Board.cmake)
+else()
+  include(Board/${BOARD_VENDOR}/Board.cmake)
+endif()
 
 # Debug Support
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -318,13 +324,23 @@ list(REMOVE_DUPLICATES LIST_MODULES)
 
 # Declare module directories to use their potential Find*.cmake files
 foreach(module ${LIST_MODULES})
-  # Sanity check
-  if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${module})
-    message(FATAL_ERROR "Module '${module}' does not exist.")
-  endif()
+  if(IS_ABSOLUTE "${module}")
+    # Sanity check
+    if(NOT EXISTS ${module})
+      message(FATAL_ERROR "Module '${module}' does not exist.")
+    endif()
 
-  # Declare directory to use its potential Find*.cmake files
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module})
+    # Declare directory to use its potential Find*.cmake files
+    list(APPEND CMAKE_MODULE_PATH ${module})
+  else()
+    # Sanity check
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${module})
+      message(FATAL_ERROR "Module '${module}' does not exist.")
+    endif()
+
+    # Declare directory to use its potential Find*.cmake files
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module})
+  endif()
 endforeach()
 
 #
@@ -362,12 +378,17 @@ set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${CPU_FLAGS}")
 
 # Build the different modules
 foreach(module ${LIST_MODULES})
-  add_subdirectory(${module})
+  if(IS_ABSOLUTE "${module}")
+    get_filename_component(module_name "${module}" NAME)
+    add_subdirectory(${module} ${PROJECT_BINARY_DIR}/${module_name})
+  else()
+    add_subdirectory(${module})
+  endif()
 endforeach()
 
 # And finally add the application itself
-if(IS_ABSOLUTE ${APPLICATION})
-  get_filename_component(APPLICATION_NAME ${APPLICATION} NAME)
+if(IS_ABSOLUTE "${APPLICATION}")
+  get_filename_component(APPLICATION_NAME "${APPLICATION}" NAME)
   add_subdirectory(${APPLICATION} ${PROJECT_BINARY_DIR}/Application/${APPLICATION_NAME})
 else()
   add_subdirectory(Application/${APPLICATION})
