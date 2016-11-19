@@ -40,10 +40,14 @@
  * Definitions
  ******************************************************************************/
 
-/*! @brief Define big endian */
-#define BIG_ENDIAN (0U)
-/*! @brief Define little endian */
-#define LITTLE_ENDIAN (1U)
+#ifndef BIG_ENDIAN
+  /*! @brief Define big endian */
+  #define BIG_ENDIAN (0U)
+#endif
+#ifndef LITTLE_ENDIAN
+  /*! @brief Define little endian */
+  #define LITTLE_ENDIAN (1U)
+#endif
 
 /*! @brief Define current endian */
 #define ENDIANNESS LITTLE_ENDIAN
