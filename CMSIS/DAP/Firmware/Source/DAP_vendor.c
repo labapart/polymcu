@@ -45,7 +45,7 @@ file to the MDK-ARM project under the file group Configuration.
 \return          number of bytes in response (lower 16 bits)
                  number of bytes in request (upper 16 bits)
 */
-uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
+__attribute__((weak)) uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
   uint32_t num = (1U << 16) | 1U;
 
   *response++ = *request;        // copy Command ID
