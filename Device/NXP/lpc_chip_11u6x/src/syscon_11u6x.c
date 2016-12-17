@@ -63,10 +63,12 @@ void Chip_SYSCTL_SetPinInterrupt(uint32_t intno, uint8_t port, uint8_t pin)
 	if (port == 0) {
 		/* Pins P0.1 to P0.23 only */
 		LPC_SYSCTL->PINTSEL[intno] = (uint32_t) pin;
-	}
-	else {
-		/* P1.1 to P1.31 and P2.0 to P2.7 */
-		LPC_SYSCTL->PINTSEL[intno] = (uint32_t) ((port - 1) * 32 + pin);
+	} else if (port == 1) {
+		/* Pins P1.1 to P1.31 */
+		LPC_SYSCTL->PINTSEL[intno] = (uint32_t) (24 + pin);
+	} else {
+		/* Pins 2.0 to P2.7 */
+		LPC_SYSCTL->PINTSEL[intno] = (uint32_t) (56 + pin);
 	}
 }
 
