@@ -114,7 +114,7 @@ void polymcu_watchdog_restore_default_timeout(void);
 void polymcu_watchdog_trigger(void);
 #endif
 
-void print_buffer_hex(uint8_t* ptr, unsigned size);
+void print_buffer_hex(uint8_t* ptr, size_t size);
 
 //
 // PolyMCU Debug Support

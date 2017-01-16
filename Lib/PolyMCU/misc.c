@@ -69,8 +69,8 @@ caddr_t _sbrk_r(void *reent, size_t incr) {
 	return (caddr_t) prev_heap_end;
 }
 
-void print_buffer_hex(uint8_t* ptr, unsigned size) {
-	for (unsigned i = 0; i < size; i++) {
+void print_buffer_hex(uint8_t* ptr, size_t size) {
+	for (unsigned int i = 0; i < size; i++) {
 		printf("%02x", *(ptr + i));
 	}
 }
