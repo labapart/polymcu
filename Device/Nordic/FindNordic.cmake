@@ -34,7 +34,7 @@ if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
   if (NORDIC_SOFT_DEVICE_VERSION STREQUAL "s130")
     add_definitions(-DSOFTDEVICE_PRESENT -DS130)
   elseif (NORDIC_SOFT_DEVICE_VERSION STREQUAL "s132")
-    add_definitions(-DSOFTDEVICE_PRESENT -DS132)
+    add_definitions(-DSOFTDEVICE_PRESENT -DS132 -DNRF_SD_BLE_API_VERSION=3)
   endif()
 endif()
 
@@ -68,6 +68,8 @@ elseif (NORDIC_NRF52)
       set(LINKER_SCRIPT ${NORDIC_SDK_ROOT}/toolchain/gcc/nrf52_xxaa.ld)
     endif()
   endif()
+else()
+  message(FATAL_ERROR "Nordic chip not supported.")
 endif()
 
 find_package(CMSIS)
@@ -79,24 +81,26 @@ add_definitions(-DCONFIG_GPIO_AS_PINRESET -DGPIOTE_ENABLED=1 -DCLOCK_ENABLED=1 -
 include_directories(${NORDIC_SDK_ROOT}/ble/common
 					${NORDIC_SDK_ROOT}/ble/ble_advertising
 					${NORDIC_SDK_ROOT}/ble/ble_db_discovery
-					${NORDIC_SDK_ROOT}/ble/device_manager
-					${NORDIC_SDK_ROOT}/ble/device_manager/config
+					${NORDIC_SDK_ROOT}/ble/peer_manager
+					${NORDIC_SDK_ROOT}/ble/nrf_ble_gatt
 					${NORDIC_SDK_ROOT}/device
 					${NORDIC_SDK_ROOT}/drivers_nrf/clock
-                    ${NORDIC_SDK_ROOT}/drivers_nrf/common
-                    ${NORDIC_SDK_ROOT}/drivers_nrf/config
+					${NORDIC_SDK_ROOT}/drivers_nrf/common
 					${NORDIC_SDK_ROOT}/drivers_nrf/delay
-                    ${NORDIC_SDK_ROOT}/drivers_nrf/hal
-					${NORDIC_SDK_ROOT}/drivers_nrf/pstorage
-					${NORDIC_SDK_ROOT}/drivers_nrf/pstorage/config
+					${NORDIC_SDK_ROOT}/drivers_nrf/hal
 					${NORDIC_SDK_ROOT}/drivers_nrf/rtc
+					${NORDIC_SDK_ROOT}/drivers_nrf/systick
 					${NORDIC_SDK_ROOT}/drivers_nrf/timer
+					${NORDIC_SDK_ROOT}/libraries/bootloader/dfu
 					${NORDIC_SDK_ROOT}/libraries/button
+					${NORDIC_SDK_ROOT}/libraries/fds
 					${NORDIC_SDK_ROOT}/libraries/fifo
+					${NORDIC_SDK_ROOT}/libraries/fstorage
+					${NORDIC_SDK_ROOT}/libraries/log
+					${NORDIC_SDK_ROOT}/libraries/log/src
 					${NORDIC_SDK_ROOT}/libraries/scheduler
 					${NORDIC_SDK_ROOT}/libraries/sensorsim
 					${NORDIC_SDK_ROOT}/libraries/timer
-					${NORDIC_SDK_ROOT}/libraries/trace
 					${NORDIC_SDK_ROOT}/libraries/uart
 					${NORDIC_SDK_ROOT}/libraries/util
 					${NORDIC_SDK_ROOT}/libraries/experimental_section_vars
@@ -111,9 +115,7 @@ if (SUPPORT_BLE_PERIPHERAL)
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_gls
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hids
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs
-                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hts
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ias
-                      ${NORDIC_SDK_ROOT}/ble/ble_services/ble_lbs
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_lls
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_nus
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs

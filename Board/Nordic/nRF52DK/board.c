@@ -97,3 +97,13 @@ void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p
 void assert_nrf_callback(uint16_t line_num, const uint8_t * file_name) {
 	app_error_handler(0xDEADBEEF, line_num, file_name);
 }
+
+void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info) {
+    puts("app_error_fault_handler: Fatal");
+    // On assert, the system can only recover with a reset.
+#ifndef DEBUG
+    NVIC_SystemReset();
+#else
+    while(1);
+#endif // DEBUG
+}

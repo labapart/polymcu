@@ -57,13 +57,8 @@ elseif (BOARD STREQUAL "Nordic/nRF52DK")
   # Build options
   #
   set(CPU "ARM Cortex-M4F")
-
-  if(BOARD_PCA10036)
-    add_definitions(-DBOARD_PCA10036)
-  else()
-    set(BOARD_PCA10040 1)
-    add_definitions(-DBOARD_PCA10040)
-  endif()
+  set(BOARD_PCA10040 1)
+  add_definitions(-DBOARD_PCA10040 -DNRF52832)
 
   # SysTick cannot be used for PolyMCU Timer API - Systick is switched off during WFI/WFE
   set(SUPPORT_TIMER_SYSTICK 0)

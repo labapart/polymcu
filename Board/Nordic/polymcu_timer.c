@@ -40,7 +40,7 @@ void polymcu_timer_event_handler(nrf_timer_event_t event_type, void* p_context) 
 
 // Generate an interrupt every 'period'
 int polymcu_timer_init(unsigned int period) {
-    nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG(0);
+    nrf_drv_timer_config_t timer_cfg = NRF_DRV_TIMER_DEFAULT_CONFIG;
 
     // Set the frequency
     timer_cfg.frequency = NRF_TIMER_FREQ_1MHz;

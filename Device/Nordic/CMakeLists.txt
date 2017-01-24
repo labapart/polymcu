@@ -34,6 +34,8 @@ find_package(Nordic)
 include_directories(${NORDIC_SDK_ROOT}
 					${NORDIC_SDK_ROOT}/drivers_nrf/gpiote
                     ${NORDIC_SDK_ROOT}/drivers_nrf/hal
+                    ${NORDIC_SDK_ROOT}/drivers_nrf/power
+                    ${NORDIC_SDK_ROOT}/drivers_nrf/rng
                     ${NORDIC_SDK_ROOT}/drivers_nrf/uart
                     ${NORDIC_SDK_ROOT}/libraries/fstorage/config
                     ${NORDIC_SDK_ROOT}/libraries/util)
@@ -42,19 +44,24 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/clock/nrf_drv_clock.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/rtc/nrf_drv_rtc.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/gpiote/nrf_drv_gpiote.c
+				${NORDIC_SDK_ROOT}/drivers_nrf/power/nrf_drv_power.c
+				${NORDIC_SDK_ROOT}/drivers_nrf/systick/nrf_drv_systick.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/timer/nrf_drv_timer.c
 				${NORDIC_SDK_ROOT}/libraries/button/app_button.c
+				${NORDIC_SDK_ROOT}/libraries/fds/fds.c
 				${NORDIC_SDK_ROOT}/libraries/fifo/app_fifo.c
+				${NORDIC_SDK_ROOT}/libraries/log/src/nrf_log_backend_serial.c
+				${NORDIC_SDK_ROOT}/libraries/log/src/nrf_log_frontend.c
 				${NORDIC_SDK_ROOT}/libraries/scheduler/app_scheduler.c
 				${NORDIC_SDK_ROOT}/libraries/sensorsim/sensorsim.c
 				${NORDIC_SDK_ROOT}/libraries/util/app_util_platform.c
-				${NORDIC_SDK_ROOT}/libraries/util/nrf_log.c)
+				${NORDIC_SDK_ROOT}/libraries/util/sdk_mapped_flags.c)
 
 if (NORDIC_NRF51)
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf51.s
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf51.S
 				          ${NORDIC_SDK_ROOT}/toolchain/system_nrf51.c)
 elseif (NORDIC_NRF52)
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.S
 				          ${NORDIC_SDK_ROOT}/toolchain/system_nrf52.c)
 endif()
 
@@ -69,11 +76,6 @@ else()
                           ${NORDIC_SDK_ROOT}/libraries/timer/app_timer_appsh.c)
 endif()
 
-# 'pstorage' depends on SoftDevice API
-if (NORDIC_SOFT_DEVICE_VERSION)
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/pstorage/pstorage.c)
-endif()
-
 #
 # BLE support
 #
@@ -83,7 +85,20 @@ if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
                           ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler_appsh.c
                           ${NORDIC_SDK_ROOT}/ble/common/ble_advdata.c
                           ${NORDIC_SDK_ROOT}/ble/common/ble_conn_params.c
-                          ${NORDIC_SDK_ROOT}/ble/common/ble_srv_common.c)
+                          ${NORDIC_SDK_ROOT}/ble/common/ble_conn_state.c
+                          ${NORDIC_SDK_ROOT}/ble/common/ble_srv_common.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/gatt_cache_manager.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/gatts_cache_manager.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/id_manager.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/peer_id.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/peer_manager.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/peer_database.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/pm_buffer.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/pm_mutex.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/peer_data_storage.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/security_dispatcher.c
+                          ${NORDIC_SDK_ROOT}/ble/peer_manager/security_manager.c
+                          ${NORDIC_SDK_ROOT}/ble/nrf_ble_gatt/nrf_ble_gatt.c)
 
   #
   # Generate Linker file
@@ -103,6 +118,7 @@ if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
   if (SUPPORT_BLE_PERIPHERAL)
     include_directories(${NORDIC_SDK_ROOT}/ble/ble_racp)
 
+    add_definitions(-DBLE_ADVERTISING_ENABLED)
     list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/ble/ble_advertising/ble_advertising.c
                             ${NORDIC_SDK_ROOT}/ble/ble_racp/ble_racp.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas/ble_bas.c
@@ -118,28 +134,25 @@ if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_lls/ble_lls.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_nus/ble_nus.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs/ble_rscs.c
-                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_tps/ble_tps.c
-                            ${NORDIC_SDK_ROOT}/ble/device_manager/device_manager_peripheral.c)
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_tps/ble_tps.c)
   endif()
 
   if (SUPPORT_BLE_CENTRAL)
     list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/ble/ble_db_discovery/ble_db_discovery.c
-                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ancs_c/ble_ancs_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ancs_c/nrf_ble_ancs_c.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ans_c/ble_ans_c.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas_c/ble_bas_c.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_cts_c/ble_cts_c.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_hrs_c/ble_hrs_c.c
                             ${NORDIC_SDK_ROOT}/ble/ble_services/ble_ias_c/ble_ias_c.c
-                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs_c/ble_rscs_c.c
-                            ${NORDIC_SDK_ROOT}/ble/device_manager/device_manager_central.c)
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_nus_c/ble_nus_c.c
+                            ${NORDIC_SDK_ROOT}/ble/ble_services/ble_rscs_c/ble_rscs_c.c)
   endif()
 endif()
 
 #
 # Debug UART support
 #
-add_definitions(-DUART0_ENABLED=1)
-
 # Use UART FIFO by default
 set(NORDIC_UART_FIFO TRUE CACHE BOOL "Use UART FIFO")
 

@@ -32,7 +32,7 @@ if (SUPPORT_RTOS)
   find_package(RTOS)
 endif()
 
-set(board_nordic_SRCS bsp/bsp.c)
+set(board_nordic_SRCS boards/boards.c bsp/bsp.c)
 
 if(SUPPORT_TIMER)
   find_package(PolyMCU)
