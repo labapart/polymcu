@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,15 +38,16 @@ include_directories(${NORDIC_SDK_ROOT}
 					${NORDIC_SDK_ROOT}/drivers_nrf/gpiote
                     ${NORDIC_SDK_ROOT}/drivers_nrf/hal
                     ${NORDIC_SDK_ROOT}/drivers_nrf/uart
+                    ${NORDIC_SDK_ROOT}/libraries/fstorage/config
                     ${NORDIC_SDK_ROOT}/libraries/util)
 
-add_definitions(-DCONFIG_GPIO_AS_PINRESET -DGPIOTE_ENABLED=1)
 set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
 				${NORDIC_SDK_ROOT}/toolchain/system_nrf52.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/clock/nrf_drv_clock.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/rtc/nrf_drv_rtc.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/gpiote/nrf_drv_gpiote.c
+				${NORDIC_SDK_ROOT}/drivers_nrf/timer/nrf_drv_timer.c
 				${NORDIC_SDK_ROOT}/libraries/button/app_button.c
 				${NORDIC_SDK_ROOT}/libraries/fifo/app_fifo.c
 				${NORDIC_SDK_ROOT}/libraries/scheduler/app_scheduler.c
@@ -73,7 +74,8 @@ endif()
 # Nordic SoftDevice Support
 #
 if (NORDIC_SOFT_DEVICE_VERSION)
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler.c
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/libraries/fstorage/fstorage.c
+                          ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler.c
                           ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler_appsh.c)
 endif()
 

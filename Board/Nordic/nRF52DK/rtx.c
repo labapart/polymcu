@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,9 @@
 #include <assert.h>
 #include <cmsis_os.h>
 #include "board.h"
+
+#include "nrf.h"
+#include "bsp.h"
 #include "nrf_drv_clock.h"
 #include "nrf_drv_rtc.h"
 
@@ -36,12 +39,13 @@ int os_tick_init(void) {
 	uint32_t err_code;
 
 	// Initialize the clock
-    err_code = nrf_drv_clock_init(NULL);
+    err_code = nrf_drv_clock_init();
     assert(err_code == NRF_SUCCESS);
-    nrf_drv_clock_lfclk_request();
+    nrf_drv_clock_lfclk_request(NULL);
 
     // Initialize RTC instance
-    err_code = nrf_drv_rtc_init(&rtc1, NULL, NULL);
+    static const nrf_drv_rtc_config_t rtc1_config = NRF_DRV_RTC_DEFAULT_CONFIG(1);
+    err_code = nrf_drv_rtc_init(&rtc1, &rtc1_config, NULL);
     assert(err_code == NRF_SUCCESS);
 
     // Enable tick event & interrupt

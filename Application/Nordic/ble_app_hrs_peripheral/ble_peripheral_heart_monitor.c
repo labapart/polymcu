@@ -934,6 +934,8 @@ int main(void)
     err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
     APP_ERROR_CHECK(err_code);
 
+    puts("Heart Rate - BLE Advertising");
+
     // Enter main loop.
     for (;;)
     {

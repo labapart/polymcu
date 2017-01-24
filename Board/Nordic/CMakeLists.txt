@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@ if (NORDIC_SOFT_DEVICE_VERSION)
 endif()
 
 if(SUPPORT_RTOS STREQUAL "RTX")
+  add_definitions(-DRTC1_CONFIG_FREQUENCY=${RTOS_CLOCK})
+
   list(APPEND board_nordic_SRCS nRF52DK/rtx.c nRF52DK/rtx_helper.s)
 endif()
 

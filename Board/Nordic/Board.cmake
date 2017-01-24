@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ list(APPEND LIST_MODULES Device/Nordic
 # Build options
 #
 set(CPU "ARM Cortex-M4F")
-add_definitions(-DNRF52)
+set(NORDIC_NRF52 1)
 
 # nRF52 has not got Systick
 if(SUPPORT_RTOS STREQUAL "RTX")
