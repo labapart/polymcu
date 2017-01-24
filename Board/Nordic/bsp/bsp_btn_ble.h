@@ -12,9 +12,9 @@
 
 /**@file
  *
- * @defgroup bsp_btn_ble Board Support Package: BLE Button Module
+ * @defgroup bsp_btn_ble BSP: BLE Button Module
  * @{
- * @ingroup app_common
+ * @ingroup bsp
  *
  * @brief Module for controlling BLE behavior through button actions.
  *
