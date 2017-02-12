@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ exit" > $TEMP_SCRIPT
 fi
 
 if [ -n "$NORDIC_BOARD" ]; then
-  JLinkExe -SelectEmuBySN $NORDIC_BOARD $TEMP_SCRIPT
+  JLinkExe -if swd -SelectEmuBySN $NORDIC_BOARD $TEMP_SCRIPT
 else
   # Ensure there is only one board connected
   NORDIC_BOARD_COUNT=`lsusb -d 1366: | wc -l`
@@ -83,7 +83,7 @@ else
     exit 1
   fi
 
-  JLinkExe $TEMP_SCRIPT
+  JLinkExe -if swd $TEMP_SCRIPT
 fi
 
 rm -Rf $TEMP_SCRIPT

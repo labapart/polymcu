@@ -55,7 +55,7 @@ Total size of config area: 0x100 bytes
 Debug
 -----
 
-1. `JLinkGDBServer -if SWD`
+1. `JLinkGDBServer -if SWD -device nrf52`
 2.
 ```
 arm-none-eabi-gdb <PolyMCU-root>/Build/nordic/Application/Examples/Baremetal/Baremetal_Example.elf
