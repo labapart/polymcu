@@ -34,6 +34,12 @@ endif()
 
 set(board_nordic_SRCS bsp/bsp.c nRF52DK/board.c)
 
+if(SUPPORT_TIMER)
+  find_package(PolyMCU)
+
+  list(APPEND board_nordic_SRCS polymcu_timer.c)
+endif()
+
 if (NORDIC_SOFT_DEVICE_VERSION)
   list(APPEND board_nordic_SRCS bsp/bsp_btn_ble.c)
 endif()

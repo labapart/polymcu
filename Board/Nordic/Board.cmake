@@ -49,4 +49,7 @@ if(SUPPORT_RTOS STREQUAL "RTX")
   set(RTOS_CLOCK 1000)
 endif()
 
+# SysTick cannot be used for PolyMCU Timer API - Systick is switched off during WFI/WFE
+set(SUPPORT_TIMER_SYSTICK 0)
+
 set(POST_BUILD_COMMANDS ${CMAKE_OBJCOPY} "-O ihex $<TARGET_FILE:Firmware> $<TARGET_PROPERTY:Firmware,OUTPUT_NAME>.hex")
