@@ -25,6 +25,9 @@
  */
 
 #include "PolyMCU.h"
+
+#include "nrf.h"
+#include "bsp.h"
 #include "nrf_drv_timer.h"
 
 static const nrf_drv_timer_t POLYMCU_HW_TIMER = NRF_DRV_TIMER_INSTANCE(0);
