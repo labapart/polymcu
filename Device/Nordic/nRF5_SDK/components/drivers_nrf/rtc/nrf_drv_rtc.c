@@ -312,7 +312,7 @@ void RTC0_IRQHandler(void)
 }
 #endif
 
-#if NRF_MODULE_ENABLED(RTC1)
+#if NRF_MODULE_ENABLED(RTC1) && (!defined(SUPPORT_RTOS))
 void RTC1_IRQHandler(void)
 {
     nrf_drv_rtc_int_handler(NRF_RTC1,RTC1_INSTANCE_INDEX, NRF_RTC_CC_CHANNEL_COUNT(1));
