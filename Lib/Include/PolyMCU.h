@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,6 +103,18 @@ int polymcu_timer_task_is_scheduled(polymcu_timer_task_t task);
  */
 void polymcu_wait(unsigned int delay);
 unsigned int polymcu_timer_get_value(void);
+
+/*
+ * Support for boards who do not use systick support for PolyMCU Timer API
+ */
+
+// This function must be called by the timer IRQ handler
+void polymcu_timer_irq_handler(void);
+
+// Board specific function to start HW timer
+void polymcu_timer_hw_start(void);
+// Board specific function to stop HW timer
+void polymcu_timer_hw_stop(void);
 
 #endif
 

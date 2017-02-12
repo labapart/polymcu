@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,15 @@ else()
 endif()
 
 if(SUPPORT_TIMER)
-  list(APPEND polymcu_SRCS timer_systick.c)
+  if (NOT DEFINED SUPPORT_TIMER_SYSTICK)
+    set(SUPPORT_TIMER_SYSTICK 1)
+  endif()
 
+  if (SUPPORT_TIMER_SYSTICK)
+    list(APPEND polymcu_SRCS timer_systick.c)
+  endif()
+
+  list(APPEND polymcu_SRCS timer.c)
   set(TIMER_TASK_MAX 5 CACHE STRING "Maximum number of Timer tasks.")
   add_definitions(-DTIMER_TASK_MAX=${TIMER_TASK_MAX})
 endif()

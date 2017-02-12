@@ -166,6 +166,7 @@ Basic variables
 | SUPPORT_DEBUG_UART              | (none\|itm\|usb\|1) | Define which UART support to use for debugging  |
 | DEBUG_UART_BAUDRATE             | integer    | Debug UART Baud Rate (default: 115200)            |
 | SUPPORT_TIMER                   | (0\|1)     | Add PolyMCU Timer API                             |
+| SUPPORT_TIMER_SYSTICK           | (0\|1)     | Use SysTick for PolyMCU Timer API (default:1)     |
 | TIMER_TASK_MAX                  | integer    | Number maximum of PolyMCU Timer tasks (default: 5) |
 | SUPPORT_RTOS                    | string     | Enable RTOS support with the name of specified RTOS |
 | SUPPORT_WATCHDOG                | (0\|1)     | Add PolyMCU Watchdog API                          |
