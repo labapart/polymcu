@@ -122,6 +122,13 @@ void nrf_drv_timer_uninit(nrf_drv_timer_t const * const p_instance);
  *
  * @param[in] p_instance Timer instance.
  */
+void nrf_drv_timer_power_on(nrf_drv_timer_t const * const p_instance);
+
+/**
+ * @brief Function for turning on and start the timer.
+ *
+ * @param[in] p_instance Pointer to the driver instance structure.
+ */
 void nrf_drv_timer_enable(nrf_drv_timer_t const * const p_instance);
 
 /**

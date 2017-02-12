@@ -110,11 +110,17 @@ void nrf_drv_timer_uninit(nrf_drv_timer_t const * const p_instance)
     m_cb[p_instance->instance_id].state = NRF_DRV_STATE_UNINITIALIZED;
 }
 
+void nrf_drv_timer_power_on(nrf_drv_timer_t const * const p_instance)
+{
+    ASSERT(m_cb[p_instance->instance_id].state == NRF_DRV_STATE_INITIALIZED);
+    m_cb[p_instance->instance_id].state = NRF_DRV_STATE_POWERED_ON;
+}
+
 void nrf_drv_timer_enable(nrf_drv_timer_t const * const p_instance)
 {
     ASSERT(m_cb[p_instance->instance_id].state == NRF_DRV_STATE_INITIALIZED);
     nrf_timer_task_trigger(p_instance->p_reg, NRF_TIMER_TASK_START);
-    m_cb[p_instance->instance_id].state = NRF_DRV_STATE_POWERED_ON;
+    nrf_drv_timer_power_on(p_instance);
 }
 
 void nrf_drv_timer_disable(nrf_drv_timer_t const * const p_instance)
