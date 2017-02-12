@@ -44,8 +44,9 @@ int os_tick_init(void) {
     nrf_drv_clock_lfclk_request(NULL);
 
     // Initialize RTC instance
-    static const nrf_drv_rtc_config_t rtc1_config = NRF_DRV_RTC_DEFAULT_CONFIG(1);
-    err_code = nrf_drv_rtc_init(&rtc1, &rtc1_config, NULL);
+    nrf_drv_rtc_config_t config = NRF_DRV_RTC_DEFAULT_CONFIG;
+    config.prescaler = RTC_FREQ_TO_PRESCALER(1000);
+    err_code = nrf_drv_rtc_init(&rtc1, &config, NULL);
     assert(err_code == NRF_SUCCESS);
 
     // Enable tick event & interrupt
