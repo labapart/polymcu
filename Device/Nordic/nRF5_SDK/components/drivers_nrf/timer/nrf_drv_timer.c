@@ -125,11 +125,17 @@ void nrf_drv_timer_uninit(nrf_drv_timer_t const * const p_instance)
     NRF_LOG_INFO("Uninitialized instance: %d.\r\n", p_instance->instance_id);
 }
 
+void nrf_drv_timer_power_on(nrf_drv_timer_t const * const p_instance)
+{
+    ASSERT(m_cb[p_instance->instance_id].state == NRF_DRV_STATE_INITIALIZED);
+    m_cb[p_instance->instance_id].state = NRF_DRV_STATE_POWERED_ON;
+}
+
 void nrf_drv_timer_enable(nrf_drv_timer_t const * const p_instance)
 {
     ASSERT(m_cb[p_instance->instance_id].state == NRF_DRV_STATE_INITIALIZED);
     nrf_timer_task_trigger(p_instance->p_reg, NRF_TIMER_TASK_START);
-    m_cb[p_instance->instance_id].state = NRF_DRV_STATE_POWERED_ON;
+    nrf_drv_timer_power_on(p_instance);
     NRF_LOG_INFO("Enabled instance: %d.\r\n", p_instance->instance_id);
 }
 
