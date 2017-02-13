@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -224,7 +224,7 @@ endif()
 #
 MACRO(TEST_SUPPORTED_BOARD BoardList)
   if (BOARD)
-    if (NOT ${BOARD} STREQUAL ${BoardList})
+    if (NOT ${BOARD} MATCHES ${BoardList})
       message(FATAL_ERROR "Board '${BOARD}' not supported for this application. This application only supports '${BoardList}'.")
     endif()
   else(BOARD)
