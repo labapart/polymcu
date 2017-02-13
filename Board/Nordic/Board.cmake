@@ -38,6 +38,12 @@ list(APPEND LIST_MODULES Device/Nordic
 set(CPU "ARM Cortex-M4F")
 set(NORDIC_NRF52 1)
 
+if(BOARD_PCA10036)
+  add_definitions(-DBOARD_PCA10036)
+else()
+  add_definitions(-DBOARD_PCA10040)
+endif()
+
 # nRF52 has not got Systick
 if(SUPPORT_RTOS STREQUAL "RTX")
   add_definitions(-DOS_SYSTICK=0 -DRTC1_ENABLED=1)

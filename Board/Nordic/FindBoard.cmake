@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
 
 find_package(Nordic)
 
-add_definitions(-DBOARD_PCA10036 -DBSP_UART_SUPPORT -DBLE_STACK_SUPPORT_REQD)
+add_definitions(-DBSP_UART_SUPPORT -DBLE_STACK_SUPPORT_REQD)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/nRF52DK
 					${CMAKE_CURRENT_LIST_DIR}/bsp)
