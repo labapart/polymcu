@@ -31,9 +31,6 @@ find_package(CMSIS)
 find_package(PolyMCU)
 find_package(Nordic)
 
-# Debug support
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG_NRF -DDEBUG_NRF_USER")
-
 include_directories(${NORDIC_SDK_ROOT}
 					${NORDIC_SDK_ROOT}/drivers_nrf/gpiote
                     ${NORDIC_SDK_ROOT}/drivers_nrf/hal
@@ -52,7 +49,8 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
 				${NORDIC_SDK_ROOT}/libraries/fifo/app_fifo.c
 				${NORDIC_SDK_ROOT}/libraries/scheduler/app_scheduler.c
 				${NORDIC_SDK_ROOT}/libraries/sensorsim/sensorsim.c
-				${NORDIC_SDK_ROOT}/libraries/util/app_util_platform.c)
+				${NORDIC_SDK_ROOT}/libraries/util/app_util_platform.c
+				${NORDIC_SDK_ROOT}/libraries/util/nrf_log.c)
 
 # Timer support
 if(SUPPORT_RTOS STREQUAL "RTX")

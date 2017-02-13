@@ -159,6 +159,7 @@ void uart_error_cb(app_uart_evt_t * p_event)
 
 uint32_t log_uart_init()
 {
+#if LABAPART
     static bool initialized = false;
     if (initialized)
     {
@@ -187,6 +188,10 @@ uint32_t log_uart_init()
     initialized = true;
 
     return err_code;
+#else
+    // UART should already be initialized
+    return NRF_SUCCESS;
+#endif
 }
 
 //lint -save -e530 -e64
