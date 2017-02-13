@@ -12,7 +12,7 @@
 
 /** @file
  *
- * @defgroup ant_sdk_profiles_sdm Stride Based Speed and Distance Monitor profile
+ * @defgroup ant_sdm Stride Based Speed and Distance Monitor profile
  * @{
  * @ingroup ant_sdk_profiles
  * @brief This module implements the Stride Based Speed and Distance Monitor profile.
@@ -157,13 +157,17 @@ typedef enum{
     ANT_SDM_PAGE_REQUEST_FAILED,                    ///< Data page request did not reach the destination.
 } ant_sdm_evt_t;
 
-// Forward declaration of the ant_sdm_profile_t type. 
+// Forward declaration of the ant_sdm_profile_t type.
 typedef struct ant_sdm_profile_s ant_sdm_profile_t;
 
 /**@brief SDM event handler type. */
 typedef void (* ant_sdm_evt_handler_t) (ant_sdm_profile_t *, ant_sdm_evt_t);
 
 #include "ant_sdm_local.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**@brief SDM Sensor configuration structure. */
 typedef struct
@@ -289,6 +293,11 @@ void ant_sdm_sens_evt_handler(ant_sdm_profile_t * p_profile, ant_evt_t * p_ant_e
  * @param[in]   p_ant_event     Event received from the ANT stack.
  */
 void ant_sdm_disp_evt_handler(ant_sdm_profile_t * p_profile, ant_evt_t * p_ant_event);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_H__
 /** @} */

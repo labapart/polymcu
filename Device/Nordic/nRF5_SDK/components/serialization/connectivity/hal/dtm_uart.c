@@ -55,31 +55,33 @@
  * @note If UART bit rate is changed, this value should be recalculated as well.
  */
 
-static uint32_t m_baud_rates[] = {[UART_BAUD_RATE_1200]   = UART_BAUDRATE_BAUDRATE_Baud1200,
-                                  [UART_BAUD_RATE_2400]   = UART_BAUDRATE_BAUDRATE_Baud2400,
-                                  [UART_BAUD_RATE_4800]   = UART_BAUDRATE_BAUDRATE_Baud4800,
-                                  [UART_BAUD_RATE_9600]   = UART_BAUDRATE_BAUDRATE_Baud9600,
-                                  [UART_BAUD_RATE_14400]  = UART_BAUDRATE_BAUDRATE_Baud14400,
-                                  [UART_BAUD_RATE_19200]  = UART_BAUDRATE_BAUDRATE_Baud19200,
-                                  [UART_BAUD_RATE_28800]  = UART_BAUDRATE_BAUDRATE_Baud28800,
-                                  [UART_BAUD_RATE_38400]  = UART_BAUDRATE_BAUDRATE_Baud38400,
-                                  [UART_BAUD_RATE_57600]  = UART_BAUDRATE_BAUDRATE_Baud57600,
-                                  [UART_BAUD_RATE_76800]  = UART_BAUDRATE_BAUDRATE_Baud76800,
-                                  [UART_BAUD_RATE_115200] = UART_BAUDRATE_BAUDRATE_Baud115200, };
+static uint32_t       m_baud_rates[] = {[UART_BAUD_RATE_1200]   = UART_BAUDRATE_BAUDRATE_Baud1200,
+                                        [UART_BAUD_RATE_2400]   = UART_BAUDRATE_BAUDRATE_Baud2400,
+                                        [UART_BAUD_RATE_4800]   = UART_BAUDRATE_BAUDRATE_Baud4800,
+                                        [UART_BAUD_RATE_9600]   = UART_BAUDRATE_BAUDRATE_Baud9600,
+                                        [UART_BAUD_RATE_14400]  = UART_BAUDRATE_BAUDRATE_Baud14400,
+                                        [UART_BAUD_RATE_19200]  = UART_BAUDRATE_BAUDRATE_Baud19200,
+                                        [UART_BAUD_RATE_28800]  = UART_BAUDRATE_BAUDRATE_Baud28800,
+                                        [UART_BAUD_RATE_38400]  = UART_BAUDRATE_BAUDRATE_Baud38400,
+                                        [UART_BAUD_RATE_57600]  = UART_BAUDRATE_BAUDRATE_Baud57600,
+                                        [UART_BAUD_RATE_76800]  = UART_BAUDRATE_BAUDRATE_Baud76800,
+                                        [UART_BAUD_RATE_115200] = UART_BAUDRATE_BAUDRATE_Baud115200, };
 
-static uint32_t m_iteration[] = {[UART_BAUD_RATE_1200]   = 51,
-                                 [UART_BAUD_RATE_2400]   = 35,
-                                 [UART_BAUD_RATE_4800]   = 27,
-                                 [UART_BAUD_RATE_9600]   = 23,
-                                 [UART_BAUD_RATE_14400]  = 21,
-                                 [UART_BAUD_RATE_19200]  = 21,
-                                 [UART_BAUD_RATE_28800]  = 20,
-                                 [UART_BAUD_RATE_38400]  = 20,
-                                 [UART_BAUD_RATE_57600]  = 19,
-                                 [UART_BAUD_RATE_76800]  = 19,
-                                 [UART_BAUD_RATE_115200] = 19, };
+static uint32_t       m_iteration[] = {[UART_BAUD_RATE_1200]   = 51,
+                                       [UART_BAUD_RATE_2400]   = 35,
+                                       [UART_BAUD_RATE_4800]   = 27,
+                                       [UART_BAUD_RATE_9600]   = 23,
+                                       [UART_BAUD_RATE_14400]  = 21,
+                                       [UART_BAUD_RATE_19200]  = 21,
+                                       [UART_BAUD_RATE_28800]  = 20,
+                                       [UART_BAUD_RATE_38400]  = 20,
+                                       [UART_BAUD_RATE_57600]  = 19,
+                                       [UART_BAUD_RATE_76800]  = 19,
+                                       [UART_BAUD_RATE_115200] = 19, };
 
-static uint32_t m_iterations_next_byte_max = 51;
+static uint32_t       m_iterations_next_byte_max = 51;
+
+static nrf_drv_uart_t m_dtm_uart_driver = NRF_DRV_UART_INSTANCE(0);
 
 /**@brief Function for UART initialization.
  */
@@ -98,13 +100,13 @@ static uint32_t uart_init(app_uart_stream_comm_params_t * p_comm_params)
     config.hwfc = NRF_UART_HWFC_DISABLED;
     config.parity = NRF_UART_PARITY_EXCLUDED;
 
-    nrf_drv_uart_uninit();
-    uint32_t err_code = nrf_drv_uart_init(&config, NULL);
+    nrf_drv_uart_uninit(&m_dtm_uart_driver);
+    uint32_t err_code = nrf_drv_uart_init(&m_dtm_uart_driver, &config, NULL);
     if (err_code != NRF_SUCCESS)
     {
         return err_code;
     }
-    nrf_drv_uart_rx_enable();
+    nrf_drv_uart_rx_enable(&m_dtm_uart_driver);
 
     m_iterations_next_byte_max = m_iteration[p_comm_params->baud_rate];
 
@@ -175,7 +177,7 @@ uint32_t dtm_start(app_uart_stream_comm_params_t uart_comm_params)
         //Will return every timeout, 625 us.
         current_time = dtm_wait();
 
-        if (NRF_SUCCESS != nrf_drv_uart_rx(&rx_byte,1))
+        if (NRF_SUCCESS != nrf_drv_uart_rx(&m_dtm_uart_driver, &rx_byte,1))
         {
             return NRF_ERROR_INTERNAL;
         }
@@ -221,11 +223,11 @@ uint32_t dtm_start(app_uart_stream_comm_params_t uart_comm_params)
             uint8_t tx_byte = (result >> 8) & 0xFF;
 
             //Transmit MSB of the result.
-            (void)nrf_drv_uart_tx(&tx_byte, 1);
+            (void)nrf_drv_uart_tx(&m_dtm_uart_driver, &tx_byte, 1);
 
             //Transmit LSB of the result.
             tx_byte = result & 0xFF;
-            (void)nrf_drv_uart_tx(&tx_byte, 1);
+            (void)nrf_drv_uart_tx(&m_dtm_uart_driver, &tx_byte, 1);
         }
     }
 }

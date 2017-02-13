@@ -9,7 +9,7 @@
  * the file.
  *
  */
- 
+
 #include <stdint.h>
 #include "ble_serialization.h"
 #include "ser_hal_transport.h"

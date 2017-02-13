@@ -17,8 +17,8 @@
  *
  * @defgroup ant_sdk_profiles_sdm_pages Stride Based Speed and Distance Monitor profile pages
  * @{
- * @ingroup ant_sdk_profiles_sdm
- * @brief This module implements functions for the SDM data pages. 
+ * @ingroup ant_sdm
+ * @brief This module implements functions for the SDM data pages.
  */
 
 #include "ant_sdm_page_1.h"
@@ -30,5 +30,14 @@
 #include "ant_common_page_70.h"
 #include "ant_common_page_80.h"
 #include "ant_common_page_81.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // __ANT_SDM_PAGES_H
 /** @} */

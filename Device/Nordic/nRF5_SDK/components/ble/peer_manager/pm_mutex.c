@@ -10,7 +10,8 @@
  *
  */
 
-
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(PEER_MANAGER)
 #include "pm_mutex.h"
 
 #include <stdbool.h>
@@ -113,3 +114,4 @@ bool pm_mutex_lock_status_get(uint8_t * p_mutex, uint16_t mutex_id)
         return true;
     }
 }
+#endif // NRF_MODULE_ENABLED(PEER_MANAGER)

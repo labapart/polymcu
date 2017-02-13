@@ -29,8 +29,12 @@
 #include <stdbool.h>
 #include "ant_bpwr.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @addtogroup ant_sdk_profiles_bpwr
+ * @addtogroup ant_bpwr
  * @{
  */
 
@@ -62,4 +66,9 @@ typedef struct
 /**
  * @}
  */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // ANT_BPWR_LOCAL_H__

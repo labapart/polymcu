@@ -10,11 +10,20 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_COMMON_PAGE_80)
+
 #include <string.h>
 #include "ant_common_page_80.h"
-#include "ant_common_page_logger.h"
-#include "app_util.h"
-#include "nordic_common.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_COMMON_PAGE_80"
+#if ANT_COMMON_PAGE_80_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_COMMON_PAGE_80_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_COMMON_PAGE_80_INFO_COLOR
+#else // ANT_COMMON_PAGE_80_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_COMMON_PAGE_80_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief ant+ common page 80 data layout structure. */
 typedef struct
@@ -32,9 +41,9 @@ typedef struct
  */
 static void page80_data_log(volatile ant_common_page80_data_t const * p_page_data)
 {
-    LOG_PAGE80("hw revision:                      %u\n\r", p_page_data->hw_revision);
-    LOG_PAGE80("manufacturer id:                  %u\n\r", p_page_data->manufacturer_id);
-    LOG_PAGE80("model number:                     %u\n\r", p_page_data->model_number);
+    NRF_LOG_INFO("hw revision:                      %u\r\n", p_page_data->hw_revision);
+    NRF_LOG_INFO("manufacturer id:                  %u\r\n", p_page_data->manufacturer_id);
+    NRF_LOG_INFO("model number:                     %u\r\n\n", p_page_data->model_number);
 }
 
 
@@ -70,4 +79,4 @@ void ant_common_page_80_decode(uint8_t const                     * p_page_buffer
     page80_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_COMMON_PAGE_80)

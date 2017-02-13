@@ -107,7 +107,7 @@ void ant_bpwr_simulator_one_iteration(ant_bpwr_simulator_t * p_simulator, ant_bp
             }
             p_simulator->p_profile->BPWR_PROFILE_instantaneous_cadence =
                  p_simulator->_cb.cadence_sensorsim_state.current_val;
-            p_simulator->p_profile->BPWR_PROFILE_wheel_period = TORQUE_PERIOD;
+            p_simulator->p_profile->BPWR_PROFILE_wheel_period += TORQUE_PERIOD;
             p_simulator->_cb.tick_incr                        +=
                 SIMULATOR_TIME_INCREMENT;
             p_simulator->p_profile->BPWR_PROFILE_wheel_tick +=

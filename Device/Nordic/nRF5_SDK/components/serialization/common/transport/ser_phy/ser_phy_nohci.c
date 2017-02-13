@@ -26,7 +26,6 @@
 #include "app_util.h"
 #include "app_util_platform.h"
 #include "app_timer.h"
-#include "app_mailbox.h"
 #include "ser_phy.h"
 #include "ser_phy_hci.h"
 #include "crc16.h"

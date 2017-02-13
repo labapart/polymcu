@@ -10,16 +10,24 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BPWR)
+
 #include "ant_bpwr_page_18.h"
-#include "app_util.h"
-#include "ant_bpwr_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BPWR_PAGE_18"
+#if ANT_BPWR_PAGE_18_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BPWR_PAGE_18_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BPWR_PAGE_18_INFO_COLOR
+#else // ANT_BPWR_PAGE_18_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BPWR_PAGE_18_LOG_ENABLED
+#include "nrf_log.h"
 
 static void page18_data_log(ant_bpwr_page18_data_t const * p_page_data)
 {
-    LOG_PAGE18("Crank:\n\r");
-    #ifdef TRACE_BPWR_PAGE_18_ENABLE
+    NRF_LOG_INFO("Crank:\r\n");
     ant_bpwr_page_torque_log((ant_bpwr_page_torque_data_t *) p_page_data);
-    #endif // TRACE_BPWR_PAGE_18_ENABLE
 }
 
 
@@ -38,4 +46,4 @@ void ant_bpwr_page_18_decode(uint8_t const          * p_page_buffer,
     page18_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_BPWR)

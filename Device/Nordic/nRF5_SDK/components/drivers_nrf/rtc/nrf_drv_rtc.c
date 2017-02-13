@@ -10,10 +10,34 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(RTC)
+#define ENABLED_RTC_COUNT (RTC0_ENABLED+RTC1_ENABLED+RTC2_ENABLED)
+#if ENABLED_RTC_COUNT
+
 #include "nrf_drv_rtc.h"
 #include "nrf_rtc.h"
 #include "nrf_assert.h"
 #include "app_util_platform.h"
+
+#define NRF_LOG_MODULE_NAME "RTC"
+
+#if RTC_CONFIG_LOG_ENABLED
+#define NRF_LOG_LEVEL       RTC_CONFIG_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  RTC_CONFIG_INFO_COLOR
+#define NRF_LOG_DEBUG_COLOR RTC_CONFIG_DEBUG_COLOR
+#define EVT_TO_STR(event)   (event == NRF_RTC_EVENT_TICK ? "NRF_RTC_EVENT_TICK" :               \
+                            (event == NRF_RTC_EVENT_OVERFLOW ? "NRF_RTC_EVENT_OVERFLOW" :       \
+                            (event == NRF_RTC_EVENT_COMPARE_0 ? "NRF_RTC_EVENT_COMPARE_0" :     \
+                            (event == NRF_RTC_EVENT_COMPARE_1 ? "NRF_RTC_EVENT_COMPARE_1" :     \
+                            (event == NRF_RTC_EVENT_COMPARE_2 ? "NRF_RTC_EVENT_COMPARE_2" :     \
+                            (event == NRF_RTC_EVENT_COMPARE_3 ? "NRF_RTC_EVENT_COMPARE_3" : "UNKNOWN EVENT")
+#else //RTC_CONFIG_LOG_ENABLED
+#define EVT_TO_STR(event)   ""
+#define NRF_LOG_LEVEL       0
+#endif //RTC_CONFIG_LOG_ENABLED
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
 
 /**@brief RTC driver instance control block structure. */
 typedef struct
@@ -24,46 +48,33 @@ typedef struct
 } nrf_drv_rtc_cb_t;
 
 // User callbacks local storage.
-static nrf_drv_rtc_handler_t m_handlers[RTC_COUNT];
-static nrf_drv_rtc_cb_t      m_cb[RTC_COUNT];
-
-static const nrf_drv_rtc_config_t m_default_config[] = {
-#if RTC0_ENABLED
-    NRF_DRV_RTC_DEFAULT_CONFIG(0),
-#endif
-#if RTC1_ENABLED
-    NRF_DRV_RTC_DEFAULT_CONFIG(1),
-#endif
-#if RTC2_ENABLED
-    NRF_DRV_RTC_DEFAULT_CONFIG(2)
-#endif
-};
+static nrf_drv_rtc_handler_t m_handlers[ENABLED_RTC_COUNT];
+static nrf_drv_rtc_cb_t      m_cb[ENABLED_RTC_COUNT];
 
 ret_code_t nrf_drv_rtc_init(nrf_drv_rtc_t const * const p_instance,
                             nrf_drv_rtc_config_t const * p_config,
                             nrf_drv_rtc_handler_t handler)
 {
+    ASSERT(p_config);
+
+    ret_code_t err_code;
+
     if (handler)
     {
         m_handlers[p_instance->instance_id] = handler;
     }
-#if !defined(SUPPORT_RTOS)
-    // nrf_drv_rtc_init() is invoked with an empty handler when initialized
-    // to be used with an RTOS
     else
     {
-        return NRF_ERROR_INVALID_PARAM;
+        err_code = NRF_ERROR_INVALID_PARAM;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
-
-    if (p_config == NULL)
-    {
-        p_config = &m_default_config[p_instance->instance_id];
-    }
-#endif
 
     if (m_cb[p_instance->instance_id].state != NRF_DRV_STATE_UNINITIALIZED)
     {
-        return NRF_ERROR_INVALID_STATE;
+        err_code = NRF_ERROR_INVALID_STATE;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
     nrf_drv_common_irq_enable(p_instance->irq, p_config->interrupt_priority);
@@ -72,7 +83,9 @@ ret_code_t nrf_drv_rtc_init(nrf_drv_rtc_t const * const p_instance,
     m_cb[p_instance->instance_id].tick_latency = p_config->tick_latency;
     m_cb[p_instance->instance_id].state        = NRF_DRV_STATE_INITIALIZED;
 
-    return NRF_SUCCESS;
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 
 void nrf_drv_rtc_uninit(nrf_drv_rtc_t const * const p_instance)
@@ -92,6 +105,7 @@ void nrf_drv_rtc_uninit(nrf_drv_rtc_t const * const p_instance)
     nrf_rtc_int_disable(p_instance->p_reg, mask);
 
     m_cb[p_instance->instance_id].state = NRF_DRV_STATE_UNINITIALIZED;
+    NRF_LOG_INFO("Uninitialized.\r\n");
 }
 
 void nrf_drv_rtc_enable(nrf_drv_rtc_t const * const p_instance)
@@ -100,14 +114,16 @@ void nrf_drv_rtc_enable(nrf_drv_rtc_t const * const p_instance)
 
     nrf_rtc_task_trigger(p_instance->p_reg, NRF_RTC_TASK_START);
     m_cb[p_instance->instance_id].state = NRF_DRV_STATE_POWERED_ON;
+    NRF_LOG_INFO("Enabled.\r\n");
 }
 
 void nrf_drv_rtc_disable(nrf_drv_rtc_t const * const p_instance)
 {
-    ASSERT(m_cb[p_instance->instance_id].state == NRF_DRV_STATE_POWERED_ON);
+    ASSERT(m_cb[p_instance->instance_id].state != NRF_DRV_STATE_UNINITIALIZED);
 
     nrf_rtc_task_trigger(p_instance->p_reg, NRF_RTC_TASK_STOP);
     m_cb[p_instance->instance_id].state = NRF_DRV_STATE_INITIALIZED;
+    NRF_LOG_INFO("Disabled.\r\n");
 }
 
 ret_code_t nrf_drv_rtc_cc_disable(nrf_drv_rtc_t const * const p_instance, uint32_t channel)
@@ -115,6 +131,7 @@ ret_code_t nrf_drv_rtc_cc_disable(nrf_drv_rtc_t const * const p_instance, uint32
     ASSERT(m_cb[p_instance->instance_id].state != NRF_DRV_STATE_UNINITIALIZED);
     ASSERT(channel<p_instance->cc_channel_count);
 
+    ret_code_t err_code;
     uint32_t int_mask = RTC_CHANNEL_INT_MASK(channel);
     nrf_rtc_event_t event    = RTC_CHANNEL_EVENT_ADDR(channel);
 
@@ -125,10 +142,15 @@ ret_code_t nrf_drv_rtc_cc_disable(nrf_drv_rtc_t const * const p_instance, uint32
         if (nrf_rtc_event_pending(p_instance->p_reg,event))
         {
             nrf_rtc_event_clear(p_instance->p_reg,event);
-            return NRF_ERROR_TIMEOUT;
+            err_code = NRF_ERROR_TIMEOUT;
+            NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+            return err_code;
         }
     }
-    return NRF_SUCCESS;
+    NRF_LOG_INFO("RTC id: %d, channel disabled: %d.\r\n", p_instance->instance_id, channel);
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 
 ret_code_t nrf_drv_rtc_cc_set(nrf_drv_rtc_t const * const p_instance,
@@ -139,6 +161,7 @@ ret_code_t nrf_drv_rtc_cc_set(nrf_drv_rtc_t const * const p_instance,
     ASSERT(m_cb[p_instance->instance_id].state != NRF_DRV_STATE_UNINITIALIZED);
     ASSERT(channel<p_instance->cc_channel_count);
 
+    ret_code_t err_code;
     uint32_t int_mask = RTC_CHANNEL_INT_MASK(channel);
     nrf_rtc_event_t event    = RTC_CHANNEL_EVENT_ADDR(channel);
 
@@ -157,7 +180,9 @@ ret_code_t nrf_drv_rtc_cc_set(nrf_drv_rtc_t const * const p_instance,
         }
         if (diff < m_cb[p_instance->instance_id].tick_latency)
         {
-            return NRF_ERROR_TIMEOUT;
+            err_code = NRF_ERROR_TIMEOUT;
+            NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+            return err_code;
         }
     }
     else
@@ -172,7 +197,10 @@ ret_code_t nrf_drv_rtc_cc_set(nrf_drv_rtc_t const * const p_instance,
     }
     nrf_rtc_event_enable(p_instance->p_reg,int_mask);
 
-    return NRF_SUCCESS;
+    NRF_LOG_INFO("RTC id: %d, channel enabled: %d, compare value: %d.\r\n", p_instance->instance_id, channel, val);
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 
 void nrf_drv_rtc_tick_enable(nrf_drv_rtc_t const * const p_instance, bool enable_irq)
@@ -186,6 +214,7 @@ void nrf_drv_rtc_tick_enable(nrf_drv_rtc_t const * const p_instance, bool enable
     {
         nrf_rtc_int_enable(p_instance->p_reg, mask);
     }
+    NRF_LOG_INFO("Tick events enabled.\r\n");
 }
 
 void nrf_drv_rtc_tick_disable(nrf_drv_rtc_t const * const p_instance)
@@ -194,6 +223,7 @@ void nrf_drv_rtc_tick_disable(nrf_drv_rtc_t const * const p_instance)
 
     nrf_rtc_event_disable(p_instance->p_reg, mask);
     nrf_rtc_int_disable(p_instance->p_reg, mask);
+    NRF_LOG_INFO("Tick events disabled.\r\n");
 }
 
 void nrf_drv_rtc_overflow_enable(nrf_drv_rtc_t const * const p_instance, bool enable_irq)
@@ -217,7 +247,6 @@ void nrf_drv_rtc_overflow_disable(nrf_drv_rtc_t const * const p_instance)
 
 uint32_t nrf_drv_rtc_max_ticks_get(nrf_drv_rtc_t const * const p_instance)
 {
-    ASSERT(m_cb[p_instance->instance_id].reliable);
     uint32_t ticks;
     if (m_cb[p_instance->instance_id].reliable)
     {
@@ -250,6 +279,8 @@ __STATIC_INLINE void nrf_drv_rtc_int_handler(NRF_RTC_Type * p_reg,
             nrf_rtc_event_disable(p_reg,int_mask);
             nrf_rtc_int_disable(p_reg,int_mask);
             nrf_rtc_event_clear(p_reg,event);
+            NRF_LOG_DEBUG("Event: %s, instance id: %d.\r\n",
+                         (uint32_t)EVT_TO_STR(event), (uint32_t)instance_id);
             m_handlers[instance_id]((nrf_drv_rtc_int_type_t)i);
         }
         int_mask <<= 1;
@@ -260,6 +291,7 @@ __STATIC_INLINE void nrf_drv_rtc_int_handler(NRF_RTC_Type * p_reg,
         nrf_rtc_event_pending(p_reg, event))
     {
         nrf_rtc_event_clear(p_reg, event);
+        NRF_LOG_DEBUG("Event: %s, instance id: %d.\r\n", (uint32_t)EVT_TO_STR(event), instance_id);
         m_handlers[instance_id](NRF_DRV_RTC_INT_TICK);
     }
 
@@ -268,27 +300,30 @@ __STATIC_INLINE void nrf_drv_rtc_int_handler(NRF_RTC_Type * p_reg,
         nrf_rtc_event_pending(p_reg, event))
     {
         nrf_rtc_event_clear(p_reg,event);
+        NRF_LOG_DEBUG("Event: %s, instance id: %d.\r\n", (uint32_t)EVT_TO_STR(event), instance_id);
         m_handlers[instance_id](NRF_DRV_RTC_INT_OVERFLOW);
     }
 }
 
-#if RTC0_ENABLED
+#if NRF_MODULE_ENABLED(RTC0)
 void RTC0_IRQHandler(void)
 {
     nrf_drv_rtc_int_handler(NRF_RTC0,RTC0_INSTANCE_INDEX, NRF_RTC_CC_CHANNEL_COUNT(0));
 }
 #endif
 
-#if RTC1_ENABLED && (!defined(SUPPORT_RTOS))
+#if NRF_MODULE_ENABLED(RTC1)
 void RTC1_IRQHandler(void)
 {
     nrf_drv_rtc_int_handler(NRF_RTC1,RTC1_INSTANCE_INDEX, NRF_RTC_CC_CHANNEL_COUNT(1));
 }
 #endif
 
-#if RTC2_ENABLED
+#if NRF_MODULE_ENABLED(RTC2)
 void RTC2_IRQHandler(void)
 {
     nrf_drv_rtc_int_handler(NRF_RTC2,RTC2_INSTANCE_INDEX, NRF_RTC_CC_CHANNEL_COUNT(2));
 }
 #endif
+#endif //ENABLED_RTC_COUNT
+#endif //NRF_MODULE_ENABLED(RTC)

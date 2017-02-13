@@ -22,11 +22,15 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for SDM data page 3.
  */
 typedef struct
 {
-    uint8_t calories; ///< Calories.
+    uint32_t calories; ///< Calories.
 } ant_sdm_page3_data_t;
 
 /**@brief Initialize page 3.
@@ -52,6 +56,11 @@ void ant_sdm_page_3_encode(uint8_t                    * p_page_buffer,
  */
 void ant_sdm_page_3_decode(uint8_t const        * p_page_buffer,
                            ant_sdm_page3_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_PAGE_3_H__
 /** @} */

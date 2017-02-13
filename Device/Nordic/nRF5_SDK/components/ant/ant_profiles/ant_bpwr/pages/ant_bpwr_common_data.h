@@ -22,13 +22,17 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for BPWR common data.
  *
  * @details This structure stores data that is not associated with a particular page.
  */
 typedef struct
 {
-    uint8_t  instantaneous_cadence; ///< Crank cadence (rpm, 0-254, 255-> invalid).
+    uint8_t  instantaneous_cadence; ///< Crank cadence (rpm, 0 - 254, 255-> invalid).
 } ant_bpwr_common_data_t;
 
 /**@brief Initialize common data.
@@ -58,6 +62,11 @@ void ant_bpwr_cadence_encode(uint8_t                     * p_page_buffer,
  */
 void ant_bpwr_cadence_decode(uint8_t const         * p_page_buffer,
                             ant_bpwr_common_data_t * p_common_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_COMMON_DATA_H__
 /** @} */

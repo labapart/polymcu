@@ -18,24 +18,28 @@
  * @defgroup ant_sdk_common_pages ANT+ common pages
  * @{
  * @ingroup ant_sdk_profiles
- * @brief This module implements functions for the ANT+ common pages. 
+ * @brief This module implements functions for the ANT+ common pages.
  * @details  ANT+ common data pages define common data formats that can be used by any device on any ANT network. The ability to send and receive these common pages is defined by the transmission type of the ANT channel parameter.
  *
  * Note that all unused pages in this section are not defined and therefore cannot be used.
  * @}
  *
- * @defgroup ant_sdk_common_page80 ANT+ common page 80
+ * @defgroup ant_common_page_80 ANT+ common page 80
  * @{
  * @ingroup ant_sdk_common_pages
  */
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ANT_COMMON_PAGE_80 (80) ///< @brief ID value of common page 80.
 
 /**@brief Data structure for ANT+ common data page 80.
  *
- * @note This structure implements only page 80 specific data. 
+ * @note This structure implements only page 80 specific data.
  */
 typedef struct
 {
@@ -79,6 +83,11 @@ void ant_common_page_80_encode(uint8_t * p_page_buffer,
  */
 void ant_common_page_80_decode(uint8_t const * p_page_buffer,
                                volatile ant_common_page80_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_COMMON_PAGE_80_H__
 /** @} */

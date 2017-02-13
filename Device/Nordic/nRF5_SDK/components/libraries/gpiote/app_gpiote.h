@@ -46,8 +46,11 @@
 #include "app_error.h"
 #include "app_util.h"
 
-#define GPIOTE_USER_NODE_SIZE   24          /**< Size of app_gpiote.gpiote_user_t (only for use inside APP_GPIOTE_BUF_SIZE()). */
-#define NO_OF_PINS              32          /**< Number of GPIO pins on the \nRFXX chip. */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define GPIOTE_USER_NODE_SIZE   ((4*sizeof(uint32_t)*GPIO_COUNT)+8)          /**< Size of app_gpiote.gpiote_user_t (only for use inside APP_GPIOTE_BUF_SIZE()). */
 
 /**@brief Compute number of bytes required to hold the GPIOTE data structures.
  *
@@ -60,8 +63,8 @@
 typedef uint8_t app_gpiote_user_id_t;
 
 /**@brief GPIOTE event handler type. */
-typedef void (*app_gpiote_event_handler_t)(uint32_t event_pins_low_to_high,
-                                           uint32_t event_pins_high_to_low);
+typedef void (*app_gpiote_event_handler_t)(uint32_t const * p_event_pins_low_to_high,
+                                           uint32_t const * p_event_pins_high_to_low);
 
 /**@brief GPIOTE input event handler type. */
 typedef void (*app_gpiote_input_event_handler_t)(void);
@@ -93,7 +96,7 @@ typedef void (*app_gpiote_input_event_handler_t)(void);
  * @param[in]   max_users               Maximum number of GPIOTE users.
  * @param[in]   p_buffer                Pointer to memory buffer for internal use in the app_gpiote
  *                                      module. The size of the buffer can be computed using the
- *                                      APP_GPIOTE_BUF_SIZE() macro. The buffer must be aligned to 
+ *                                      APP_GPIOTE_BUF_SIZE() macro. The buffer must be aligned to
  *                                      a 4 byte boundary.
  *
  * @retval      NRF_SUCCESS             Successful initialization.
@@ -105,10 +108,14 @@ uint32_t app_gpiote_init(uint8_t max_users, void * p_buffer);
 /**@brief Function for registering a GPIOTE user.
  *
  * @param[out]  p_user_id               Id for the new GPIOTE user.
- * @param[in]   pins_low_to_high_mask   Mask defining which pins will generate events to this user 
- *                                      when state is changed from low->high.
- * @param[in]   pins_high_to_low_mask   Mask defining which pins will generate events to this user
- *                                      when state is changed from high->low.
+ * @param[in]   p_pins_low_to_high_mask Pointer to word array with mask defining which pins
+ *                                      will generate events to this user when state is changed
+ *                                      from low->high. Size of array depends on number of ports
+ *                                      in the device.
+ * @param[in]   p_pins_high_to_low_mask Pointer to word array with mask defining which pins
+ *                                      will generate events to this user when state is changed
+ *                                      from high->low. Size of array depends on number of ports
+ *                                      in the device.
  * @param[in]   event_handler           Pointer to function to be executed when an event occurs.
  *
  * @retval      NRF_SUCCESS             Successful initialization.
@@ -120,8 +127,8 @@ uint32_t app_gpiote_init(uint8_t max_users, void * p_buffer);
  *                                      @ref app_gpiote_init.
  */
 uint32_t app_gpiote_user_register(app_gpiote_user_id_t *     p_user_id,
-                                  uint32_t                   pins_low_to_high_mask,
-                                  uint32_t                   pins_high_to_low_mask,
+                                  uint32_t const *           p_pins_low_to_high_mask,
+                                  uint32_t const *           p_pins_high_to_low_mask,
                                   app_gpiote_event_handler_t event_handler);
 
 /**@brief Function for informing the GPIOTE module that the specified user wants to use the GPIOTE module.
@@ -149,9 +156,11 @@ uint32_t app_gpiote_user_disable(app_gpiote_user_id_t user_id);
 /**@brief Function for getting the state of the pins which are registered for the specified user.
  *
  * @param[in]   user_id         Id of user to check.
- * @param[out]  p_pins          Bit mask corresponding to the pins configured to generate events to
- *                              the specified user. All bits corresponding to pins in the state
- *                              'high' will have value '1', all others will have value '0'.
+ * @param[out]  p_pins          Pointer to array of words with bit mask corresponding to the pins
+ *                              configured to generate events to the specified user. All bits
+ *                              corresponding to pins in the state 'high' will have value '1',
+ *                              all others will have value '0'. Size of array depends on number
+ *                              of ports in the device.
  *
  * @retval      NRF_SUCCESS               On success.
  * @retval      NRF_ERROR_INVALID_PARAM   Invalid user_id provided, No a valid user.
@@ -160,59 +169,9 @@ uint32_t app_gpiote_user_disable(app_gpiote_user_id_t user_id);
  */
 uint32_t app_gpiote_pins_state_get(app_gpiote_user_id_t user_id, uint32_t * p_pins);
 
-/**@brief Function for registering event handlers for GPIOTE IN events.
- *
- * @param[in] channel         GPIOTE channel [0..3].
- * @param[in] pin             Pins associated with GPIOTE channel. Changes on following pins will generate events.
- * @param[in] polarity        Specify operation on input that shall trigger IN event.
- * @param[in] event_handler   Event handler invoked on the IN event in the GPIOTE interrupt.
- *
- * @retval   NRF_SUCCESS                 On success.
- * @retval   NRF_ERROR_INVALID_PARAM     Invalid channel or pin number.
- * @retval   NRF_ERROR_NOT_SUPPORTED     Driver doesn't support IN events.
- */
-uint32_t app_gpiote_input_event_handler_register(const uint8_t channel,
-                                                 const uint32_t pin,
-                                                 const uint32_t polarity,
-                                                 app_gpiote_input_event_handler_t event_handler);
-
-/**@brief Function for unregistering event handlers for GPIOTE IN events.
- *
- * @retval   NRF_SUCCESS                 On success.
- * @retval   NRF_ERROR_NOT_SUPPORTED     Driver doesn't support IN events.
- */
-uint32_t app_gpiote_input_event_handler_unregister(const uint8_t channel);
-
-/**@brief Function for registering event handler invoked at the end of a GPIOTE interrupt.
- *
- * @param[in] event_handler    Event handler invoked at the end of the GPIOTE interrupt.
- *
- * @retval   NRF_SUCCESS                 On success.
- * @retval   NRF_ERROR_NOT_SUPPORTED     Driver doesn't support IN events.
- */
-uint32_t app_gpiote_end_irq_event_handler_register(app_gpiote_input_event_handler_t event_handler);
-
-/**@brief Function for unregistering event handler invoked at the end of a GPIOTE interrupt.
- *
- * @retval   NRF_SUCCESS                 On success.
- * @retval   NRF_ERROR_NOT_SUPPORTED     Driver doesn't support IN events.
- */
-uint32_t app_gpiote_end_irq_event_handler_unregister(void);
-
-/**@brief Function for enabling interrupts in the GPIOTE driver.
- *
- * @retval   NRF_SUCCESS                 On success.
- * @retval   NRF_ERROR_NOT_SUPPORTED     Driver doesn't support.
- */
-uint32_t app_gpiote_enable_interrupts(void);
-
-/**@brief Function for disabling interrupts in the GPIOTE driver.
- *
- * @retval   NRF_SUCCESS                 On success.
- * @retval   NRF_ERROR_NOT_SUPPORTED     Driver doesn't support.
- */
-uint32_t app_gpiote_disable_interrupts(void);
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif // APP_GPIOTE_H__
 

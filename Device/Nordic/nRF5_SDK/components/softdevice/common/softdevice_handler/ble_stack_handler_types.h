@@ -29,9 +29,23 @@
 #include "nrf_sdm.h"
 #include "app_error.h"
 #include "app_util.h"
+#include "sdk_config.h"
 
-#define BLE_STACK_EVT_MSG_BUF_SIZE       (sizeof(ble_evt_t) + (GATT_MTU_SIZE_DEFAULT))     /**< Size of BLE event message buffer. This will be provided to the SoftDevice while fetching an event. */
-#define BLE_STACK_HANDLER_SCHED_EVT_SIZE 0                                                 /**< The size of the scheduler event used by SoftDevice handler when passing BLE events using the @ref app_scheduler. */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+/** @brief  Default Maximum ATT MTU size.
+ *
+ * This define should be defined in the sdk_config.h file to override the default.
+ */
+#ifndef NRF_BLE_GATT_MAX_MTU_SIZE
+    #define NRF_BLE_GATT_MAX_MTU_SIZE GATT_MTU_SIZE_DEFAULT
+#endif
+
+#define BLE_STACK_EVT_MSG_BUF_SIZE       (sizeof(ble_evt_t) + (NRF_BLE_GATT_MAX_MTU_SIZE))     /**< Size of BLE event message buffer. This will be provided to the SoftDevice while fetching an event. */
+#define BLE_STACK_HANDLER_SCHED_EVT_SIZE 0                                                     /**< The size of the scheduler event used by SoftDevice handler when passing BLE events using the @ref app_scheduler. */
 
 /**@brief Application stack event handler type. */
 typedef void (*ble_evt_handler_t) (ble_evt_t * p_ble_evt);
@@ -58,6 +72,11 @@ uint32_t softdevice_ble_evt_handler_set(ble_evt_handler_t ble_evt_handler);
 #define BLE_STACK_HANDLER_SCHED_EVT_SIZE  0
 
 #endif // BLE_STACK_SUPPORT_REQD
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // BLE_STACK_HANDLER_TYPES_H__
 

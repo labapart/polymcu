@@ -9,9 +9,9 @@
  * the file.
  *
  */
-
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(LPCOMP)
 #include "nrf_drv_lpcomp.h"
-
 #include "nrf_assert.h"
 #include "nrf_error.h"
 #include "nrf_soc.h"
@@ -21,28 +21,42 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define LPCOMP_IRQ			LPCOMP_IRQn
-#define LPCOMP_IRQ_HANDLER 	LPCOMP_IRQHandler
+#define NRF_LOG_MODULE_NAME "LPCOMP"
+
+#if LPCOMP_CONFIG_LOG_ENABLED
+#define NRF_LOG_LEVEL       LPCOMP_CONFIG_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  LPCOMP_CONFIG_INFO_COLOR
+#define NRF_LOG_DEBUG_COLOR LPCOMP_CONFIG_DEBUG_COLOR
+#define EVT_TO_STR(event)   (event == NRF_LPCOMP_EVENT_READY ? "NRF_LPCOMP_EVENT_READY" :                \
+                            (event == NRF_LPCOMP_EVENT_DOWN ? "NRF_LPCOMP_EVENT_DOWN" :                  \
+                            (event == NRF_LPCOMP_EVENT_UP ? "NRF_LPCOMP_EVENT_UP" :                      \
+                            (event == NRF_LPCOMP_EVENT_CROSS ? "NRF_LPCOMP_EVENT_CROSS" : "UNKNOWN EVENT"))))
+#else //LPCOMP_CONFIG_LOG_ENABLED
+#define EVT_TO_STR(event)   ""
+#define NRF_LOG_LEVEL       0
+#endif //LPCOMP_CONFIG_LOG_ENABLED
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
 
 static lpcomp_events_handler_t m_lpcomp_events_handler = NULL;
 static nrf_drv_state_t         m_state = NRF_DRV_STATE_UNINITIALIZED;
 
-static const nrf_drv_lpcomp_config_t m_default_config = NRF_DRV_LPCONF_DEFAULT_CONFIG;
+#if NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
+    #define IRQ_HANDLER_NAME     irq_handler_for_lpcomp
+    #define IRQ_HANDLER          static void IRQ_HANDLER_NAME(void)
 
-#if PERIPHERAL_RESOURCE_SHARING_ENABLED
-    #define IRQ_HANDLER_NAME    irq_handler_for_lpcomp
-    #define IRQ_HANDLER      	static void IRQ_HANDLER_NAME(void)
-
-	IRQ_HANDLER;
+    IRQ_HANDLER;
 #else
-    #define IRQ_HANDLER void LPCOMP_IRQ_HANDLER(void)
-#endif // PERIPHERAL_RESOURCE_SHARING_ENABLED
+    #define IRQ_HANDLER void LPCOMP_IRQHandler(void)
+#endif // NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
 
 static void lpcomp_execute_handler(nrf_lpcomp_event_t event, uint32_t event_mask)
 {
     if ( nrf_lpcomp_event_check(event) && nrf_lpcomp_int_enable_check(event_mask) )
     {
         nrf_lpcomp_event_clear(event);
+        NRF_LOG_DEBUG("Event: %s.\r\n", (uint32_t)EVT_TO_STR(event));
 
         m_lpcomp_events_handler(event);
     }
@@ -61,20 +75,22 @@ IRQ_HANDLER
 ret_code_t nrf_drv_lpcomp_init(const nrf_drv_lpcomp_config_t * p_config,
                                lpcomp_events_handler_t   events_handler)
 {
+    ASSERT(p_config);
+    ret_code_t err_code;
+
     if (m_state != NRF_DRV_STATE_UNINITIALIZED)
     { // LPCOMP driver is already initialized
-        return NRF_ERROR_INVALID_STATE;
+        err_code = NRF_ERROR_INVALID_STATE;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
-    if (p_config == NULL)
-    {
-        p_config = &m_default_config;
-    }
-
-#if PERIPHERAL_RESOURCE_SHARING_ENABLED
+#if NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
     if (nrf_drv_common_per_res_acquire(NRF_LPCOMP, IRQ_HANDLER_NAME) != NRF_SUCCESS)
     {
-        return NRF_ERROR_BUSY;
+        err_code = NRF_ERROR_BUSY;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 #endif
 
@@ -86,7 +102,9 @@ ret_code_t nrf_drv_lpcomp_init(const nrf_drv_lpcomp_config_t * p_config,
     }
     else
     {
-        return NRF_ERROR_INVALID_PARAM;
+        err_code = NRF_ERROR_INVALID_PARAM;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
     nrf_lpcomp_input_select(p_config->input);
@@ -114,7 +132,9 @@ ret_code_t nrf_drv_lpcomp_init(const nrf_drv_lpcomp_config_t * p_config,
 
     m_state = NRF_DRV_STATE_INITIALIZED;
 
-    return NRF_SUCCESS;
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 
 
@@ -123,8 +143,12 @@ void nrf_drv_lpcomp_uninit(void)
     ASSERT(m_state != NRF_DRV_STATE_UNINITIALIZED);
     nrf_drv_common_irq_disable(LPCOMP_IRQn);
     nrf_drv_lpcomp_disable();
+#if NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
+    nrf_drv_common_per_res_release(NRF_LPCOMP);
+#endif
     m_state = NRF_DRV_STATE_UNINITIALIZED;
     m_lpcomp_events_handler = NULL;
+    NRF_LOG_INFO("Uninitialized.\r\n");
 }
 
 void nrf_drv_lpcomp_enable(void)
@@ -133,6 +157,7 @@ void nrf_drv_lpcomp_enable(void)
     nrf_lpcomp_enable();
     nrf_lpcomp_task_trigger(NRF_LPCOMP_TASK_START);
     m_state = NRF_DRV_STATE_POWERED_ON;
+    NRF_LOG_INFO("Enabled.\r\n");
 }
 
 void nrf_drv_lpcomp_disable(void)
@@ -141,6 +166,7 @@ void nrf_drv_lpcomp_disable(void)
     nrf_lpcomp_disable();
     nrf_lpcomp_task_trigger(NRF_LPCOMP_TASK_STOP);
     m_state = NRF_DRV_STATE_POWERED_ON;
+    NRF_LOG_INFO("Disabled.\r\n");
 }
 
 void nrf_drv_lpcomp_event_handler_register(lpcomp_events_handler_t lpcomp_events_handler)
@@ -148,4 +174,4 @@ void nrf_drv_lpcomp_event_handler_register(lpcomp_events_handler_t lpcomp_events
     m_lpcomp_events_handler = lpcomp_events_handler;
 }
 
-
+#endif //NRF_MODULE_ENABLED(LPCOMP)

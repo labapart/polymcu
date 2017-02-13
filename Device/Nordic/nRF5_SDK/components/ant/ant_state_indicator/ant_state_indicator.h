@@ -3,7 +3,7 @@
 
 /** @file
  *
- * @defgroup ant_sdk_state_indicator ANT channel state indicator
+ * @defgroup ant_state_indicator ANT channel state indicator
  * @{
  * @ingroup ant_sdk_utils
  * @brief ANT channel state indicator module.
@@ -13,6 +13,10 @@
 
 #include <stdint.h>
 #include "ant_stack_handler_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /**
@@ -60,6 +64,11 @@ uint32_t ant_state_indicator_channel_opened(void);
  */
 void ant_state_indicator_sleep_mode_enter(void);
 
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 /** @} */

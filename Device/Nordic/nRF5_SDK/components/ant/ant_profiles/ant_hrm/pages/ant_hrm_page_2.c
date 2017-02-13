@@ -9,8 +9,20 @@
  * the file.
  *
  */
+
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_HRM)
+
 #include "ant_hrm_page_2.h"
-#include "ant_hrm_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_HRM_PAGE_2"
+#if ANT_HRM_PAGE_2_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_HRM_PAGE_2_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_HRM_PAGE_2_INFO_COLOR
+#else // ANT_HRM_PAGE_2_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_HRM_PAGE_2_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief HRM page 2 data layout structure. */
 typedef struct
@@ -28,8 +40,8 @@ typedef struct
  */
 static void page2_data_log(ant_hrm_page2_data_t const * p_page_data)
 {
-    LOG_PAGE2("Manufacturer ID:                  %u\n\r", (unsigned int)p_page_data->manuf_id);
-    LOG_PAGE2("Serial No (upper 16-bits):        0x%X\n\r", (unsigned int)p_page_data->serial_num);
+    NRF_LOG_INFO("Manufacturer ID:                  %u\r\n", (unsigned int)p_page_data->manuf_id);
+    NRF_LOG_INFO("Serial No (upper 16-bits):        0x%X\r\n\n", (unsigned int)p_page_data->serial_num);
 }
 
 
@@ -63,4 +75,4 @@ void ant_hrm_page_2_decode(uint8_t const        * p_page_buffer,
     page2_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_HRM)

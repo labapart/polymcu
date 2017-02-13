@@ -22,6 +22,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Common data structure for Bicycle Power data pages 17, 18.
  *
  * @note This structure implements specific data that is common for pages 17, 18.
@@ -65,6 +69,11 @@ void ant_bpwr_page_torque_decode(uint8_t const               * p_page_buffer,
  * @param[in] p_page_data      Pointer to the page data.
  */
 void ant_bpwr_page_torque_log(ant_bpwr_page_torque_data_t const * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_PAGE_TORQUE_COMMON_H__
 /** @} */

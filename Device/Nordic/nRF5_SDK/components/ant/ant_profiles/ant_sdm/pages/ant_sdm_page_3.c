@@ -10,9 +10,21 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_SDM)
+
 #include "ant_sdm_page_3.h"
 #include "ant_sdm_utils.h"
-#include "ant_sdm_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_SDM_PAGE_3"
+#if ANT_SDM_PAGE_3_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_SDM_PAGE_3_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_SDM_PAGE_3_INFO_COLOR
+#else // ANT_SDM_PAGE_3_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_SDM_PAGE_3_LOG_ENABLED
+#include "nrf_log.h"
+
 
 /**@brief SDM page 3 data layout structure. */
 typedef struct
@@ -24,7 +36,7 @@ typedef struct
 
 static void page_3_data_log(ant_sdm_page3_data_t const * p_page_data)
 {
-    LOG_PAGE3("Calories:                         %u\n\r", p_page_data->calories);
+    NRF_LOG_INFO("Calories:                         %u\r\n\n", p_page_data->calories);
 }
 
 
@@ -44,9 +56,11 @@ void ant_sdm_page_3_decode(uint8_t const        * p_page_buffer,
     ant_sdm_page3_data_layout_t const * p_incoming_data =
         (ant_sdm_page3_data_layout_t *)p_page_buffer;
 
-    p_page_data->calories = p_incoming_data->calories;
+    uint8_t prev_calories = (uint8_t) p_page_data->calories;
+
+    p_page_data->calories += ((p_incoming_data->calories - prev_calories) & UINT8_MAX);
 
     page_3_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_SDM)

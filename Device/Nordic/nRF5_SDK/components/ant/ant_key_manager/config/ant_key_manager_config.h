@@ -9,9 +9,13 @@
  * the file.
  *
  */
- 
+
 #ifndef ANT_KEY_MANAGER_CONFIG_H__
 #define ANT_KEY_MANAGER_CONFIG_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @addtogroup ant_key_manager
@@ -29,5 +33,10 @@
 /**
  * @}
  */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_KEY_MANAGER_CONFIG_H__

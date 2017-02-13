@@ -14,9 +14,13 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Connectivity Middleware dispatcher function
  *
- * @details It will handle decode the opcode from RX buffer and based on the opcode it will search
+ * @details It will handle decode the opcode from the RX buffer and based on the opcode it will search
  *          for registered handler. Handler is called once it is found.
  *
  * @param[in]     p_rx_buf            Pointer to input buffer.
@@ -35,4 +39,9 @@ uint32_t conn_mw_handler (uint8_t const * const p_rx_buf,
                           uint32_t              rx_buf_len,
                           uint8_t * const       p_tx_buf,
                           uint32_t      * const p_tx_buf_len);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif //_CONN_MW_H

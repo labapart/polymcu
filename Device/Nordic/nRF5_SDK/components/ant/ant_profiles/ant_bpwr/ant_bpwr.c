@@ -10,13 +10,22 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BPWR)
+
 #include "nrf_assert.h"
 #include "app_error.h"
 #include "ant_interface.h"
-#include "app_util.h"
 #include "ant_bpwr.h"
-#include "ant_bpwr_page_logger.h"
-#include "app_error.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BPWR"
+#if ANT_BPWR_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BPWR_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BPWR_INFO_COLOR
+#else // ANT_BPWR_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BPWR_LOG_ENABLED
+#include "nrf_log.h"
 
 #define BPWR_CALIB_INT_TIMEOUT ((ANT_CLOCK_FREQUENCY * BPWR_CALIBRATION_TIMOUT_S) / BPWR_MSG_PERIOD) // calibration timeout in ant message period's unit
 
@@ -54,7 +63,7 @@ static ret_code_t ant_bpwr_init(ant_bpwr_profile_t         * p_profile,
     p_profile->page_80 = DEFAULT_ANT_COMMON_page80();
     p_profile->page_81 = DEFAULT_ANT_COMMON_page81();
 
-    LOG_BPWR("ANT B-PWR channel %u init\n\r", p_profile->channel_number);
+    NRF_LOG_INFO("ANT B-PWR channel %u init\r\n", p_profile->channel_number);
     return ant_channel_init(p_channel_config);
 }
 
@@ -175,7 +184,7 @@ static void sens_message_encode(ant_bpwr_profile_t * p_profile, uint8_t * p_mess
 
     p_bpwr_message_payload->page_number = next_page_number_get(p_profile);
 
-    LOG_BPWR("B-PWR tx page: %u\r\n", p_bpwr_message_payload->page_number);
+    NRF_LOG_INFO("B-PWR tx page: %u\r\n", p_bpwr_message_payload->page_number);
 
     switch (p_bpwr_message_payload->page_number)
     {
@@ -209,7 +218,7 @@ static void sens_message_encode(ant_bpwr_profile_t * p_profile, uint8_t * p_mess
         default:
             return;
     }
-    LOG_BPWR("\r\n");
+
     p_profile->evt_handler(p_profile, (ant_bpwr_evt_t)p_bpwr_message_payload->page_number);
 
 }
@@ -248,7 +257,7 @@ static void disp_message_decode(ant_bpwr_profile_t * p_profile, uint8_t * p_mess
     const ant_bpwr_message_layout_t * p_bpwr_message_payload =
         (ant_bpwr_message_layout_t *)p_message_payload;
 
-    LOG_BPWR("B-PWR rx page: %u\r\n", p_bpwr_message_payload->page_number);
+    NRF_LOG_INFO("B-PWR rx page: %u\r\n", p_bpwr_message_payload->page_number);
 
     switch (p_bpwr_message_payload->page_number)
     {
@@ -281,10 +290,9 @@ static void disp_message_decode(ant_bpwr_profile_t * p_profile, uint8_t * p_mess
             break;
 
         default:
-            LOG_BPWR("\r\n");
             return;
     }
-    LOG_BPWR("\r\n");
+
     p_profile->evt_handler(p_profile, (ant_bpwr_evt_t)p_bpwr_message_payload->page_number);
 }
 
@@ -309,7 +317,7 @@ ret_code_t ant_bpwr_calib_request(ant_bpwr_profile_t * p_profile, ant_bpwr_page1
     {
         p_profile->_cb.p_disp_cb->calib_timeout = BPWR_CALIB_INT_TIMEOUT; // initialize watch on calibration's time-out
         p_profile->_cb.p_disp_cb->calib_stat    = BPWR_DISP_CALIB_REQUESTED;
-        LOG_BPWR("Start calibration process\r\n");
+        NRF_LOG_INFO("Start calibration process\r\n");
     }
     return err_code;
 }
@@ -360,7 +368,7 @@ static void service_calib(ant_bpwr_profile_t * p_profile, uint8_t event)
                 return;
         }
 
-        LOG_BPWR("End calibration process\r\n");
+        NRF_LOG_INFO("End calibration process\r\n");
         p_profile->_cb.p_disp_cb->calib_stat = BPWR_DISP_CALIB_NONE;
 
         p_profile->evt_handler(p_profile, bpwr_event);
@@ -384,7 +392,7 @@ static void ant_message_send(ant_bpwr_profile_t * p_profile)
 
 ret_code_t ant_bpwr_disp_open(ant_bpwr_profile_t * p_profile)
 {
-    LOG_BPWR("ANT B-PWR %u open\n\r", p_profile->channel_number);
+    NRF_LOG_INFO("ANT B-PWR %u open\r\n", p_profile->channel_number);
     return sd_ant_channel_open(p_profile->channel_number);
 }
 
@@ -394,7 +402,7 @@ ret_code_t ant_bpwr_sens_open(ant_bpwr_profile_t * p_profile)
     // Fill tx buffer for the first frame
     ant_message_send(p_profile);
 
-    LOG_BPWR("ANT B-PWR %u open\n\r", p_profile->channel_number);
+    NRF_LOG_INFO("ANT B-PWR %u open\r\n", p_profile->channel_number);
     return sd_ant_channel_open(p_profile->channel_number);
 }
 
@@ -453,4 +461,4 @@ void ant_bpwr_disp_evt_handler(ant_bpwr_profile_t * p_profile, ant_evt_t * p_ant
     }
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_BPWR)

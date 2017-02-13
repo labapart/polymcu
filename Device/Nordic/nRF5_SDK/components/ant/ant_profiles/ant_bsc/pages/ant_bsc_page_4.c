@@ -9,10 +9,22 @@
  * the file.
  *
  */
+
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BSC)
+
 #include "ant_bsc_page_4.h"
 #include "ant_bsc_utils.h"
-#include "ant_bsc_page_logger.h"
 #include "app_util.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BCS_PAGE_4"
+#if ANT_BSC_PAGE_4_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BSC_PAGE_4_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BSC_PAGE_4_INFO_COLOR
+#else // ANT_BSC_PAGE_4_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BSC_PAGE_4_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief BSC page 4 data layout structure. */
 typedef struct
@@ -31,11 +43,10 @@ STATIC_ASSERT(ANT_BSC_BAT_VOLTAGE_PRECISION == 1000);
 /**@brief Function for printing speed or cadence page4 data. */
 static void page4_data_log( ant_bsc_page4_data_t const * p_page_data)
 {
-    LOG_PAGE4("%-30s %u.%03uV\r\n",
-              "Battery voltage:",
+    NRF_LOG_INFO("Battery voltage:           %u.%03uV\r\n",
               (unsigned int)p_page_data->coarse_bat_volt,
               (unsigned int)ANT_BSC_BAT_VOLTAGE_FRACTION_MV(p_page_data->fract_bat_volt));
-    LOG_PAGE4("%-30s %u\n\r", "Battery status:", (unsigned int)p_page_data->bat_status);
+    NRF_LOG_INFO("Battery status:            %u\r\n", (unsigned int)p_page_data->bat_status);
 }
 
 void ant_bsc_page_4_encode(uint8_t * p_page_buffer, ant_bsc_page4_data_t const * p_page_data)
@@ -47,7 +58,7 @@ void ant_bsc_page_4_encode(uint8_t * p_page_buffer, ant_bsc_page4_data_t const *
     p_outcoming_data->coarse_bat_volt   = p_page_data->coarse_bat_volt;
     p_outcoming_data->bat_status        = p_page_data->bat_status;
     p_outcoming_data->bitfield_reserved = 0;
-    
+
     page4_data_log( p_page_data);
 }
 
@@ -62,3 +73,4 @@ void ant_bsc_page_4_decode(uint8_t const * p_page_buffer, ant_bsc_page4_data_t *
     page4_data_log( p_page_data);
 }
 
+#endif // NRF_MODULE_ENABLED(ANT_BSC)

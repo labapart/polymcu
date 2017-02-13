@@ -29,11 +29,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "bsp.h"
 #include "ant_sdm.h"
 #include "ant_sdm_utils.h"
 #include "sensorsim.h"
 #include "ant_sdm_simulator_local.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**@brief SDM simulator configuration structure. */
 typedef struct
@@ -99,6 +102,11 @@ void ant_sdm_simulator_increment(ant_sdm_simulator_t * p_simulator);
  * @param[in]  p_simulator      Pointer to the simulator instance.
  */
 void ant_sdm_simulator_decrement(ant_sdm_simulator_t * p_simulator);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_SIMULATOR_H__
 /** @} */

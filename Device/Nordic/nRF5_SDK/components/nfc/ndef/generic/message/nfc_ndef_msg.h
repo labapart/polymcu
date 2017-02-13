@@ -14,13 +14,17 @@
 #define NFC_NDEF_MSG_H__
 
 #include "nfc_ndef_record.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**@file
  *
  * @defgroup nfc_ndef_msg Custom NDEF messages
  * @{
  * @ingroup  nfc_modules
  *
- * @brief    Generation of NFC NDEF messages for the NFC Type 2 Tag.
+ * @brief    Generation of NFC NDEF messages for the NFC tag.
  *
  */
 
@@ -32,28 +36,32 @@
      uint32_t                  max_record_count; ///< Number of elements in the allocated pp_record array, which defines the maximum number of records within the NDEF message.
      uint32_t                  record_count;     ///< Number of records in the NDEF message.
  } nfc_ndef_msg_desc_t;
- 
+
  /**
   * @brief  Function for encoding an NDEF message.
   *
   * This function encodes an NDEF message according to the provided message descriptor.
-  *
-  * @param[in] p_ndef_msg_desc  Pointer to the message descriptor.
-  * @param[out] p_msg_buffer    Pointer to the message destination.
-  * @param[in,out] p_msg_len    Size of the available memory for the message as input. Size of the generated
-  *                                 message as output.
   * 
+  * @note The way of encoding an NDEF message may vary depending on tag's platform, which
+  *       can be chosen with @ref NFC_NDEF_MSG_TAG_TYPE in @c sdk_config.h.
+  *
+  * @param[in]     p_ndef_msg_desc  Pointer to the message descriptor.
+  * @param[out]    p_msg_buffer     Pointer to the message destination. If NULL, function will
+ *                                  calculate the expected size of the message.
+  * @param[in,out] p_msg_len        Size of the available memory for the message as input. Size of
+  *                                 the generated message as output.
+  *
   * @return  Return value from @ref nfc_ndef_record_encode.
   */
-ret_code_t nfc_ndef_msg_encode( nfc_ndef_msg_desc_t const * p_ndef_msg_desc,
-                                uint8_t                   * p_msg_buffer,
-                                uint32_t                  * const  p_msg_len);
+ret_code_t nfc_ndef_msg_encode(nfc_ndef_msg_desc_t const * p_ndef_msg_desc,
+                               uint8_t                   * p_msg_buffer,
+                               uint32_t                  * const  p_msg_len);
 
 /**
  * @brief Function for clearing an NDEF message.
  *
  * This function clears an NDEF message descriptor, thus empties the NDEF message.
- * 
+ *
  * @param[in,out] p_msg Pointer to the message descriptor.
  */
 void nfc_ndef_msg_clear( nfc_ndef_msg_desc_t * p_msg);
@@ -67,15 +75,15 @@ void nfc_ndef_msg_clear( nfc_ndef_msg_desc_t * p_msg);
  * @retval NRF_SUCCESS      If the record was added successfully.
  * @retval NRF_ERROR_NO_MEM If the message already contains the maximum number of records and the operation is not allowed.
  */
-ret_code_t nfc_ndef_msg_record_add( nfc_ndef_msg_desc_t    * const p_msg,
-                                    nfc_ndef_record_desc_t * const p_record);
+ret_code_t nfc_ndef_msg_record_add(nfc_ndef_msg_desc_t    * const p_msg,
+                                   nfc_ndef_record_desc_t * const p_record);
 
-                              
+
 /**@brief Macro for creating and initializing an NFC NDEF message descriptor.
  *
  * This macro creates and initializes a static instance of type @ref nfc_ndef_msg_desc_t
  * and a static array of pointers to record descriptors (@ref nfc_ndef_record_desc_t) used
- * by the message. 
+ * by the message.
  *
  * Use the macro @ref NFC_NDEF_MSG to access the NDEF message descriptor instance.
  *
@@ -91,7 +99,7 @@ ret_code_t nfc_ndef_msg_record_add( nfc_ndef_msg_desc_t    * const p_msg,
             .max_record_count = MAX_RECORD_CNT                                             \
         }
 
-/** @brief Macro for accessing the NFC NDEF message descriptor instance 
+/** @brief Macro for accessing the NFC NDEF message descriptor instance
  *  that you created with @ref NFC_NDEF_MSG_DEF.
  */
 #define NFC_NDEF_MSG(NAME) (NAME##_nfc_ndef_msg_desc)
@@ -99,9 +107,9 @@ ret_code_t nfc_ndef_msg_record_add( nfc_ndef_msg_desc_t    * const p_msg,
 /**
  * @brief Macro for creating and initializing an NFC NDEF record descriptor with an encapsulated NDEF message.
 
- * This macro creates and initializes a static instance of type 
- * @ref nfc_ndef_record_desc_t that contains an encapsulated NDEF message as 
- * payload. @ref nfc_ndef_msg_encode is used as payload constructor to encode 
+ * This macro creates and initializes a static instance of type
+ * @ref nfc_ndef_record_desc_t that contains an encapsulated NDEF message as
+ * payload. @ref nfc_ndef_msg_encode is used as payload constructor to encode
  * the message. The encoded message is then used as payload for the record.
  *
  * Use the macro @ref NFC_NDEF_NESTED_NDEF_MSG_RECORD to access the NDEF record descriptor instance.
@@ -144,5 +152,10 @@ ret_code_t nfc_ndef_msg_record_add( nfc_ndef_msg_desc_t    * const p_msg,
 /**
  * @}
  */
+
+#ifdef __cplusplus
+}
+#endif
+
  #endif
 

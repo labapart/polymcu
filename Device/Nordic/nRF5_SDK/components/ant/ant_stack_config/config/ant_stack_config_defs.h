@@ -9,12 +9,22 @@
  * the file.
  *
  */
- 
+
 #ifndef ANT_STACK_CONFIG_DEFS_H__
 #define ANT_STACK_CONFIG_DEFS_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define ANT_CONFIG_TOTAL_CHANNELS_ALLOCATED     0
 #define ANT_CONFIG_ENCRYPTED_CHANNELS           0
 #define ANT_CONFIG_BURST_QUEUE_SIZE             128
+#define ANT_CONFIG_EVENT_QUEUE_SIZE             32
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_STACK_CONFIG_DEFS_H__

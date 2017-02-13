@@ -9,7 +9,7 @@
  * the file.
  *
  */
- 
+
 #include <stdint.h>
 #include "app_error.h"
 #include "ble_dtm_app.h"
@@ -37,10 +37,10 @@ uint32_t ble_dtm_init(app_uart_stream_comm_params_t * p_uart_comm_params)
     {
         return NRF_ERROR_NULL;
     }
-    
+
     uint32_t err_code = NRF_SUCCESS;
     uint32_t index = 0;
-    
+
     uint8_t * p_tx_buf = NULL;
     uint32_t tx_buf_len = 0;
 

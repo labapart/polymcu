@@ -10,10 +10,21 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_SDM)
+
 #include "ant_sdm_page_16.h"
 #include "ant_sdm_utils.h"
-#include "nordic_common.h"
-#include "ant_sdm_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_SDM_PAGE_16"
+#if ANT_SDM_PAGE_16_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_SDM_PAGE_16_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_SDM_PAGE_16_INFO_COLOR
+#else // ANT_SDM_PAGE_16_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_SDM_PAGE_16_LOG_ENABLED
+#include "nrf_log.h"
+
 
 /**@brief SDM page 16 data layout structure. */
 typedef struct
@@ -30,14 +41,13 @@ STATIC_ASSERT(ANT_SDM_DISTANCE_DISP_PRECISION == 10); ///< Display format need t
  */
 static void page_16_data_log(ant_sdm_common_data_t const * p_common_data)
 {
-#if (defined TRACE_SDM_PAGE_16_ENABLE) && (defined ENABLE_DEBUG_LOG_SUPPORT)
     uint64_t distance = ANT_SDM_DISTANCE_RESCALE(p_common_data->distance);
-#endif // (defined TRACE_SDM_PAGE_16_ENABLE) && (defined ENABLE_DEBUG_LOG_SUPPORT)
 
-    LOG_PAGE16("Distance                         %u.%01u m\n\r",
-               (unsigned int)(distance / ANT_SDM_DISTANCE_DISP_PRECISION),
-               (unsigned int)(distance % ANT_SDM_DISTANCE_DISP_PRECISION));
-    LOG_PAGE16("Strides                          %u\n\r", (unsigned int)p_common_data->strides);
+    NRF_LOG_INFO("Distance                             %u.%01u m\r\n",
+                 (unsigned int)(distance / ANT_SDM_DISTANCE_DISP_PRECISION),
+                 (unsigned int)(distance % ANT_SDM_DISTANCE_DISP_PRECISION));
+    NRF_LOG_INFO("Strides                              %u\r\n\n",
+                 (unsigned int)p_common_data->strides);
 }
 
 
@@ -65,4 +75,4 @@ void ant_sdm_page_16_decode(uint8_t const         * p_page_buffer,
     page_16_data_log(p_common_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_SDM)

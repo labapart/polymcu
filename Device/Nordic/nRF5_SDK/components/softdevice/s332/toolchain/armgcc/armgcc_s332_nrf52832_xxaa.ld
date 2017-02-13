@@ -5,8 +5,8 @@ GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x27000, LENGTH = 0x59000
-  RAM (rwx) :  ORIGIN = 0x20001780, LENGTH = 0xe880
+  FLASH (rx) : ORIGIN = 0x29000, LENGTH = 0x57000
+  RAM (rwx) :  ORIGIN = 0x20001e30, LENGTH = 0xe1d0
 }
 
 SECTIONS
@@ -16,6 +16,12 @@ SECTIONS
     PROVIDE(__start_fs_data = .);
     KEEP(*(.fs_data))
     PROVIDE(__stop_fs_data = .);
+  } > RAM
+  .pwr_mgmt_data :
+  {
+    PROVIDE(__start_pwr_mgmt_data = .);
+    KEEP(*(.pwr_mgmt_data))
+    PROVIDE(__stop_pwr_mgmt_data = .);
   } > RAM
 } INSERT AFTER .data;
 

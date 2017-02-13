@@ -9,7 +9,7 @@
  * the file.
  *
  */
- 
+
 #include "ble_dtm_app.h"
 #include "ble_serialization.h"
 #include "nrf_error.h"

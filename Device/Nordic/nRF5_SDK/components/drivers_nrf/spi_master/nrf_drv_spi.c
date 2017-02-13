@@ -10,14 +10,29 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(SPI)
+#define ENABLED_SPI_COUNT (SPI0_ENABLED+SPI1_ENABLED+SPI2_ENABLED)
+#if ENABLED_SPI_COUNT
+
 #include "nrf_drv_spi.h"
 #include "nrf_drv_common.h"
 #include "nrf_gpio.h"
 #include "nrf_assert.h"
 #include "app_util_platform.h"
 
+#define NRF_LOG_MODULE_NAME "SPI"
 
-#ifndef NRF52
+#if SPI_CONFIG_LOG_ENABLED
+#define NRF_LOG_LEVEL       SPI_CONFIG_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  SPI_CONFIG_INFO_COLOR
+#define NRF_LOG_DEBUG_COLOR SPI_CONFIG_DEBUG_COLOR
+#else //SPI_CONFIG_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif //SPI_CONFIG_LOG_ENABLED
+#include "nrf_log.h"
+
+#ifndef SPIM_PRESENT
     // Make sure SPIx_USE_EASY_DMA is 0 for nRF51 (if a common
     // "nrf_drv_config.h" file is provided for nRF51 and nRF52).
     #undef  SPI0_USE_EASY_DMA
@@ -28,16 +43,28 @@
     #define SPI2_USE_EASY_DMA 0
 #endif
 
+#ifndef SPI0_USE_EASY_DMA
+#define SPI0_USE_EASY_DMA 0
+#endif
+
+#ifndef SPI1_USE_EASY_DMA
+#define SPI1_USE_EASY_DMA 0
+#endif
+
+#ifndef SPI2_USE_EASY_DMA
+#define SPI2_USE_EASY_DMA 0
+#endif
+
 // This set of macros makes it possible to exclude parts of code when one type
 // of supported peripherals is not used.
-#if ((SPI0_ENABLED && SPI0_USE_EASY_DMA) || \
-     (SPI1_ENABLED && SPI1_USE_EASY_DMA) || \
-     (SPI2_ENABLED && SPI2_USE_EASY_DMA))
+#if ((NRF_MODULE_ENABLED(SPI0) && SPI0_USE_EASY_DMA) || \
+     (NRF_MODULE_ENABLED(SPI1) && SPI1_USE_EASY_DMA) || \
+     (NRF_MODULE_ENABLED(SPI2) && SPI2_USE_EASY_DMA))
     #define SPIM_IN_USE
 #endif
-#if ((SPI0_ENABLED && !SPI0_USE_EASY_DMA) || \
-     (SPI1_ENABLED && !SPI1_USE_EASY_DMA) || \
-     (SPI2_ENABLED && !SPI2_USE_EASY_DMA))
+#if ((NRF_MODULE_ENABLED(SPI0) && !SPI0_USE_EASY_DMA) || \
+     (NRF_MODULE_ENABLED(SPI1) && !SPI1_USE_EASY_DMA) || \
+     (NRF_MODULE_ENABLED(SPI2) && !SPI2_USE_EASY_DMA))
     #define SPI_IN_USE
 #endif
 #if defined(SPIM_IN_USE) && defined(SPI_IN_USE)
@@ -57,11 +84,7 @@
 #endif
 
 #ifdef SPIM_IN_USE
-#ifdef NRF52_PAN_23
-#define END_INT_MASK     (NRF_SPIM_INT_ENDTX_MASK | NRF_SPIM_INT_ENDRX_MASK)
-#else
 #define END_INT_MASK     NRF_SPIM_INT_END_MASK
-#endif
 #endif
 
 // Control block - driver instance local data.
@@ -81,72 +104,61 @@ typedef struct
     bool tx_done : 1;
     bool rx_done : 1;
 } spi_control_block_t;
-static spi_control_block_t m_cb[SPI_COUNT];
+static spi_control_block_t m_cb[ENABLED_SPI_COUNT];
 
-static nrf_drv_spi_config_t const m_default_config[SPI_COUNT] = {
-#if SPI0_ENABLED
-    NRF_DRV_SPI_DEFAULT_CONFIG(0),
-#endif
-#if SPI1_ENABLED
-    NRF_DRV_SPI_DEFAULT_CONFIG(1),
-#endif
-#if SPI2_ENABLED
-    NRF_DRV_SPI_DEFAULT_CONFIG(2),
-#endif
-};
-
-#if PERIPHERAL_RESOURCE_SHARING_ENABLED
+#if NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
     #define IRQ_HANDLER_NAME(n) irq_handler_for_instance_##n
     #define IRQ_HANDLER(n)      static void IRQ_HANDLER_NAME(n)(void)
 
-    #if SPI0_ENABLED
+    #if NRF_MODULE_ENABLED(SPI0)
         IRQ_HANDLER(0);
     #endif
-    #if SPI1_ENABLED
+    #if NRF_MODULE_ENABLED(SPI1)
         IRQ_HANDLER(1);
     #endif
-    #if SPI2_ENABLED
+    #if NRF_MODULE_ENABLED(SPI2)
         IRQ_HANDLER(2);
     #endif
-    static nrf_drv_irq_handler_t const m_irq_handlers[SPI_COUNT] = {
-    #if SPI0_ENABLED
+    static nrf_drv_irq_handler_t const m_irq_handlers[ENABLED_SPI_COUNT] = {
+    #if NRF_MODULE_ENABLED(SPI0)
         IRQ_HANDLER_NAME(0),
     #endif
-    #if SPI1_ENABLED
+    #if NRF_MODULE_ENABLED(SPI1)
         IRQ_HANDLER_NAME(1),
     #endif
-    #if SPI2_ENABLED
+    #if NRF_MODULE_ENABLED(SPI2)
         IRQ_HANDLER_NAME(2),
     #endif
     };
 #else
     #define IRQ_HANDLER(n) void SPI##n##_IRQ_HANDLER(void)
-#endif // PERIPHERAL_RESOURCE_SHARING_ENABLED
+#endif // NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
 
 
 ret_code_t nrf_drv_spi_init(nrf_drv_spi_t const * const p_instance,
                             nrf_drv_spi_config_t const * p_config,
                             nrf_drv_spi_handler_t handler)
 {
+    ASSERT(p_config);
     spi_control_block_t * p_cb  = &m_cb[p_instance->drv_inst_idx];
-
+    ret_code_t err_code;
+    
     if (p_cb->state != NRF_DRV_STATE_UNINITIALIZED)
     {
-        return NRF_ERROR_INVALID_STATE;
+        err_code = NRF_ERROR_INVALID_STATE;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
-#if PERIPHERAL_RESOURCE_SHARING_ENABLED
+#if NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
     if (nrf_drv_common_per_res_acquire(p_instance->p_registers,
             m_irq_handlers[p_instance->drv_inst_idx]) != NRF_SUCCESS)
     {
-        return NRF_ERROR_BUSY;
+        err_code = NRF_ERROR_BUSY;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 #endif
-
-    if (p_config == NULL)
-    {
-        p_config = &m_default_config[p_instance->drv_inst_idx];
-    }
 
     p_cb->handler = handler;
 
@@ -214,7 +226,7 @@ ret_code_t nrf_drv_spi_init(nrf_drv_spi_t const * const p_instance,
 
         if (p_cb->handler)
         {
-            nrf_spim_int_enable(p_spim, END_INT_MASK | NRF_SPIM_INT_STOPPED_MASK);
+            nrf_spim_int_enable(p_spim, END_INT_MASK);
         }
 
         nrf_spim_enable(p_spim);
@@ -247,7 +259,11 @@ ret_code_t nrf_drv_spi_init(nrf_drv_spi_t const * const p_instance,
     p_cb->transfer_in_progress = false;
     p_cb->state = NRF_DRV_STATE_INITIALIZED;
 
-    return NRF_SUCCESS;
+    NRF_LOG_INFO("Init\r\n");
+    
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 
 void nrf_drv_spi_uninit(nrf_drv_spi_t const * const p_instance)
@@ -289,7 +305,7 @@ void nrf_drv_spi_uninit(nrf_drv_spi_t const * const p_instance)
     )
     #undef DISABLE_ALL
 
-#if PERIPHERAL_RESOURCE_SHARING_ENABLED
+#if NRF_MODULE_ENABLED(PERIPHERAL_RESOURCE_SHARING)
     nrf_drv_common_per_res_release(p_instance->p_registers);
 #endif
 
@@ -308,6 +324,9 @@ ret_code_t nrf_drv_spi_transfer(nrf_drv_spi_t const * const p_instance,
     xfer_desc.tx_length   = tx_buffer_length;
     xfer_desc.rx_length   = rx_buffer_length;
 
+    NRF_LOG_INFO("Transfer tx_len:%d, rx_len:%d.\r\n", tx_buffer_length, rx_buffer_length);
+    NRF_LOG_DEBUG("Tx data:\r\n");
+    NRF_LOG_HEXDUMP_DEBUG((uint8_t *)p_tx_buffer, tx_buffer_length * sizeof(p_tx_buffer));
     return nrf_drv_spi_xfer(p_instance, &xfer_desc, 0);
 }
 
@@ -323,6 +342,10 @@ static void finish_transfer(spi_control_block_t * p_cb)
     // transfers to be started directly from the handler function.
     p_cb->transfer_in_progress = false;
     p_cb->evt.type = NRF_DRV_SPI_EVENT_DONE;
+    NRF_LOG_INFO("Transfer rx_len:%d.\r\n", p_cb->evt.data.done.rx_length);
+    NRF_LOG_DEBUG("Rx data:\r\n");
+    NRF_LOG_HEXDUMP_DEBUG((uint8_t *)p_cb->evt.data.done.p_rx_buffer, 
+                            p_cb->evt.data.done.rx_length * sizeof(p_cb->evt.data.done.p_rx_buffer));
     p_cb->handler(&p_cb->evt);
 }
 
@@ -409,6 +432,7 @@ static void spi_xfer(NRF_SPI_Type                  * p_spi,
         do {
             while (!nrf_spi_event_check(p_spi, NRF_SPI_EVENT_READY)) {}
             nrf_spi_event_clear(p_spi, NRF_SPI_EVENT_READY);
+            NRF_LOG_DEBUG("SPI: Event: NRF_SPI_EVENT_READY.\r\n"); 
         } while (transfer_byte(p_spi, p_cb));
         if (p_cb->ss_pin != NRF_DRV_SPI_PIN_NOT_USED)
         {
@@ -423,17 +447,16 @@ __STATIC_INLINE void spim_int_enable(NRF_SPIM_Type * p_spim, bool enable)
 {
     if (!enable)
     {
-        nrf_spim_int_disable(p_spim, END_INT_MASK | NRF_SPIM_INT_STOPPED_MASK);
+        nrf_spim_int_disable(p_spim, END_INT_MASK);
     }
     else
     {
-        nrf_spim_int_enable(p_spim, END_INT_MASK |  NRF_SPIM_INT_STOPPED_MASK);
+        nrf_spim_int_enable(p_spim, END_INT_MASK);
     }
 }
 
 __STATIC_INLINE void spim_list_enable_handle(NRF_SPIM_Type * p_spim, uint32_t flags)
 {
-#ifndef NRF52_PAN_46
     if (NRF_DRV_SPI_FLAG_TX_POSTINC & flags)
     {
         nrf_spim_tx_list_enable(p_spim);
@@ -451,7 +474,6 @@ __STATIC_INLINE void spim_list_enable_handle(NRF_SPIM_Type * p_spim, uint32_t fl
     {
         nrf_spim_rx_list_disable(p_spim);
     }
-#endif
 }
 
 static ret_code_t spim_xfer(NRF_SPIM_Type                * p_spim,
@@ -459,25 +481,22 @@ static ret_code_t spim_xfer(NRF_SPIM_Type                * p_spim,
                            nrf_drv_spi_xfer_desc_t const * p_xfer_desc,
                            uint32_t                        flags)
 {
+    ret_code_t err_code;
     // EasyDMA requires that transfer buffers are placed in Data RAM region;
     // signal error if they are not.
     if ((p_xfer_desc->p_tx_buffer != NULL && !nrf_drv_is_in_RAM(p_xfer_desc->p_tx_buffer)) ||
         (p_xfer_desc->p_rx_buffer != NULL && !nrf_drv_is_in_RAM(p_xfer_desc->p_rx_buffer)))
     {
         p_cb->transfer_in_progress = false;
-        return NRF_ERROR_INVALID_ADDR;
+        err_code = NRF_ERROR_INVALID_ADDR;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
     nrf_spim_tx_buffer_set(p_spim, p_xfer_desc->p_tx_buffer, p_xfer_desc->tx_length);
     nrf_spim_rx_buffer_set(p_spim, p_xfer_desc->p_rx_buffer, p_xfer_desc->rx_length);
 
-#ifdef NRF52_PAN_23
-    nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_ENDTX);
-    nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_ENDRX);
-#else
     nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_END);
-#endif
-    nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_STOPPED);
 
     spim_list_enable_handle(p_spim, flags);
 
@@ -488,25 +507,19 @@ static ret_code_t spim_xfer(NRF_SPIM_Type                * p_spim,
 
     if (!p_cb->handler)
     {
-#ifdef NRF52_PAN_23
-        while (!nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_ENDTX) ||
-               !nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_ENDRX)) {}
-#else
         while (!nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_END)){}
-#endif
-        // Stop the peripheral after transaction is finished.
-        nrf_spim_task_trigger(p_spim, NRF_SPIM_TASK_STOP);
-        while (!nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_STOPPED)) {}
         if (p_cb->ss_pin != NRF_DRV_SPI_PIN_NOT_USED)
         {
             nrf_gpio_pin_set(p_cb->ss_pin);
         }
     }
-		else
-		{
-				spim_int_enable(p_spim, !(flags & NRF_DRV_SPI_FLAG_NO_XFER_EVT_HANDLER));
-		}
-    return NRF_SUCCESS;
+        else
+        {
+            spim_int_enable(p_spim, !(flags & NRF_DRV_SPI_FLAG_NO_XFER_EVT_HANDLER));
+        }
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 #endif
 
@@ -516,12 +529,16 @@ ret_code_t nrf_drv_spi_xfer(nrf_drv_spi_t     const * const p_instance,
 {
     spi_control_block_t * p_cb  = &m_cb[p_instance->drv_inst_idx];
     ASSERT(p_cb->state != NRF_DRV_STATE_UNINITIALIZED);
-    ASSERT(p_tx_buffer != NULL || tx_buffer_length == 0);
-    ASSERT(p_rx_buffer != NULL || rx_buffer_length == 0);
+    ASSERT(p_xfer_desc->p_tx_buffer != NULL || p_xfer_desc->tx_length == 0);
+    ASSERT(p_xfer_desc->p_rx_buffer != NULL || p_xfer_desc->rx_length == 0);
+
+    ret_code_t err_code = NRF_SUCCESS;
 
     if (p_cb->transfer_in_progress)
     {
-        return NRF_ERROR_BUSY;
+        err_code = NRF_ERROR_BUSY;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
     else
     {
@@ -548,10 +565,14 @@ ret_code_t nrf_drv_spi_xfer(nrf_drv_spi_t     const * const p_instance,
         if (flags)
         {
             p_cb->transfer_in_progress = false;
-            return NRF_ERROR_NOT_SUPPORTED;
+            err_code = NRF_ERROR_NOT_SUPPORTED;
         }
-        spi_xfer(p_instance->p_registers, p_cb, p_xfer_desc);
-        return NRF_SUCCESS;
+        else
+        {
+            spi_xfer(p_instance->p_registers, p_cb, p_xfer_desc);
+        }
+        NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     )
 }
 #ifdef SPIM_IN_USE
@@ -559,36 +580,12 @@ static void irq_handler_spim(NRF_SPIM_Type * p_spim, spi_control_block_t * p_cb)
 {
     ASSERT(p_cb->handler);
 
-#ifdef NRF52_PAN_23
-    if (nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_STOPPED))
-    {
-        nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_STOPPED);
-        finish_transfer(p_cb);
-    }
-    else
-    {
-        if (nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_ENDTX))
-        {
-            nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_ENDTX);
-            p_cb->tx_done = true;
-        }
-        if (nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_ENDRX))
-        {
-            nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_ENDRX);
-            p_cb->rx_done = true;
-        }
-        if (p_cb->tx_done && p_cb->rx_done)
-        {
-            nrf_spim_task_trigger(p_spim, NRF_SPIM_TASK_STOP);
-        }
-    }
-#else
     if (nrf_spim_event_check(p_spim, NRF_SPIM_EVENT_END))
     {
         nrf_spim_event_clear(p_spim, NRF_SPIM_EVENT_END);
+        NRF_LOG_DEBUG("SPIM: Event: NRF_SPIM_EVENT_END.\r\n");
         finish_transfer(p_cb);
     }
-#endif
 }
 
 uint32_t nrf_drv_spi_start_task_get(nrf_drv_spi_t const * p_instance)
@@ -610,6 +607,7 @@ static void irq_handler_spi(NRF_SPI_Type * p_spi, spi_control_block_t * p_cb)
     ASSERT(p_cb->handler);
 
     nrf_spi_event_clear(p_spi, NRF_SPI_EVENT_READY);
+    NRF_LOG_DEBUG("SPI: Event: NRF_SPI_EVENT_READY.\r\n"); 
 
     if (!transfer_byte(p_spi, p_cb))
     {
@@ -618,7 +616,7 @@ static void irq_handler_spi(NRF_SPI_Type * p_spi, spi_control_block_t * p_cb)
 }
 #endif // SPI_IN_USE
 
-#if SPI0_ENABLED
+#if NRF_MODULE_ENABLED(SPI0)
 IRQ_HANDLER(0)
 {
     spi_control_block_t * p_cb  = &m_cb[SPI0_INSTANCE_INDEX];
@@ -628,9 +626,9 @@ IRQ_HANDLER(0)
         irq_handler_spi(NRF_SPI0, p_cb);
     #endif
 }
-#endif // SPI0_ENABLED
+#endif // NRF_MODULE_ENABLED(SPI0)
 
-#if SPI1_ENABLED
+#if NRF_MODULE_ENABLED(SPI1)
 IRQ_HANDLER(1)
 {
     spi_control_block_t * p_cb  = &m_cb[SPI1_INSTANCE_INDEX];
@@ -640,9 +638,9 @@ IRQ_HANDLER(1)
         irq_handler_spi(NRF_SPI1, p_cb);
     #endif
 }
-#endif // SPI1_ENABLED
+#endif // NRF_MODULE_ENABLED(SPI1)
 
-#if SPI2_ENABLED
+#if NRF_MODULE_ENABLED(SPI2)
 IRQ_HANDLER(2)
 {
     spi_control_block_t * p_cb  = &m_cb[SPI2_INSTANCE_INDEX];
@@ -652,4 +650,6 @@ IRQ_HANDLER(2)
         irq_handler_spi(NRF_SPI2, p_cb);
     #endif
 }
-#endif // SPI2_ENABLED
+#endif // NRF_MODULE_ENABLED(SPI2)
+#endif // ENABLED_SPI_COUNT
+#endif // NRF_MODULE_ENABLED(SPI)

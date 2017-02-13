@@ -10,6 +10,8 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_ENCRYPT_NEGOTIATION_SLAVE)
 #include <stdlib.h>
 #include <string.h>
 #include "ant_encrypt_config.h"
@@ -18,12 +20,7 @@
 #include "nrf_error.h"
 #include "app_error.h"
 
-#include "ant_stack_config_defs.h"
 #include "ant_encrypt_negotiation_slave.h"
-
-#ifndef ANT_ENCRYPT_SLAVE_NEGOTIATION_USED
-    #error "To use this module, ANT_ENCRYPT_SLAVE_NEGOTIATION_USED must be declared globally."
-#else
 
 /** Number of supported channels. */
 #define NUMBER_OF_CHANNELS (ANT_CONFIG_TOTAL_CHANNELS_ALLOCATED)
@@ -162,7 +159,4 @@ void ant_slave_encrypt_negotiation(ant_evt_t * p_ant_evt)
     }
 }
 
-
-#endif
-
-
+#endif // NRF_MODULE_ENABLED(ANT_ENCRYPT_NEGOTIATION_SLAVE)

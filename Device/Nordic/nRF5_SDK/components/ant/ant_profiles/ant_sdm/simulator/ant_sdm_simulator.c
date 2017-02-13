@@ -10,9 +10,11 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_SDM)
+
 #include "ant_sdm_simulator.h"
 #include "ant_sdm_utils.h"
-#include "nordic_common.h"
 
 #define SIMULATOR_STRIDE_LENGTH_UNIT_REVERSAL 100                 ///< Stride length unit is cm.
 #define SIMULATOR_BURN_RATE_UNIT              1000                ///< Burn rate uinit is kcal per km.
@@ -85,7 +87,7 @@ void ant_sdm_simulator_one_iteration(ant_sdm_simulator_t * p_simulator)
     if (p_simulator->p_profile->SDM_PROFILE_capabilities.calorie_is_valid)
     {
         p_simulator->p_profile->SDM_PROFILE_calories = value_rescale(distance,
-                                                                     SIMULATOR_BURN_RATE_UNIT 
+                                                                     SIMULATOR_BURN_RATE_UNIT
                                                                      * ANT_SDM_DISTANCE_UNIT_REVERSAL,
                                                                      p_simulator->_cb.burn_rate);
     }
@@ -127,4 +129,4 @@ void ant_sdm_simulator_decrement(ant_sdm_simulator_t * p_simulator)
     }
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_SDM)

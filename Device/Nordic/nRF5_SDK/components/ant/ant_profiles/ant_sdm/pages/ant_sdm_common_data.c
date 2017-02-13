@@ -10,10 +10,20 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_SDM)
+
 #include "ant_sdm_common_data.h"
 #include "ant_sdm_utils.h"
-#include "ant_sdm_page_logger.h"
-#include "nordic_common.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_SDM"
+#if ANT_SDM_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_SDM_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_SDM_INFO_COLOR
+#else // ANT_SDM_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_SDM_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief SDM common page data layout structure. */
 typedef struct
@@ -34,9 +44,9 @@ static void speed_data_log(ant_sdm_common_data_t const * p_common_data)
     uint32_t speed = ANT_SDM_SPEED_RESCALE(p_common_data->speed);
     UNUSED_VARIABLE(speed);
 
-    LOG_SPEED("Speed                             %u.%02u m/s\n\r", 
-                                            (unsigned int)(speed / ANT_SDM_SPEED_DISP_PRECISION),
-                                            (unsigned int)(speed % ANT_SDM_SPEED_DISP_PRECISION));
+    NRF_LOG_INFO("Speed                                        %u.%02u m/s\r\n\n",
+                 (unsigned int)(speed / ANT_SDM_SPEED_DISP_PRECISION),
+                 (unsigned int)(speed % ANT_SDM_SPEED_DISP_PRECISION));
 }
 
 void ant_sdm_speed_encode(uint8_t                     * p_page_buffer,
@@ -55,7 +65,7 @@ void ant_sdm_speed_decode(uint8_t const         * p_page_buffer,
                           ant_sdm_common_data_t * p_common_data)
 {
     ant_sdm_speed_data_layout_t const * p_incoming_data = (ant_sdm_speed_data_layout_t *)p_page_buffer;
-    uint16_t                            speed           = (p_incoming_data->speed_integer 
+    uint16_t                            speed           = (p_incoming_data->speed_integer
                                                         * ANT_SDM_SPEED_UNIT_REVERSAL)
                                                         + p_incoming_data->speed_fractional;
 
@@ -63,3 +73,5 @@ void ant_sdm_speed_decode(uint8_t const         * p_page_buffer,
 
     speed_data_log(p_common_data);
 }
+
+#endif // NRF_MODULE_ENABLED(ANT_SDM)

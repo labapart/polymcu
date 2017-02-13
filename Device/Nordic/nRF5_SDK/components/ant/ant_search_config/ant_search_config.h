@@ -3,7 +3,7 @@
 
 /** @file
  *
- * @defgroup ant_sdk_search_config ANT search configuration
+ * @defgroup ant_search_config ANT search configuration
  * @{
  * @ingroup ant_sdk_utils
  * @brief ANT channel search configuration module.
@@ -11,16 +11,19 @@
 
 #include <stdint.h>
 #include "ant_parameters.h"
+#include "sdk_config.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define ANT_SEARCH_SHARING_CYCLES_DISABLE   0x00    ///< Disable search sharing.
 
 #define ANT_LOW_PRIORITY_SEARCH_DISABLE     0x00    ///< Disable low priority search.
 #define ANT_LOW_PRIORITY_TIMEOUT_DISABLE    0xFF    ///< Disable low priority search time-out.
-#define ANT_DEFAULT_LOW_PRIORITY_TIMEOUT    0x02    ///< Default low priority search time-out.
 
 #define ANT_HIGH_PRIORITY_SEARCH_DISABLE    0x00    ///< Disable high priority search.
 #define ANT_HIGH_PRIORITY_TIMEOUT_DISABLE   0xFF    ///< Disable high priority search time-out.
-#define ANT_DEFAULT_HIGH_PRIORITY_TIMEOUT   0x0A    ///< Default high priority search time-out.
 
 /**@brief Search priority. */
 typedef enum
@@ -77,6 +80,11 @@ typedef struct
  * @retval     NRF_SUCCESS     If the channel was successfully configured. Otherwise, an error code is returned.
  */
 uint32_t ant_search_init(ant_search_config_t const * p_config);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SEARCH_CONFIG_H__
 /** @} */

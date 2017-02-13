@@ -21,9 +21,13 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief BSC profile battery status.
  *
- * This enum represents possible battery status values for the ANT BSC profile. 
+ * This enum represents possible battery status values for the ANT BSC profile.
  */
 typedef enum
 {
@@ -39,7 +43,7 @@ typedef enum
 
 /**@brief Data structure for BSC data page 4.
  *
- * This structure implements only page 4 specific data. 
+ * This structure implements only page 4 specific data.
  */
 typedef struct
 {
@@ -71,6 +75,11 @@ void ant_bsc_page_4_encode(uint8_t * p_page_buffer, ant_bsc_page4_data_t const *
  * @param[out] p_page_data      Pointer to the page data.
  */
 void ant_bsc_page_4_decode(uint8_t const * p_page_buffer, ant_bsc_page4_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BSC_PAGE_4_H__
 /** @} */

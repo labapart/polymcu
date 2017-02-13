@@ -14,9 +14,9 @@
  * @addtogroup nrf_wdt WDT HAL and driver
  * @ingroup nrf_drivers
  * @brief Watchdog timer (WDT) APIs.
- * @details The WDT HAL provides basic APIs for accessing the registers of the watchdog timer. 
+ * @details The WDT HAL provides basic APIs for accessing the registers of the watchdog timer.
  * The WDT driver provides APIs on a higher level.
- * @defgroup lib_driver_wdt WDT driver
+ * @defgroup nrf_drv_wdt WDT driver
  * @{
  * @ingroup  nrf_wdt
  *
@@ -30,7 +30,11 @@
 #include <stdint.h>
 #include "sdk_errors.h"
 #include "nrf_wdt.h"
-#include "nrf_drv_config.h"
+#include "sdk_config.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**@brief Struct for WDT initialization. */
 typedef struct
@@ -46,11 +50,11 @@ typedef void (*nrf_wdt_event_handler_t)(void);
 /**@brief WDT channel id type. */
 typedef nrf_wdt_rr_register_t nrf_drv_wdt_channel_id;
 
-#define NRF_DRV_WDT_DEAFULT_CONFIG                     \
-    {                                                  \
-        .behaviour          = WDT_CONFIG_BEHAVIOUR,    \
-        .reload_value       = WDT_CONFIG_RELOAD_VALUE, \
-        .interrupt_priority = WDT_CONFIG_IRQ_PRIORITY, \
+#define NRF_DRV_WDT_DEAFULT_CONFIG                                       \
+    {                                                                    \
+        .behaviour          = (nrf_wdt_behaviour_t)WDT_CONFIG_BEHAVIOUR, \
+        .reload_value       = WDT_CONFIG_RELOAD_VALUE,                   \
+        .interrupt_priority = WDT_CONFIG_IRQ_PRIORITY,                   \
     }
 /**
  * @brief This function initializes watchdog.
@@ -60,7 +64,7 @@ typedef nrf_wdt_rr_register_t nrf_drv_wdt_channel_id;
  *
  * @note Function asserts if wdt_event_handler is NULL.
  *
- * @return    NRF_SUCCESS on success, NRF_ERROR_INVALID_STATE if module ws already initialized.
+ * @return    NRF_SUCCESS on success, otherwise an error code.
  */
 ret_code_t nrf_drv_wdt_init(nrf_drv_wdt_config_t const * p_config,
                             nrf_wdt_event_handler_t     wdt_event_handler);
@@ -119,6 +123,11 @@ __STATIC_INLINE uint32_t nrf_drv_wdt_ppi_event_addr(nrf_wdt_event_t event)
 {
     return nrf_wdt_event_address_get(event);
 }
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 
 /** @} */

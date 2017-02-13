@@ -13,15 +13,18 @@
 #ifndef ANT_SDM_UTILS_H__
 #define ANT_SDM_UTILS_H__
 
-#include "app_util.h"
 #include "nrf_assert.h"
 #include "nrf.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** @file
  *
  * @defgroup ant_sdk_profiles_sdm_utils Stride Based Speed and Distance Monitor profile utilities
  * @{
- * @ingroup ant_sdk_profiles_sdm
+ * @ingroup ant_sdm
  * @brief This module implements utilities for the Stride Based Speed and Distance Monitor profile.
  *
  */
@@ -72,6 +75,11 @@
                                                                  ANT_SDM_CADENCE_DISP_PRECISION)
 
 /** @} */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_UTILS_H__
 

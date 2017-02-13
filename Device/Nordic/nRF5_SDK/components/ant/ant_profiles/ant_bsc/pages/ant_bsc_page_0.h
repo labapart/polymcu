@@ -21,9 +21,13 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for BSC data page 0.
  *
- * This structure is used as a common page. 
+ * This structure is used as a common page.
  */
 typedef struct
 {
@@ -53,6 +57,11 @@ void ant_bsc_page_0_encode(uint8_t * p_page_buffer, ant_bsc_page0_data_t const *
  * @param[out] p_page_data      Pointer to the page data.
  */
 void ant_bsc_page_0_decode(uint8_t const * p_page_buffer, ant_bsc_page0_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BSC_PAGE_0_H__
 /** @} */

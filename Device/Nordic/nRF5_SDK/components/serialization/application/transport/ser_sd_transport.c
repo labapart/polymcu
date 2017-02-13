@@ -18,17 +18,11 @@
 #include "nrf_error.h"
 #include "app_error.h"
 #include "ble_serialization.h"
-
+#include "ser_dbg_sd_str.h"
 #include "ser_app_power_system_off.h"
-
 #include "app_util.h"
-
-#ifdef ENABLE_DEBUG_LOG_SUPPORT
-#include "app_trace.h"
-#define APPL_LOG                        app_trace_log             /**< Debug logger macro that will be used in this file to do logging of debug information over UART. */
-#else
-#define APPL_LOG(...)
-#endif //ENABLE_DEBUG_LOG_SUPPORT
+#define NRF_LOG_MODULE_NAME "SER_XFER"
+#include "nrf_log.h"
 
 /** SoftDevice event handler. */
 static ser_sd_transport_evt_handler_t m_evt_handler = NULL;
@@ -101,7 +95,7 @@ static void ser_sd_transport_rx_packet_handler(uint8_t * p_data, uint16_t length
 
             case SER_PKT_TYPE_EVT:
                 /* It is ensured during opening that handler is not NULL. No check needed. */
-                APPL_LOG("\r\n[EVT_ID]: 0x%X \r\n", uint16_decode(&p_data[SER_EVT_ID_POS])); // p_data points to EVT_ID
+                NRF_LOG_DEBUG("[EVT]: %s \r\n", (uint32_t)ser_dbg_sd_evt_str_get(uint16_decode(&p_data[SER_EVT_ID_POS]))); // p_data points to EVT_ID
                 m_evt_handler(p_data, length);
                 break;
 
@@ -132,7 +126,7 @@ static void ser_sd_transport_hal_handler(ser_hal_transport_evt_t event)
         }
         break;
     case SER_HAL_TRANSP_EVT_TX_PKT_SENT:
-        if(ser_app_power_system_off_get() == true)
+        if (ser_app_power_system_off_get() == true)
         {
             ser_app_power_system_off_enter();
         }
@@ -254,6 +248,7 @@ uint32_t ser_sd_transport_cmd_write(const uint8_t *                p_buffer,
     {
         m_rsp_wait = false;
     }
-    APPL_LOG("\r\n[SD_CALL_ID]: 0x%X, err_code= 0x%X\r\n", p_buffer[1], err_code);
+    
+    NRF_LOG_DEBUG("[SD_CALL]:%s, err_code= 0x%X\r\n", (uint32_t)ser_dbg_sd_call_str_get(p_buffer[1]), err_code);
     return err_code;
 }

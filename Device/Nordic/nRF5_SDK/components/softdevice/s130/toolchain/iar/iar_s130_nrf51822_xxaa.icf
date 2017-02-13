@@ -6,7 +6,7 @@ define symbol __ICFEDIT_intvec_start__ = 0x1b000;
 /*-Memory Regions-*/
 define symbol __ICFEDIT_region_ROM_start__   = 0x1b000;
 define symbol __ICFEDIT_region_ROM_end__     = 0x3ffff;
-define symbol __ICFEDIT_region_RAM_start__   = 0x20000000;
+define symbol __ICFEDIT_region_RAM_start__   = 0x200013c8;
 define symbol __ICFEDIT_region_RAM_end__     = 0x20003fff;
 export symbol __ICFEDIT_region_RAM_start__;
 export symbol __ICFEDIT_region_RAM_end__;
@@ -31,3 +31,4 @@ place in ROM_region   { readonly };
 place in RAM_region   { readwrite,
                         block CSTACK,
                         block HEAP };
+

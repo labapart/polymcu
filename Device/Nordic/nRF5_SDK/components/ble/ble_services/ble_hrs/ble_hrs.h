@@ -12,7 +12,7 @@
 
 /** @file
  *
- * @defgroup ble_sdk_srv_hrs Heart Rate Service
+ * @defgroup ble_hrs Heart Rate Service
  * @{
  * @ingroup ble_sdk_srv
  * @brief Heart Rate Service module.
@@ -36,8 +36,8 @@
  * @note The application must propagate BLE stack events to the Heart Rate Service module by calling
  *       ble_hrs_on_ble_evt() from the @ref softdevice_handler callback.
  *
- * @note Attention! 
- *  To maintain compliance with Nordic Semiconductor ASA Bluetooth profile 
+ * @note Attention!
+ *  To maintain compliance with Nordic Semiconductor ASA Bluetooth profile
  *  qualification listings, this section of source code must not be modified.
  */
 
@@ -48,6 +48,11 @@
 #include <stdbool.h>
 #include "ble.h"
 #include "ble_srv_common.h"
+#include "nrf_ble_gatt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Body Sensor Location values
 #define BLE_HRS_BODY_SENSOR_LOCATION_OTHER      0
@@ -73,7 +78,7 @@ typedef struct
     ble_hrs_evt_type_t evt_type;                        /**< Type of event. */
 } ble_hrs_evt_t;
 
-// Forward declaration of the ble_hrs_t type. 
+// Forward declaration of the ble_hrs_t type.
 typedef struct ble_hrs_s ble_hrs_t;
 
 /**@brief Heart Rate Service event handler type. */
@@ -104,6 +109,7 @@ struct ble_hrs_s
     bool                         is_sensor_contact_detected;                           /**< TRUE if sensor contact has been detected. */
     uint16_t                     rr_interval[BLE_HRS_MAX_BUFFERED_RR_INTERVALS];       /**< Set of RR Interval measurements since the last Heart Rate Measurement transmission. */
     uint16_t                     rr_interval_count;                                    /**< Number of RR Interval measurements since the last Heart Rate Measurement transmission. */
+    uint8_t                      max_hrm_len;                                          /**< Current maximum HR measurement length, adjusted according to the current ATT MTU. */
 };
 
 /**@brief Function for initializing the Heart Rate Service.
@@ -116,6 +122,17 @@ struct ble_hrs_s
  * @return      NRF_SUCCESS on successful initialization of service, otherwise an error code.
  */
 uint32_t ble_hrs_init(ble_hrs_t * p_hrs, const ble_hrs_init_t * p_hrs_init);
+
+
+/**@brief Function for handling the GATT module's events.
+ *
+ * @details Handles all events from the GATT module of interest to the Heart Rate Service.
+ *
+ * @param[in]   p_hrs      Heart Rate Service structure.
+ * @param[in]   p_gatt_evt  Event received from the GATT module.
+ */
+void ble_hrs_on_gatt_evt(ble_hrs_t * p_hrs, nrf_ble_gatt_evt_t * p_gatt_evt);
+
 
 /**@brief Function for handling the Application's BLE Stack events.
  *
@@ -186,6 +203,11 @@ void ble_hrs_sensor_contact_detected_update(ble_hrs_t * p_hrs, bool is_sensor_co
  * @return      NRF_SUCCESS on success, otherwise an error code.
  */
 uint32_t ble_hrs_body_sensor_location_set(ble_hrs_t * p_hrs, uint8_t body_sensor_location);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // BLE_HRS_H__
 

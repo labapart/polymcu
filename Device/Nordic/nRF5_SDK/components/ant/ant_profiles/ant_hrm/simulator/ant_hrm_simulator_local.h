@@ -15,9 +15,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "bsp.h"
 #include "ant_hrm.h"
 #include "sensorsim.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @ingroup ant_sdk_hrm_simulator
@@ -30,5 +33,10 @@ typedef struct
     sensorsim_state_t sensorsim_state;        ///< State of the simulated sensor.
     sensorsim_cfg_t   sensorsim_cfg;          ///< Configuration of the simulated sensor.
 } ant_hrm_simulator_cb_t;
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_HRM_SIMULATOR_LOCAL_H__

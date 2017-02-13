@@ -23,6 +23,10 @@
 #include <stdint.h>
 #include "ant_sdm_common_data.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for SDM data page 1.
  */
 typedef struct
@@ -60,6 +64,11 @@ void ant_sdm_page_1_encode(uint8_t                     * p_page_buffer,
 void ant_sdm_page_1_decode(uint8_t const         * p_page_buffer,
                            ant_sdm_page1_data_t  * p_page_data,
                            ant_sdm_common_data_t * p_common_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_PAGE_1_H__
 /** @} */

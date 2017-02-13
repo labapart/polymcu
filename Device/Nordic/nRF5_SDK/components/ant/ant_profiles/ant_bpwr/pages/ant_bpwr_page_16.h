@@ -22,6 +22,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for Bicycle Power data page 16.
  *
  * @note This structure implements only page 16 specific data.
@@ -70,6 +74,11 @@ void ant_bpwr_page_16_encode(uint8_t                      * p_page_buffer,
  */
 void ant_bpwr_page_16_decode(uint8_t const          * p_page_buffer,
                              ant_bpwr_page16_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_PAGE_16_H__
 /** @} */

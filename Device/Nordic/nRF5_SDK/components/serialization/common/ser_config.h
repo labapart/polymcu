@@ -17,6 +17,10 @@
 
 #include "nrf.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***********************************************************************************************//**
  * General parameters configuration.
  **************************************************************************************************/
@@ -26,7 +30,7 @@
 #define SER_SD_ERROR_CODE    (uint32_t)(0xDEADBEEF)
 
 /** Value used as error code indicating warning - unusual situation but not critical so system
- *  should NOT be reseted. */
+ *  should NOT be reset. */
 #define SER_WARNING_CODE     (uint32_t)(0xBADDCAFE)
 
 /***********************************************************************************************//**
@@ -69,7 +73,7 @@
 #define SER_PHY_UART_PARITY             true
 #define SER_PHY_UART_BAUDRATE           UART_BAUDRATE_BAUDRATE_Baud1M
 
-/** Find UART baudrate value based on chosen register setting. */
+/** Find UART baud rate value based on the chosen register setting. */
 #if (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud1200)
     #define SER_PHY_UART_BAUDRATE_VAL 1200uL
 #elif (SER_PHY_UART_BAUDRATE == UART_BAUDRATE_BAUDRATE_Baud2400)
@@ -104,10 +108,15 @@
     #define SER_PHY_UART_BAUDRATE_VAL 1000000uL
 #endif /* SER_PHY_UART_BAUDRATE */
 
-/** Configuration timeouts of connectivity MCU */
-#define CONN_CHIP_RESET_TIME            50      /**< The time to keep the reset line to the nRF51822 low (in milliseconds). */
-#define CONN_CHIP_WAKEUP_TIME           500     /**< The time for nRF51822 to reset and become ready to receive serialized commands (in milliseconds). */
+/** Configuration timeouts of connectivity MCU. */
+#define CONN_CHIP_RESET_TIME            50      /**< Time to keep the reset line to the connectivity chip low (in milliseconds). */
+#define CONN_CHIP_WAKEUP_TIME           500     /**< Time for the connectivity chip to reset and become ready to receive serialized commands (in milliseconds). */
 
 #define SER_MAX_CONNECTIONS 8
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SER_CONFIG_H__ */

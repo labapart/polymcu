@@ -10,6 +10,9 @@
  *
  */
 
+#include "sdk_config.h"
+#if ANT_HRM_ENABLED
+
 #include "ant_hrm_simulator.h"
 #include "ant_hrm_utils.h"
 #include "nordic_common.h"
@@ -115,3 +118,4 @@ void ant_hrm_simulator_decrement(ant_hrm_simulator_t * p_simulator)
 }
 
 
+#endif // ANT_HRM_ENABLED

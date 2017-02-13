@@ -23,6 +23,10 @@
 #include <stdint.h>
 #include "ant_sdm_common_data.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Function for encoding page 16.
  *
  * @param[in]  p_common_data    Pointer to the page data.
@@ -38,6 +42,11 @@ void ant_sdm_page_16_encode(uint8_t                     * p_page_buffer,
  */
 void ant_sdm_page_16_decode(uint8_t const         * p_page_buffer,
                             ant_sdm_common_data_t * p_common_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_PAGE_16_H__
 /** @} */

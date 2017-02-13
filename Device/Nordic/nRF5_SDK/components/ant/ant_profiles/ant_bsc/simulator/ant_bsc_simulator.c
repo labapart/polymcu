@@ -31,7 +31,7 @@
 #define WHEEL_CIRCUMFERENCE                     1766u   ///< bike wheel circumference [mm]
 #define MM_TO_METERS(MM_VAL)                    ((MM_VAL) / 1000u)
 #define TWO_SEC_TO_TICKS                        2048    ///< number of [1/1024s] ticks in 2 sec period
-#define CUMULATIVE_TIME_UNIT                    2       ///< cumulative time unit 
+#define CUMULATIVE_TIME_UNIT                    2       ///< cumulative time unit
 
 void ant_bsc_simulator_init(ant_bsc_simulator_t           * p_simulator,
                             ant_bsc_simulator_cfg_t const * p_config,
@@ -51,21 +51,21 @@ void ant_bsc_simulator_init(ant_bsc_simulator_t           * p_simulator,
     p_simulator->_cb.sensorsim_s_cfg.max          = SPEED_SIM_MAX_VAL;
     p_simulator->_cb.sensorsim_s_cfg.incr         = SPEED_SIM_INCREMENT;
     p_simulator->_cb.sensorsim_s_cfg.start_at_max = false;
-    sensorsim_init(&(p_simulator->_cb.sensorsim_s_state), 
+    sensorsim_init(&(p_simulator->_cb.sensorsim_s_state),
                    &(p_simulator->_cb.sensorsim_s_cfg));
     p_simulator->_cb.sensorsim_c_cfg.min          = CADENCE_SIM_MIN_VAL;
     p_simulator->_cb.sensorsim_c_cfg.max          = CADENCE_SIM_MAX_VAL;
     p_simulator->_cb.sensorsim_c_cfg.incr         = CADENCE_SIM_INCREMENT;
     p_simulator->_cb.sensorsim_c_cfg.start_at_max = false;
     p_simulator->_cb.stop_cnt                     = 0;
-    sensorsim_init(&(p_simulator->_cb.sensorsim_c_state), 
+    sensorsim_init(&(p_simulator->_cb.sensorsim_c_state),
                    &(p_simulator->_cb.sensorsim_c_cfg));
 }
 
 
 void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
 {
-    
+
     // Set constant battery voltage
     p_simulator->p_profile->BSC_PROFILE_coarse_bat_volt = 2;
     p_simulator->p_profile->BSC_PROFILE_fract_bat_volt  = 200;
@@ -74,9 +74,9 @@ void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
     // Calculate speed and cadence values
     if (p_simulator->_cb.auto_change)
     {
-        p_simulator->_cb.speed_sim_val   = sensorsim_measure(&(p_simulator->_cb.sensorsim_s_state), 
+        p_simulator->_cb.speed_sim_val   = sensorsim_measure(&(p_simulator->_cb.sensorsim_s_state),
                                                             &(p_simulator->_cb.sensorsim_s_cfg));
-        p_simulator->_cb.cadence_sim_val = sensorsim_measure(&(p_simulator->_cb.sensorsim_c_state), 
+        p_simulator->_cb.cadence_sim_val = sensorsim_measure(&(p_simulator->_cb.sensorsim_c_state),
                                                             &(p_simulator->_cb.sensorsim_c_cfg));
     }
     else
@@ -98,7 +98,7 @@ void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
         {
             if (p_simulator->_cb.stop_cnt == 60)
             {
-               p_simulator->_cb.stop_cnt = 0; 
+               p_simulator->_cb.stop_cnt = 0;
             }
         }
     }
@@ -111,16 +111,16 @@ void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
         p_simulator->p_profile->BSC_PROFILE_stop_indicator = 0;
     }
 
-    // @note: Take a local copy within scope in order to assist the compiler in variable register 
-    // allocation. 
+    // @note: Take a local copy within scope in order to assist the compiler in variable register
+    // allocation.
     const uint32_t computed_speed   = p_simulator->_cb.speed_sim_val;
     const uint32_t computed_cadence = p_simulator->_cb.cadence_sim_val;
 
     // @note: This implementation assumes that the current instantaneous speed/cadence can vary and this
     // function is called with static frequency.
-    // value and the speed/cadence pulse interval is derived from it. The computation is based on 60 
+    // value and the speed/cadence pulse interval is derived from it. The computation is based on 60
     // seconds in a minute and the used time base is 1/1024 seconds.
-    const uint32_t current_speed_pulse_interval   = 
+    const uint32_t current_speed_pulse_interval   =
                        MM_TO_METERS((WHEEL_CIRCUMFERENCE * 1024u) / computed_speed);
     const uint32_t current_cadence_pulse_interval = (60u * 1024u) / computed_cadence;
 
@@ -133,14 +133,14 @@ void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
     p_simulator->_cb.fraction_since_last_c_evt += ITERATION_FRACTION(p_simulator->_cb.device_type);
 
     uint32_t add_period = p_simulator->_cb.fraction_since_last_s_evt / ANT_CLOCK_FREQUENCY;
-    if(add_period > 0)
+    if (add_period > 0)
     {
         p_simulator->_cb.time_since_last_s_evt++;
         p_simulator->_cb.fraction_since_last_s_evt %= ANT_CLOCK_FREQUENCY;
     }
 
     add_period = p_simulator->_cb.fraction_since_last_c_evt / ANT_CLOCK_FREQUENCY;
-    if(add_period > 0)
+    if (add_period > 0)
     {
         p_simulator->_cb.time_since_last_c_evt++;
         p_simulator->_cb.fraction_since_last_c_evt %= ANT_CLOCK_FREQUENCY;
@@ -151,7 +151,7 @@ void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
                    p_simulator->_cb.prev_time_since_evt;
     p_simulator->_cb.prev_time_since_evt = p_simulator->p_profile->BSC_PROFILE_event_time;
 
-    if(diff >= 0)       // Check for time count overflow
+    if (diff >= 0)       // Check for time count overflow
     {
         // No overflow
         p_simulator->_cb.cumulative_time += diff / TWO_SEC_TO_TICKS;
@@ -184,8 +184,8 @@ void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
         p_simulator->p_profile->BSC_PROFILE_rev_count       += new_s_events;
         p_simulator->p_profile->BSC_PROFILE_speed_rev_count += new_s_events;
 
-        // Current speed event time is the previous event time plus the current speed 
-        // pulse interval. 
+        // Current speed event time is the previous event time plus the current speed
+        // pulse interval.
         uint32_t current_speed_event_time = p_simulator->p_profile->BSC_PROFILE_event_time +
                                             add_speed_event_time;
         // Set current event time.
@@ -208,8 +208,8 @@ void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator)
         p_simulator->p_profile->BSC_PROFILE_rev_count         += new_c_events;
         p_simulator->p_profile->BSC_PROFILE_cadence_rev_count += new_c_events;
 
-        // Current speed event time is the previous event time plus the current speed 
-        // pulse interval. 
+        // Current speed event time is the previous event time plus the current speed
+        // pulse interval.
         uint32_t current_cadence_event_time = p_simulator->p_profile->BSC_PROFILE_event_time +
                                               add_cadence_event_time;
         // Set current event time.

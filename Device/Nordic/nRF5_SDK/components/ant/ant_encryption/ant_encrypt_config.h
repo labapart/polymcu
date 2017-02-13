@@ -28,6 +28,10 @@
 #include "sdk_errors.h"
 #include "ant_stack_handler_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @name Advanced burst configuration for encryption modules
  * @{
  */
@@ -167,17 +171,17 @@ ret_code_t ant_channel_encrypt_config_perform(uint8_t                          c
  * for that channel. When called for a slave channel, it saves
  * the encryption configuration for future use.
  *
- * This function should be used by the @ref ant_sdk_channel_config module.
+ * This function should be used by the @ref ant_channel_config module.
  *
  * @param[in] channel_type     ANT channel type: CHANNEL_TYPE_SLAVE or CHANNEL_TYPE_MASTER.
  * @param[in] channel_num      ANT channel number.
  * @param[in] p_crypto_config  Pointer to the encryption configuration.
  *
- * @retval NRF_SUCCESS             If the function completed successfully.
- * @retval NRF_ERROR_INVALID_PARAM If the channel type is invalid.
- * @retval MODULE_NOT_INITIALZED   If the stack is not configured for encryption.
- * @retval Other                   Otherwise, the error value returned by the
- *                                 @ref ant_channel_encrypt_config_perform function is returned.
+ * @retval NRF_SUCCESS                      If the function completed successfully.
+ * @retval NRF_ERROR_INVALID_PARAM          If the channel type is invalid.
+ * @retval NRF_ERROR_MODULE_NOT_INITIALZED  If the stack is not configured for encryption.
+ * @retval Other                            Otherwise, the error value returned by the @ref
+ *                                          ant_channel_encrypt_config_perform function is returned.
  */
 ret_code_t ant_channel_encrypt_config(uint8_t                          channel_type,
                                       uint8_t                          channel_num,
@@ -216,4 +220,9 @@ void ant_enc_event_handler_register(ant_encryp_user_handler_t p_handler);
 /**
  * @}
  */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // ANT_ENCRYPT_CONFIG__

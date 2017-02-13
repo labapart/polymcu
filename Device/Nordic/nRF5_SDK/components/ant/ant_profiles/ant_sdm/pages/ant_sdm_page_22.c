@@ -10,10 +10,22 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_SDM)
+
 #include <string.h>
 #include "ant_sdm_page_22.h"
 #include "ant_sdm_utils.h"
-#include "ant_sdm_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_SDM_PAGE_22"
+#if ANT_SDM_PAGE_22_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_SDM_PAGE_22_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_SDM_PAGE_22_INFO_COLOR
+#else // ANT_SDM_PAGE_22_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_SDM_PAGE_22_LOG_ENABLED
+#include "nrf_log.h"
+
 
 /**@brief SDM page 22 data layout structure. */
 typedef struct
@@ -28,38 +40,38 @@ typedef struct
  */
 static void page_22_data_log(ant_sdm_page22_data_t const * p_page_data)
 {
-    LOG_PAGE22("Capabilities:    ");
+    NRF_LOG_INFO("Capabilities:                       ");
 
     if (p_page_data->capabilities.items.time_is_valid)
     {
-        LOG_PAGE22(" time");
+        NRF_LOG_RAW_INFO(" time");
     }
 
     if (p_page_data->capabilities.items.distance_is_valid)
     {
-        LOG_PAGE22(" distance");
+        NRF_LOG_RAW_INFO(" distance");
     }
 
     if (p_page_data->capabilities.items.speed_is_valid)
     {
-        LOG_PAGE22(" speed");
+        NRF_LOG_RAW_INFO(" speed");
     }
 
     if (p_page_data->capabilities.items.latency_is_valid)
     {
-        LOG_PAGE22(" latency");
+        NRF_LOG_RAW_INFO(" latency");
     }
 
     if (p_page_data->capabilities.items.cadency_is_valid)
     {
-        LOG_PAGE22(" cadency");
+        NRF_LOG_RAW_INFO(" cadence");
     }
 
     if (p_page_data->capabilities.items.calorie_is_valid)
     {
-        LOG_PAGE22(" calorie");
+        NRF_LOG_RAW_INFO(" calories");
     }
-    LOG_PAGE22("\n\r");
+    NRF_LOG_RAW_INFO("\r\n\n");
 }
 
 
@@ -86,4 +98,4 @@ void ant_sdm_page_22_decode(uint8_t const         * p_page_buffer,
     page_22_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_SDM)

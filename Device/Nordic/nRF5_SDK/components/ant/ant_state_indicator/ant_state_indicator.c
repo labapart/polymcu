@@ -10,6 +10,8 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_STATE_INDICATOR)
 #include "ant_parameters.h"
 #include "bsp.h"
 #include "ant_state_indicator.h"
@@ -45,11 +47,11 @@ uint32_t ant_state_indicator_channel_opened(void)
         case CHANNEL_TYPE_SLAVE:
             err_code = bsp_indication_set(BSP_INDICATE_SCANNING);
             break;
-        
+
         case CHANNEL_TYPE_SLAVE_RX_ONLY:
             err_code = bsp_indication_set(BSP_INDICATE_SCANNING);
             break;
-        
+
         case CHANNEL_TYPE_MASTER:
             err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
             break;
@@ -88,7 +90,7 @@ void ant_state_indicator_evt_handler(ant_evt_t * p_ant_evt)
                     err_code = bsp_indication_set(BSP_INDICATE_IDLE);
                     ant_state_indicator_sleep_mode_enter();
                     break;
-								
+
                 case EVENT_RX_SEARCH_TIMEOUT:
                     err_code = bsp_indication_set(BSP_INDICATE_IDLE);
                     break;
@@ -127,3 +129,5 @@ void ant_state_indicator_sleep_mode_enter(void)
 /**
  *@}
  */
+
+#endif // NRF_MODULE_ENABLED(ANT_STATE_INDICATOR)

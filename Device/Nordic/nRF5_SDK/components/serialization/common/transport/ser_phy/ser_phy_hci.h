@@ -16,7 +16,7 @@
  * @{
  * @ingroup ble_sdk_lib_serialization
  *
- * @brief   HCI PHY layer for serialization.
+ * @brief   @tagAPI52832 HCI PHY layer for serialization.
  *
  * @details This file contains declarations of functions and definitions of data structures and
  *          identifiers (typedef enum) used as API of the serialization HCI PHY layer.
@@ -29,17 +29,21 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Serialization PHY HCI module events types. */
 typedef enum
 {
     SER_PHY_HCI_SLIP_EVT_PKT_SENT = 0,      /**< An event indicating that packet has been transmitted. */
-    SER_PHY_HCI_SLIP_EVT_ACK_SENT,      	/**< An event indicating that ack packet has been transmitted. */
+    SER_PHY_HCI_SLIP_EVT_ACK_SENT,          /**< An event indicating that ack packet has been transmitted. */
     SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED,      /**< An event indicating that packet has been received.  */
     SER_PHY_HCI_SLIP_EVT_HW_ERROR,          /**< An event indicating a hardware error in PHY HCI module.  */
     SER_PHY_HCI_SLIP_EVT_TYPE_MAX           /**< Enumeration upper bound. */
 } ser_phy_hci_slip_evt_type_t;
 
-/**@brief A struct representing a PHY HCI packet. */
+/**@brief Struct representing a PHY HCI packet. */
 typedef struct
 {
     uint8_t * p_buffer;     /**< Pointer to a buffer containing a packet. */
@@ -47,39 +51,39 @@ typedef struct
 } ser_phy_hci_pkt_params_t;
 
 
-/**@brief A struct containing parameters of the event of type @ref SER_PHY_HCI_SLIP_EVT_HW_ERROR. */
+/**@brief Struct containing parameters of event of type @ref SER_PHY_HCI_SLIP_EVT_HW_ERROR. */
 typedef struct
 {
-    uint32_t error_code; /**< Hardware error code - specific for any microcontroller. */
+    uint32_t error_code; /**< Hardware error code - specific for a microcontroller. */
 } ser_phy_hci_evt_hw_error_params_t;
 
 
-/**@brief A struct containing events from a Serialization PHY module.
+/**@brief Struct containing events from the Serialization PHY module.
  *
- * @note  Some events do not have parameters, then whole information is contained in the evt_type.
+ * @note  Some events do not have parameters, then the whole information is contained in the evt_type.
  */
-typedef struct 
+typedef struct
 {
     ser_phy_hci_slip_evt_type_t            evt_type; /**< Type of an event. */
-    union  /**< Union alternative identified by evt_type in enclosing struct. */
+    union  /**< Union alternative identified by evt_type in the enclosing struct. */
     {
-        /** Parameters of the event of type @ref SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED. */
+        /** Parameters of event of type @ref SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED. */
         ser_phy_hci_pkt_params_t             received_pkt;
-        /** Parameters of the event of type @ref SER_PHY_HCI_SLIP_EVT_HW_ERROR. */
+        /** Parameters of event of type @ref SER_PHY_HCI_SLIP_EVT_HW_ERROR. */
         ser_phy_hci_evt_hw_error_params_t    hw_error;
     } evt_params;
 } ser_phy_hci_slip_evt_t;
 
 
-/**@brief A type of generic callback function handler to be used by all PHY HCI events.
+/**@brief Type of generic callback function handler to be used by all PHY HCI events.
  *
  * @param[in] event    Serialization PHY HCI module event.
  */
 typedef void (*ser_phy_hci_slip_event_handler_t)(ser_phy_hci_slip_evt_t *p_event);
 
-/**@brief A function for opening and initializing a HCI SLIP PHY module.
+/**@brief Function for opening and initializing a HCI SLIP PHY module.
  *
- * @note  The function initializes hardware and internal module states, and registers callback
+ * @note  The function initializes hardware and internal module states and registers callback
  *        function to be used by all PHY HCI module events.
  *
  * @warning If the function has been already called, the function @ref ser_phy_hci_slip_close has to be
@@ -90,8 +94,8 @@ typedef void (*ser_phy_hci_slip_event_handler_t)(ser_phy_hci_slip_evt_t *p_event
  *
  * @retval NRF_SUCCESS                Operation success.
  * @retval NRF_ERROR_INVALID_STATE    Operation failure. The function has been already called.
- *                                    To call it again the function @ref ser_phy_hci_slip_close has to
- *                                    be called previously.
+ *                                    To call it again, the function @ref ser_phy_hci_slip_close has to
+ *                                    be called first.
  * @retval NRF_ERROR_NULL             Operation failure. NULL pointer supplied.
  * @retval NRF_ERROR_INVALID_PARAM    Operation failure. Hardware initialization parameters are not
  *                                    supported.
@@ -102,7 +106,7 @@ uint32_t ser_phy_hci_slip_open(ser_phy_hci_slip_event_handler_t events_handler);
 /**@brief A function for transmitting a HCI SLIP packet.
  *
  * @note  The function adds a packet pointed by p_buffer parameter to a transmission queue and
- *        schedules generating an event of type @ref SER_PHY_HCI_SLIP_EVT_PKT_SENT upon transmission
+ *        schedules generation of an event of type @ref SER_PHY_HCI_SLIP_EVT_PKT_SENT upon transmission
  *        completion.
  *
  * @param[in] p_header  Pointer to ser_phy_hci_pkt_params_t structure representing packet header.
@@ -110,10 +114,10 @@ uint32_t ser_phy_hci_slip_open(ser_phy_hci_slip_event_handler_t events_handler);
  * @param[in] p_crc     Pointer to ser_phy_hci_pkt_params_t structure representing packet crc.
  *
  * @retval NRF_SUCCESS                Operation success. Packet was added to the transmission queue
- *                                    and event will be send upon transmission completion.
+ *                                    and event will be sent upon transmission completion.
  * @retval NRF_ERROR_NULL             Operation failure. NULL pointer supplied in p_header parameter.
  *                                    NULL pointer is allowed for p_payload and p_crc parameters.
- * @retval NRF_ERROR_INVALID_PARAM    Operation failure. Number of bytes to be send equal to 0.
+ * @retval NRF_ERROR_INVALID_PARAM    Operation failure. Number of bytes to be sent equals 0.
  * @retval NRF_ERROR_BUSY             Operation failure. Transmitting of a packet in progress.
  */
 uint32_t ser_phy_hci_slip_tx_pkt_send(const ser_phy_hci_pkt_params_t * p_header,
@@ -123,8 +127,8 @@ uint32_t ser_phy_hci_slip_tx_pkt_send(const ser_phy_hci_pkt_params_t * p_header,
 
 /**@brief A function for freeing an RX buffer.
  *
- * @note The function has to be called as a response for event @ref SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED
- *       when RX packet has been processed. The function frees the RX buffer and therefore enables
+ * @note The function has to be called as a response to event @ref SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED
+ *       when an RX packet has been processed. The function frees the RX buffer and therefore enables
  *       reception of next incoming data.
 
  * @param[in] p_buffer    Pointer to an RX buffer which must be freed.
@@ -138,10 +142,15 @@ uint32_t ser_phy_hci_slip_rx_buf_free(uint8_t * p_buffer);
 
 /**@brief A function for closing a PHY HCI module.
  *
- * @note  The function disables hardware, resets internal module states and unregisters events
+ * @note  The function disables hardware, resets internal module states, and unregisters the events
  *        callback function.
  */
 void ser_phy_hci_slip_close(void);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SER_PHY_HCI_H__ */
 /** @} */

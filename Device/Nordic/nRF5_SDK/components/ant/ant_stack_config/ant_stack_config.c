@@ -9,21 +9,18 @@
  * the file.
  *
  */
- 
+
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_STACK_CONFIG)
 #include "nrf_assert.h"
 #include "ant_stack_config.h"
 #include "ant_interface.h"
 #include "ant_parameters.h"
-// The header below should be provided by a project.
-// At least ANT_CONFIG_TOTAL_CHANNELS_ALLOCATED and ANT_CONFIG_ENCRYPTED_CHANNELS must be defined.
-#include "ant_stack_config_defs.h"
 
-#ifndef ANT_CONFIG_BURST_QUEUE_SIZE
-    #define ANT_CONFIG_BURST_QUEUE_SIZE 128 // legacy tx burst buffer queue size 128 B
-#endif
-
-
-#define ANT_BUFFER_SIZE_FOR_SD    ANT_ENABLE_GET_REQUIRED_SPACE(ANT_CONFIG_TOTAL_CHANNELS_ALLOCATED, ANT_CONFIG_ENCRYPTED_CHANNELS, ANT_CONFIG_BURST_QUEUE_SIZE)
+#define ANT_BUFFER_SIZE_FOR_SD    ANT_ENABLE_GET_REQUIRED_SPACE(ANT_CONFIG_TOTAL_CHANNELS_ALLOCATED, \
+                                                                ANT_CONFIG_ENCRYPTED_CHANNELS,       \
+                                                                ANT_CONFIG_BURST_QUEUE_SIZE,         \
+                                                                ANT_CONFIG_EVENT_QUEUE_SIZE)
 
 static union
 {
@@ -40,9 +37,12 @@ uint32_t ant_stack_static_config(void)
     {
         .ucTotalNumberOfChannels        = ANT_CONFIG_TOTAL_CHANNELS_ALLOCATED,
         .ucNumberOfEncryptedChannels    = ANT_CONFIG_ENCRYPTED_CHANNELS,
+        .usNumberOfEvents               = ANT_CONFIG_EVENT_QUEUE_SIZE,
         .pucMemoryBlockStartLocation    = ant_stack_buffer.u8,
         .usMemoryBlockByteSize          = ANT_BUFFER_SIZE_FOR_SD
     };
 
     return sd_ant_enable(&m_ant_enable_cfg);
 }
+
+#endif // NRF_MODULE_ENABLED(ANT_STACK_CONFIG)

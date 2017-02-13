@@ -17,14 +17,14 @@
 
 /** @file
  *
- * @defgroup ser_cmd_decoder Command decoder in the connectivity chip
+ * @defgroup ser_cmd_decoder Command decoder in the Connectivity Chip
  * @{
  * @ingroup ser_conn
  *
- * @brief   Decoder for serialized commands from an Application Chip.
+ * @brief   Decoder for serialized commands from the Application Chip.
  *
  * @details This file contains declaration of common function used for commands decoding and sending
- *          responses back to an Application Chip after a command is processed.
+ *          responses back to the Application Chip after a command is processed.
  */
 
 #ifndef SER_CONN_CMD_DECODER_H__
@@ -32,12 +32,16 @@
 
 #include <stdint.h>
 
-/**@brief A function decodes an encoded command and sends a response to an Application Chip.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**@brief A function decodes an encoded command and sends a response to the Application Chip.
  *
  * @details The function decodes an encoded command and calls a SoftDevice API function when a
- *          command decoder was found or forms a common response with error code
+ *          command decoder is found or forms a common response with error code
  *          NRF_ERROR_NOT_SUPPORTED otherwise. Then the function sends a SoftDevice response or
- *          the response with NRF_ERROR_NOT_SUPPORTED error code to an Application Chip.
+ *          the response with NRF_ERROR_NOT_SUPPORTED error code to the Application Chip.
  *
  * @param[in]   p_command      The encoded command.
  * @param[in]   command_len    Length of the encoded command including opcode.
@@ -47,6 +51,11 @@
  * @retval    NRF_ERROR_INTERNAL    Operation failure. Internal error ocurred.                                               .
  */
 uint32_t ser_conn_command_process(uint8_t * p_command, uint16_t command_len);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SER_CONN_CMD_DECODER_H__ */
 

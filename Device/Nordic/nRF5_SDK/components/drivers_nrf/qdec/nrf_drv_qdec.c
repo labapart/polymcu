@@ -10,6 +10,8 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(QDEC)
 #include <stdint.h>
 #include <stddef.h>
 
@@ -22,6 +24,23 @@
 #include "app_util_platform.h"
 #include "nrf_assert.h"
 
+#define NRF_LOG_MODULE_NAME "QDEC"
+
+#if QDEC_CONFIG_LOG_ENABLED
+#define NRF_LOG_LEVEL       QDEC_CONFIG_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  QDEC_CONFIG_INFO_COLOR
+#define NRF_LOG_DEBUG_COLOR QDEC_CONFIG_DEBUG_COLOR
+#define EVT_TO_STR(event)   (event == NRF_QDEC_EVENT_SAMPLERDY ? "NRF_QDEC_EVENT_SAMPLERDY" :        \
+                            (event == NRF_QDEC_EVENT_REPORTRDY ? "NRF_QDEC_EVENT_REPORTRDY" :        \
+                            (event == NRF_QDEC_EVENT_ACCOF ? "NRF_QDEC_EVENT_ACCOF" : "UNKNOWN EVENT")))
+#else //QDEC_CONFIG_LOG_ENABLED
+#define EVT_TO_STR(event)   ""
+#define NRF_LOG_LEVEL       0
+#endif //QDEC_CONFIG_LOG_ENABLED
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+
+
 static qdec_event_handler_t m_qdec_event_handler = NULL;
 static const nrf_drv_qdec_config_t m_default_config = NRF_DRV_QDEC_DEFAULT_CONFIG;
 static nrf_drv_state_t m_state = NRF_DRV_STATE_UNINITIALIZED;
@@ -32,7 +51,8 @@ void QDEC_IRQHandler(void)
     if ( nrf_qdec_event_check(NRF_QDEC_EVENT_SAMPLERDY) &&
          nrf_qdec_int_enable_check(NRF_QDEC_INT_SAMPLERDY_MASK) )
     {
-        nrf_qdec_event_clear(NRF_QDEC_EVENT_SAMPLERDY);
+        nrf_qdec_event_clear(NRF_QDEC_EVENT_SAMPLERDY); 
+        NRF_LOG_DEBUG("Event: %s.\r\n", (uint32_t)EVT_TO_STR(NRF_QDEC_EVENT_SAMPLERDY));
 
         event.type = NRF_QDEC_EVENT_SAMPLERDY;
         event.data.sample.value = (int8_t)nrf_qdec_sample_get();
@@ -43,6 +63,7 @@ void QDEC_IRQHandler(void)
          nrf_qdec_int_enable_check(NRF_QDEC_INT_REPORTRDY_MASK) )
     {
         nrf_qdec_event_clear(NRF_QDEC_EVENT_REPORTRDY);
+        NRF_LOG_DEBUG("Event: %s.\r\n", (uint32_t)EVT_TO_STR(NRF_QDEC_INT_REPORTRDY_MASK));
 
         event.type = NRF_QDEC_EVENT_REPORTRDY;
 
@@ -55,6 +76,7 @@ void QDEC_IRQHandler(void)
          nrf_qdec_int_enable_check(NRF_QDEC_INT_ACCOF_MASK) )
     {
         nrf_qdec_event_clear(NRF_QDEC_EVENT_ACCOF);
+        NRF_LOG_DEBUG("Event: %s.\r\n", (uint32_t)EVT_TO_STR(NRF_QDEC_EVENT_ACCOF));
 
         event.type = NRF_QDEC_EVENT_ACCOF;
         m_qdec_event_handler(event);
@@ -65,9 +87,13 @@ void QDEC_IRQHandler(void)
 ret_code_t nrf_drv_qdec_init(const nrf_drv_qdec_config_t * p_config,
                              qdec_event_handler_t event_handler)
 {
+    ret_code_t err_code;
+
     if (m_state != NRF_DRV_STATE_UNINITIALIZED)
     {
-        return NRF_ERROR_INVALID_STATE; // qdec_event_handler has been already registered
+        err_code = NRF_ERROR_INVALID_STATE;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
     if (p_config == NULL)
@@ -81,11 +107,13 @@ ret_code_t nrf_drv_qdec_init(const nrf_drv_qdec_config_t * p_config,
     }
     else
     {
-        return NRF_ERROR_INVALID_PARAM;
+        err_code = NRF_ERROR_INVALID_PARAM;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
     nrf_qdec_sampleper_set(p_config->sampleper);
-    nrf_gpio_cfg_input(p_config->pselled,NRF_GPIO_PIN_NOPULL);
+    nrf_gpio_cfg_input(p_config->pselled, NRF_GPIO_PIN_NOPULL);
     nrf_gpio_cfg_input(p_config->psela, NRF_GPIO_PIN_NOPULL);
     nrf_gpio_cfg_input(p_config->pselb, NRF_GPIO_PIN_NOPULL);
     nrf_qdec_pio_assign( p_config->psela, p_config->pselb, p_config->pselled);
@@ -120,7 +148,9 @@ ret_code_t nrf_drv_qdec_init(const nrf_drv_qdec_config_t * p_config,
 
     m_state = NRF_DRV_STATE_INITIALIZED;
 
-    return NRF_SUCCESS;
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 
 void nrf_drv_qdec_uninit(void)
@@ -129,6 +159,7 @@ void nrf_drv_qdec_uninit(void)
     nrf_drv_qdec_disable();
     nrf_drv_common_irq_disable(QDEC_IRQn);
     m_state = NRF_DRV_STATE_UNINITIALIZED;
+    NRF_LOG_INFO("Uninitialized.\r\n");
 }
 
 void nrf_drv_qdec_enable(void)
@@ -137,14 +168,16 @@ void nrf_drv_qdec_enable(void)
     nrf_qdec_enable();
     nrf_qdec_task_trigger(NRF_QDEC_TASK_START);
     m_state = NRF_DRV_STATE_POWERED_ON;
+    NRF_LOG_INFO("Enabled.\r\n");
 }
 
 void nrf_drv_qdec_disable(void)
 {
     ASSERT(m_state == NRF_DRV_STATE_POWERED_ON);
-    nrf_qdec_disable();
     nrf_qdec_task_trigger(NRF_QDEC_TASK_STOP);
+    nrf_qdec_disable();
     m_state = NRF_DRV_STATE_INITIALIZED;
+    NRF_LOG_INFO("Disabled.\r\n");
 }
 
 void nrf_drv_qdec_accumulators_read(int16_t * p_acc, int16_t * p_accdbl)
@@ -154,6 +187,11 @@ void nrf_drv_qdec_accumulators_read(int16_t * p_acc, int16_t * p_accdbl)
 
     *p_acc    = (int16_t)nrf_qdec_accread_get();
     *p_accdbl = (int16_t)nrf_qdec_accdblread_get();
+
+    NRF_LOG_DEBUG("Accumulators data, ACC register:\r\n");
+    NRF_LOG_HEXDUMP_DEBUG((uint8_t *)p_acc, sizeof(p_acc));
+    NRF_LOG_DEBUG("Accumulators data, ACCDBL register:\r\n");
+    NRF_LOG_HEXDUMP_DEBUG((uint8_t *)p_accdbl, sizeof(p_accdbl));
 }
 
 void nrf_drv_qdec_task_address_get(nrf_qdec_task_t task, uint32_t * p_task)
@@ -166,3 +204,4 @@ void nrf_drv_qdec_event_address_get(nrf_qdec_event_t event, uint32_t * p_event)
     *p_event = (uint32_t)nrf_qdec_event_address_get(event);
 }
 
+#endif //NRF_MODULE_ENABLED(QDEC)

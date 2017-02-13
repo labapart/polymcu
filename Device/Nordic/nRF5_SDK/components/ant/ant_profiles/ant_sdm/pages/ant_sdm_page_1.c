@@ -10,9 +10,20 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_SDM)
+
 #include "ant_sdm_page_1.h"
 #include "ant_sdm_utils.h"
-#include "ant_sdm_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_SDM_PAGE_1"
+#if ANT_SDM_PAGE_1_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_SDM_PAGE_1_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_SDM_PAGE_1_INFO_COLOR
+#else // ANT_SDM_PAGE_1_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_SDM_PAGE_1_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief SDM page 1 data layout structure. */
 typedef struct
@@ -39,23 +50,21 @@ STATIC_ASSERT(ANT_SDM_DISTANCE_DISP_PRECISION == 10);         ///< Display forma
 static void page_1_data_log(ant_sdm_page1_data_t const  * p_page_data,
                             ant_sdm_common_data_t const * p_common_data)
 {
-#if (defined TRACE_SDM_PAGE_1_ENABLE) && (defined ENABLE_DEBUG_LOG_SUPPORT)
     uint32_t strides        = p_common_data->strides;
     uint64_t distance       = ANT_SDM_DISTANCE_RESCALE(p_common_data->distance);
     uint16_t update_latency = ANT_SDM_UPDATE_LATENCY_RESCALE(p_page_data->update_latency);
     uint32_t time           = ANT_SDM_TIME_RESCALE(p_page_data->time);
-#endif // (defined TRACE_SDM_PAGE_1_ENABLE) && (defined ENABLE_DEBUG_LOG_SUPPORT)
 
-    LOG_PAGE1("Update latency                    %u.%03u s\n\r",
+    NRF_LOG_INFO("Update latency                        %u.%03u s\r\n",
               update_latency / ANT_SDM_UPDATE_LATENCY_DISP_PRECISION,
               update_latency % ANT_SDM_UPDATE_LATENCY_DISP_PRECISION);
-    LOG_PAGE1("Time                              %u.%03u s\n\r", 
+    NRF_LOG_INFO("Time                                  %u.%03u s\r\n",
               (unsigned int)(time / ANT_SDM_TIME_DISP_PRECISION),
               (unsigned int)(time % ANT_SDM_TIME_DISP_PRECISION));
-    LOG_PAGE1("Distance                          %u.%01um \n\r",
+    NRF_LOG_INFO("Distance                              %u.%01um \r\n",
               (unsigned int)(distance / ANT_SDM_DISTANCE_DISP_PRECISION),
               (unsigned int)(distance % ANT_SDM_DISTANCE_DISP_PRECISION));
-    LOG_PAGE1("Strides                           %u\n\r", (unsigned int)strides);
+    NRF_LOG_INFO("Strides                               %u\r\n", (unsigned int)strides);
 }
 
 
@@ -105,4 +114,4 @@ void ant_sdm_page_1_decode(uint8_t const         * p_page_buffer,
     page_1_data_log(p_page_data, p_common_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_SDM)

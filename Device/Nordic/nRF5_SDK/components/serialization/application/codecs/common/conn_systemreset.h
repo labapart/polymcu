@@ -9,9 +9,13 @@
  * the file.
  *
  */
- 
+
 #ifndef CONN_SYSTEMRESET_H__
 #define CONN_SYSTEMRESET_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @addtogroup ser_codecs Serialization codecs
@@ -25,7 +29,7 @@
 
 /**@file
  *
- * @defgroup conn_systemreset Connectivity chip reset command request encoder.
+ * @defgroup conn_systemreset Connectivity chip reset command request encoder
  * @{
  * @ingroup  ser_app_common_codecs
  *
@@ -40,4 +44,9 @@
 uint32_t conn_systemreset(void);
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // CONN_SYSTEMRESET_H__

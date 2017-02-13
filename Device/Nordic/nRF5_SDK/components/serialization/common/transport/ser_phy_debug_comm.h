@@ -36,6 +36,10 @@
 #else
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Low level hardware events
 typedef enum
 {
@@ -76,7 +80,7 @@ void debug_evt(hci_dbg_evt_type_t evt, uint32_t data);
 #define DEBUG_EVT(event_type, data)    \
 do {                            \
     debug_evt(event_type, data);       \
-} while(0);
+} while (0);
 
 
 #define DEBUG_EVT_HCI_PHY_EVT_TX_PKT_SENT(data)      \
@@ -163,5 +167,10 @@ do {                                                  \
 } while (0);
 
 #endif  // SER_PHY_HCI_DEBUG_ENABLE
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // SER_PHY_DEBUG_COMM_H__

@@ -18,8 +18,12 @@
 #include <stdbool.h>
 #include "ant_sdm.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @addtogroup ant_sdk_profiles_sdm
+ * @addtogroup ant_sdm
  * @{
  */
 
@@ -42,5 +46,10 @@ typedef struct
 /**
  * @}
  */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_LOCAL_H__

@@ -37,6 +37,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // low level hardware event types
 typedef enum
 {
@@ -125,6 +129,11 @@ do {                                                \
 } while (0);
 
 
+#endif
+
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif //SER_PHY_DEBUG_CONN_H__

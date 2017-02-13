@@ -14,6 +14,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file
  */
@@ -63,5 +67,10 @@ uint32_t ant_fs_key_set(uint8_t network_number);
 /**
  * @}
  */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_KEY_MANAGER_H__

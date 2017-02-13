@@ -11,9 +11,13 @@
  */
 
 #include "nrf_adc.h"
-#include "nrf_drv_config.h"
+#include "sdk_config.h"
 #include "sdk_errors.h"
 #include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @addtogroup nrf_adc ADC HAL and driver
@@ -22,12 +26,11 @@
  * @details The ADC HAL provides basic APIs for accessing the registers of the analog-to-digital converter.
  * The ADC driver provides APIs on a higher level.
  *
- * @defgroup nrf_adc_drv ADC driver
+ * @defgroup nrf_drv_adc ADC driver
  * @{
  * @ingroup nrf_adc
- * @brief Analog-to-digital converter (ADC) driver. 
+ * @brief Analog-to-digital converter (ADC) driver.
  */
-
 
 /**
  * @brief Driver event types.
@@ -84,9 +87,9 @@ typedef struct
  *
  * @note The bit fields reflect bit fields in the ADC CONFIG register.
  */
-typedef struct 
+typedef struct
 {
-    uint32_t resolution        :2; ///< 8-10 bit resolution.
+    uint32_t resolution        :2; ///< 8 - 10 bit resolution.
     uint32_t input             :3; ///< Input selection and scaling.
     uint32_t reference         :2; ///< Reference source.
     uint32_t reserved          :1; ///< Unused bit fields.
@@ -116,7 +119,7 @@ struct nrf_drv_adc_channel_s
 /**
  * @brief ADC configuration.
  */
-typedef struct 
+typedef struct
 {
     uint8_t interrupt_priority;              ///< Priority of ADC interrupt.
 } nrf_drv_adc_config_t;
@@ -186,7 +189,7 @@ void nrf_drv_adc_sample(void);
 /**
  * @brief Function for executing a single ADC conversion.
  *
- * This function selects the desired input and starts a single conversion. If a valid pointer 
+ * This function selects the desired input and starts a single conversion. If a valid pointer
  * is provided for the result, the function blocks until the conversion is completed. Otherwise, the
  * function returns when the conversion is started, and the result is provided in an event (driver
  * must be initialized in non-blocking mode otherwise an assertion will fail). The function will fail if
@@ -199,7 +202,7 @@ void nrf_drv_adc_sample(void);
  * @retval NRF_SUCCESS    If conversion was successful.
  * @retval NRF_ERROR_BUSY If the ADC driver is busy.
  */
-ret_code_t nrf_drv_adc_sample_convert(nrf_drv_adc_channel_t const * const p_channel, 
+ret_code_t nrf_drv_adc_sample_convert(nrf_drv_adc_channel_t const * const p_channel,
                                       nrf_adc_value_t * p_value);
 
 /**
@@ -210,17 +213,17 @@ ret_code_t nrf_drv_adc_sample_convert(nrf_drv_adc_channel_t const * const p_chan
  * driver is initialized in blocking mode, the function returns when the buffer is filled.
  *
  * Conversion is done on all enabled channels, but it is not triggered by this
- * function. This function will prepare the ADC for sampling and then 
- * wait for the SAMPLE task. Sampling can be triggered manually by the @ref 
+ * function. This function will prepare the ADC for sampling and then
+ * wait for the SAMPLE task. Sampling can be triggered manually by the @ref
  * nrf_drv_adc_sample function or by PPI using the @ref NRF_ADC_TASK_START task.
  *
- * @note If more than one channel is enabled, the function emulates scanning, and 
+ * @note If more than one channel is enabled, the function emulates scanning, and
  * a single START task will trigger conversion on all enabled channels. For example:
- * If 3 channels are enabled and the user requests 6 samples, the completion event 
- * handler will be called after 2 START tasks. 
- * @note The application must adjust the sampling frequency. The maximum frequency 
- * depends on the sampling timer and the maximum latency of the ADC interrupt. If 
- * an interrupt is not handled before the next sampling is triggered, the sample 
+ * If 3 channels are enabled and the user requests 6 samples, the completion event
+ * handler will be called after 2 START tasks.
+ * @note The application must adjust the sampling frequency. The maximum frequency
+ * depends on the sampling timer and the maximum latency of the ADC interrupt. If
+ * an interrupt is not handled before the next sampling is triggered, the sample
  * will be lost.
  *
  * @param[in] buffer Result buffer.
@@ -249,17 +252,6 @@ bool nrf_drv_adc_is_busy(void);
  */
 __STATIC_INLINE uint32_t nrf_drv_adc_start_task_get(void);
 
-/**
- * @brief Function for converting a GPIO pin number to an analog input pin mask to be used in
- *        the ADC channel configuration.
- *
- * @param[in]  pin GPIO pin.
- *
- * @return     Analog input pin mask. The function returns @ref NRF_ADC_CONFIG_INPUT_DISABLED
- *             if the specified pin is not an analog input.
- */
-__STATIC_INLINE nrf_adc_config_input_t nrf_drv_adc_gpio_to_ain(uint32_t pin);
-
 #ifndef SUPPRESS_INLINE_IMPLEMENTATION
 
 __STATIC_INLINE uint32_t nrf_drv_adc_start_task_get(void)
@@ -267,22 +259,9 @@ __STATIC_INLINE uint32_t nrf_drv_adc_start_task_get(void)
     return nrf_adc_task_address_get(NRF_ADC_TASK_START);
 }
 
-__STATIC_INLINE nrf_adc_config_input_t nrf_drv_adc_gpio_to_ain(uint32_t pin)
-{
-    // AIN2 - AIN7
-    if (pin >= 1 && pin <= 6)
-    {
-        return (nrf_adc_config_input_t)(1 << (pin+1));
-    }
-    // AIN0 - AIN1
-    else if (pin >= 26 && pin <= 27)
-    {
-        return (nrf_adc_config_input_t)(1 <<(pin - 26));
-    }
-    else
-    {
-        return NRF_ADC_CONFIG_INPUT_DISABLED;
-    }
+#ifdef __cplusplus
 }
+#endif
+
 #endif
 /** @} */

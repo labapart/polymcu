@@ -10,10 +10,19 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BPWR)
+
 #include "ant_bpwr_page_16.h"
-#include "ant_bpwr_page_logger.h"
-#include "app_util.h"
-#include "nordic_common.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BPWR_PAGE_16"
+#if ANT_BPWR_PAGE_16_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BPWR_PAGE_16_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BPWR_PAGE_16_INFO_COLOR
+#else // ANT_BPWR_PAGE_16_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BPWR_PAGE_16_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief bicycle power page 16 data layout structure. */
 typedef struct
@@ -28,20 +37,20 @@ typedef struct
 
 static void page16_data_log(ant_bpwr_page16_data_t const * p_page_data)
 {
-    LOG_PAGE16("event count:                      %u\n\r", p_page_data->update_event_count);
+    NRF_LOG_INFO("event count:                        %u\r\n", p_page_data->update_event_count);
 
     if (p_page_data->pedal_power.byte != 0xFF)
     {
-        LOG_PAGE16("pedal power:                      %u %%\n\r",
+        NRF_LOG_INFO("pedal power:                        %u %%\r\n",
                    p_page_data->pedal_power.items.distribution);
     }
     else
     {
-        LOG_PAGE16("pedal power:                      --\n\r");
+        NRF_LOG_INFO("pedal power:                        --\r\n");
     }
 
-    LOG_PAGE16("accumulated power:                %u W\n\r", p_page_data->accumulated_power);
-    LOG_PAGE16("instantaneous power:              %u W\n\r", p_page_data->instantaneous_power);
+    NRF_LOG_INFO("accumulated power:                  %u W\r\n", p_page_data->accumulated_power);
+    NRF_LOG_INFO("instantaneous power:                %u W\r\n", p_page_data->instantaneous_power);
 }
 
 
@@ -77,4 +86,4 @@ void ant_bpwr_page_16_decode(uint8_t const          * p_page_buffer,
     page16_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_BPWR)

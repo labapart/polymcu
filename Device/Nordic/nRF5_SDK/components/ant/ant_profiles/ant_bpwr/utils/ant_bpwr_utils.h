@@ -16,11 +16,15 @@
 #include "nrf_assert.h"
 #include "nrf.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @file
  *
  * @defgroup ant_sdk_profiles_bpwr_utils Bicycle Power profile utilities
  * @{
- * @ingroup ant_sdk_profiles_bpwr
+ * @ingroup ant_bpwr
  * @brief This module implements utilities for the Bicycle Power profile.
  *
  */
@@ -44,6 +48,11 @@
                                                                             ANT_BPWR_ACC_TORQUE_DISP_PRECISION)
 
 /** @} */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_UTILS_H__
 

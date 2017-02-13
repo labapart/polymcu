@@ -9,11 +9,15 @@
  * the file.
  *
  */
- 
+
 #ifndef ANT_STACK_CONFIG_H__
 #define ANT_STACK_CONFIG_H__
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @file
@@ -24,14 +28,14 @@
  * @{
  * @ingroup ant_sdk_utils
  * @brief Configuration of resources used in the ANT stack.
- * 
+ *
  * This module initializes the stack according to the configuration of the ANT channels.
  */
 
 /**
  * @brief   Function for configuring and enabling the ANT stack.
- * @details The function sets the channel configuration for the stack using the parameters provided 
- *          in the ant_stack_config_defs.h file. It also assigns a correspondingly large buffer
+ * @details The function sets the channel configuration for the stack using the parameters provided
+ *          in the sdk_config.h file. It also assigns a correspondingly large buffer
  *          as static resource.
  *
  * @return A SoftDevice error code.
@@ -41,5 +45,10 @@ uint32_t ant_stack_static_config(void);
 /**
  * @}
  */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_STACK_CONFIG_H__

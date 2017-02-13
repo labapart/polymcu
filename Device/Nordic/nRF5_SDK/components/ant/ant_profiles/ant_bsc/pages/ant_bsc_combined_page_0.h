@@ -21,9 +21,13 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for Bicycle Combined Speed and Cadence data page 0.
  *
- * This structure is used as a common page. 
+ * This structure is used as a common page.
  */
 typedef struct
 {
@@ -57,6 +61,11 @@ void ant_bsc_combined_page_0_encode(uint8_t * p_page_buffer, ant_bsc_combined_pa
  * @param[out] p_page_data      Pointer to the page data.
  */
 void ant_bsc_combined_page_0_decode(uint8_t const * p_page_buffer, ant_bsc_combined_page0_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BSC_COMBINED_PAGE_0_H__
 /** @} */

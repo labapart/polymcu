@@ -16,5 +16,5 @@
 void ser_conn_reset_command_process()
 {
     (void)sd_nvic_SystemReset();
-    while(1);
+    while (1);
 }

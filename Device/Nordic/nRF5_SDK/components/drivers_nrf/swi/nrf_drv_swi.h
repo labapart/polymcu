@@ -12,7 +12,7 @@
 
 /**@file
  *
- * @defgroup lib_driver_swi SWI driver
+ * @defgroup nrf_drv_swi SWI driver
  * @{
  * @ingroup  nrf_drivers
  *
@@ -27,15 +27,20 @@
 #include <stdint.h>
 #include "app_util.h"
 #include "app_util_platform.h"
-#include "nrf_drv_config.h"
+#include "sdk_common.h"
 #include "sdk_errors.h"
+#include "nrf_peripherals.h"
 
 #ifndef EGU_ENABLED
     #define EGU_ENABLED 0
 #endif
 
-#if EGU_ENABLED > 0
+#if NRF_MODULE_ENABLED(EGU)
 #include "nrf_egu.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 typedef uint8_t nrf_swi_t;         ///< @brief SWI channel (unsigned integer).
@@ -56,25 +61,12 @@ typedef uint16_t nrf_swi_flags_t;
 typedef void (* nrf_swi_handler_t)(nrf_swi_t, nrf_swi_flags_t);
 
 /**@brief Maximum numbers of SWIs. This number is fixed for a specific chip. */
-#if EGU_ENABLED > 0
-#define SWI_MAX              NRF_EGU_COUNT
+#if NRF_MODULE_ENABLED(EGU)
+#define SWI_MAX              EGU_COUNT
 #else
-#define SWI_MAX              6
-#endif
-
+#define SWI_MAX              SWI_COUNT
 /**@brief Number of flags per SWI (fixed number). */
-#if EGU_ENABLED > 0
-#define SWI_MAX_FLAGS        NRF_EGU_CHANNEL_COUNT
-#else
 #define SWI_MAX_FLAGS        16
-#endif
-
-#ifndef SWI_COUNT
-/** @brief Number of software interrupts available.
- *
- *  This number can be set in the range from 1 to SWI_MAX.
- */
-#define SWI_COUNT 4
 #endif
 
 #ifdef SOFTDEVICE_PRESENT
@@ -93,13 +85,13 @@ typedef void (* nrf_swi_handler_t)(nrf_swi_t, nrf_swi_flags_t);
 #endif
 
 /**@brief Default SWI priority. */
-#define SWI_DEFAULT_PRIORITY APP_IRQ_PRIORITY_LOW
+#define SWI_DEFAULT_PRIORITY APP_IRQ_PRIORITY_LOWEST
 
 
 /**@brief Function for initializing the SWI module.
  *
- * @retval     NRF_SUCCESS                If the module was successfully initialized.
- * @retval     MODULE_ALREADY_INITIALIZED If the module has already been initialized.
+ * @retval     NRF_SUCCESS                           If the module was successfully initialized.
+ * @retval     NRF_ERROR_MODULE_ALREADY_INITIALIZED  If the module has already been initialized.
  */
 ret_code_t nrf_drv_swi_init(void);
 
@@ -139,7 +131,8 @@ void nrf_drv_swi_free(nrf_swi_t * p_swi);
 void nrf_drv_swi_trigger(nrf_swi_t swi, uint8_t flag_number);
 
 
-#if EGU_ENABLED > 0
+#if (EGU_ENABLED > 0) || defined(__SDK_DOXYGEN__)
+
 
 /**@brief Function for returning the EGU trigger task address.
  *
@@ -159,8 +152,13 @@ uint32_t nrf_drv_swi_task_trigger_address_get(nrf_swi_t swi, uint8_t channel);
  */
 uint32_t nrf_drv_swi_event_triggered_address_get(nrf_swi_t swi, uint8_t channel);
 
-#endif // EGU_ENABLED > 0
+#endif // NRF_MODULE_ENABLED(EGU)
 
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // NRF_DRV_SWI_H__
 

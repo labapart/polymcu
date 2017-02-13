@@ -9,11 +9,11 @@
  * the file.
  *
  */
-
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(APP_TWI)
 #include "app_twi.h"
 #include "nrf_assert.h"
 #include "app_util_platform.h"
-#include "sdk_common.h"
 
 
 // Increase specified queue index and when it goes outside the queue move it
@@ -34,7 +34,7 @@ static bool queue_put(app_twi_queue_t *             p_queue,
 
     // If the queue is already full, we cannot put any more elements into it.
     if ((write_idx == p_queue->size && p_queue->read_idx == 0) ||
-        write_idx == p_queue->read_idx-1)
+        write_idx == p_queue->read_idx - 1)
     {
         return false;
     }
@@ -97,13 +97,13 @@ static ret_code_t start_transfer(app_twi_t * p_app_twi)
      */
     if ((p_transfer->flags & APP_TWI_NO_STOP) &&
         !APP_TWI_IS_READ_OP(p_transfer->operation) &&
-        ((current_transfer_idx+1) < p_app_twi->p_current_transaction->number_of_transfers) &&
+        ((current_transfer_idx + 1) < p_app_twi->p_current_transaction->number_of_transfers) &&
         APP_TWI_OP_ADDRESS(p_transfer->operation) ==
-        APP_TWI_OP_ADDRESS(p_app_twi->p_current_transaction->p_transfers[current_transfer_idx+1].operation)
+        APP_TWI_OP_ADDRESS(p_app_twi->p_current_transaction->p_transfers[current_transfer_idx + 1].operation)
     )
     {
         app_twi_transfer_t const * p_second_transfer =
-            &p_app_twi->p_current_transaction->p_transfers[current_transfer_idx+1];
+            &p_app_twi->p_current_transaction->p_transfers[current_transfer_idx + 1];
         xfer_desc.p_secondary_buf = p_second_transfer->p_data;
         xfer_desc.secondary_length = p_second_transfer->length;
         xfer_desc.type = APP_TWI_IS_READ_OP(p_second_transfer->operation) ? NRF_DRV_TWI_XFER_TXRX :
@@ -374,3 +374,4 @@ ret_code_t app_twi_perform(app_twi_t *                p_app_twi,
         return p_app_twi->internal_transaction_result;
     }
 }
+#endif //NRF_MODULE_ENABLED(APP_TWI)

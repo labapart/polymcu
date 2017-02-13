@@ -16,11 +16,15 @@
 #include "nrf_assert.h"
 #include "nrf.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @file
  *
  * @defgroup ant_sdk_profiles_hrm_utils Heart Rate Monitor profile utilities
  * @{
- * @ingroup ant_sdk_profiles_hrm
+ * @ingroup ant_hrm
  * @brief This module implements utilities for the Heart Rate Monitor profile.
  *
  */
@@ -69,6 +73,11 @@
                                                     + (ANT_HRM_BEAT_TIME_COUNTS_PER_SEC / 2))                                          \
                                                     / ANT_HRM_BEAT_TIME_COUNTS_PER_SEC)
 /** @} */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_HRM_UTILS_H__
 

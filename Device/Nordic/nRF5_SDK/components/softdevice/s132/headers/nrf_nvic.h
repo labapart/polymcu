@@ -39,7 +39,7 @@
  *
  * @note In order to use this module, the following code has to be added to a .c file:
  *     \code
- *     nrf_nvic_state_t nrf_nvic_state;
+ *     nrf_nvic_state_t nrf_nvic_state = {0};
  *     \endcode
  *
  * @note Definitions and declarations starting with __ (double underscore) in this header file are
@@ -91,7 +91,7 @@ extern "C" {
   #define __NRF_NVIC_APP_IRQS_0 (~__NRF_NVIC_SD_IRQS_0)
 #endif
 
-#ifdef NRF52
+#if (defined(NRF52) || defined(NRF52840_XXAA))
   #define __NRF_NVIC_ISER_COUNT (2) /**< The number of ISER/ICER registers in the NVIC that are used. */
 
   /**@brief Interrupts used by the SoftDevice. */
@@ -166,7 +166,7 @@ static inline uint32_t __sd_nvic_app_accessible_irq(IRQn_Type IRQn)
   {
     return ((1UL<<IRQn) & __NRF_NVIC_APP_IRQS_0) != 0;
   }
-#ifdef NRF52
+#if (defined(NRF52) || defined(NRF52840_XXAA))
   else if (IRQn < 64)
   {
     return ((1UL<<(IRQn-32)) & __NRF_NVIC_APP_IRQS_1) != 0;
@@ -197,7 +197,7 @@ static inline uint32_t __sd_nvic_is_app_accessible_priority(uint32_t priority)
     return 0;
   }
 #endif
-#ifdef NRF52
+#if (defined(NRF52) || defined(NRF52840_XXAA))
   if(   priority == 0
      || priority == 1
      || priority == 4
@@ -418,6 +418,8 @@ static inline uint32_t sd_nvic_SystemReset(void)
  * execution context
  * @sa sd_nvic_critical_region_exit
  *
+ * @param[out] p_is_nested_critical_region If 1, the application is now in a nested critical region.
+ *
  * @retval ::NRF_SUCCESS
  */
 static inline uint32_t sd_nvic_critical_region_enter(uint8_t * p_is_nested_critical_region)
@@ -428,7 +430,7 @@ static inline uint32_t sd_nvic_critical_region_enter(uint8_t * p_is_nested_criti
     nrf_nvic_state.__cr_flag = 1;
     nrf_nvic_state.__irq_masks[0] = ( NVIC->ICER[0] & __NRF_NVIC_APP_IRQS_0 );
     NVIC->ICER[0] = __NRF_NVIC_APP_IRQS_0;
-    #ifdef NRF52
+    #if (defined(NRF52) || defined(NRF52840_XXAA))
     nrf_nvic_state.__irq_masks[1] = ( NVIC->ICER[1] & __NRF_NVIC_APP_IRQS_1 );
     NVIC->ICER[1] = __NRF_NVIC_APP_IRQS_1;
     #endif
@@ -460,7 +462,7 @@ static inline uint32_t sd_nvic_critical_region_exit(uint8_t is_nested_critical_r
   {
     int was_masked = __sd_nvic_irq_disable();
     NVIC->ISER[0] = nrf_nvic_state.__irq_masks[0];
-    #ifdef NRF52
+    #if (defined(NRF52) || defined(NRF52840_XXAA))
     NVIC->ISER[1] = nrf_nvic_state.__irq_masks[1];
     #endif
     nrf_nvic_state.__cr_flag = 0;

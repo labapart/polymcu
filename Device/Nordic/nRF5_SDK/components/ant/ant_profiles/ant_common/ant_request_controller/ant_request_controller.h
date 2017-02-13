@@ -25,6 +25,10 @@
 #include "ant_common_page_70.h"
 #include "ant_stack_handler_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Request controller events types. */
 typedef enum
 {
@@ -116,6 +120,11 @@ ant_request_controller_evt_t ant_request_controller_disp_evt_handler(
 void ant_request_controller_sens_evt_handler(ant_request_controller_t * p_controller,
                                             ant_evt_t                * p_ant_event);
 
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_REQUEST_CONTROLLER_H__
 /** @} */

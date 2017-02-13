@@ -46,9 +46,9 @@
 #include "nrf_soc.h"
 
 #ifdef SER_CONNECTIVITY
-#include "ser_phy_config_conn_nrf51.h"
+#include "ser_phy_config_conn.h"
 #else
-#include "ser_phy_config_app_nrf51.h"
+#include "ser_phy_config_app.h"
 #endif /* SER_CONNECTIVITY */
 
 #include "ser_config.h"

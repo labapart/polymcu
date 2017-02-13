@@ -21,7 +21,7 @@
  * @brief ANT BSC simulator module.
  *
  * @details This module simulates a pulse for the ANT Bicycle Speed and Cadence profile. The module
- * calculates abstract values, which are handled by the BSC pages data model to ensure that 
+ * calculates abstract values, which are handled by the BSC pages data model to ensure that
  * they are compatible. It provides a handler for changing the cadence and speed values manually
  * as well as functionality to change the values automatically.
  *
@@ -29,11 +29,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "bsp.h"
 #include "ant_bsc.h"
 #include "ant_bsc_utils.h"
 #include "sensorsim.h"
 #include "ant_bsc_simulator_local.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**@brief BSC simulator configuration structure. */
 typedef struct
@@ -61,11 +64,11 @@ void ant_bsc_simulator_init(ant_bsc_simulator_t           * p_simulator,
                             ant_bsc_simulator_cfg_t const * p_config,
                             bool                            auto_change);
 
-/**@brief Function for simulating a device event. 
- * 
+/**@brief Function for simulating a device event.
+ *
  * @details Based on this event, the transmitter data is simulated.
  *
- * This function should be called in the BSC Sensor event handler. 
+ * This function should be called in the BSC Sensor event handler.
  */
 void ant_bsc_simulator_one_iteration(ant_bsc_simulator_t * p_simulator);
 
@@ -80,6 +83,11 @@ void ant_bsc_simulator_increment(ant_bsc_simulator_t * p_simulator);
  * @param[in]  p_simulator      Pointer to the simulator instance.
  */
 void ant_bsc_simulator_decrement(ant_bsc_simulator_t * p_simulator);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BSC_SIMULATOR_H__
 /** @} */

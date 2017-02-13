@@ -10,10 +10,20 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BPWR)
+
 #include "ant_bpwr_common_data.h"
 #include "ant_bpwr_utils.h"
-#include "ant_bpwr_page_logger.h"
-#include "nordic_common.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BPWR_COMMON"
+#if ANT_BPWR_COMMON_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BPWR_COMMON_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BPWR_COMMON_INFO_COLOR
+#else // ANT_BPWR_COMMON_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BPWR_COMMON_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief BPWR common page data layout structure. */
 typedef struct
@@ -31,11 +41,11 @@ static void cadence_data_log(ant_bpwr_common_data_t const * p_common_data)
 {
     if (p_common_data->instantaneous_cadence == 0xFF)
     {
-        LOG_CADENCE("instantaneous cadence:            -- rpm\n\r");
+        NRF_LOG_INFO("instantaneous cadence:               -- rpm\r\n\n");
     }
     else
     {
-        LOG_CADENCE("instantaneous cadence:            %u rpm\n\r",
+        NRF_LOG_INFO("instantaneous cadence:               %u rpm\r\n\n",
                     p_common_data->instantaneous_cadence);
     }
 }
@@ -57,3 +67,5 @@ void ant_bpwr_cadence_decode(uint8_t const         * p_page_buffer,
 
     cadence_data_log(p_common_data);
 }
+
+#endif // NRF_MODULE_ENABLED(ANT_BPWR)

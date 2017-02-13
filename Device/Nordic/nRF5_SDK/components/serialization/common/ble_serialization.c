@@ -294,7 +294,7 @@ uint32_t count16_cond_data16_enc(uint16_t const * const p_data,
 
     if (p_data)
     {
-        SER_ASSERT_LENGTH_LEQ((int32_t)(2 * count + 1), ((int32_t)buf_len - (int32_t)*p_index));
+        SER_ASSERT_LENGTH_LEQ((int32_t)(2 * count + 1), ((int32_t)buf_len - (int32_t) * p_index));
         p_buf[*p_index] = SER_FIELD_PRESENT;
         *p_index       += 1;
 
@@ -344,6 +344,7 @@ uint32_t count16_cond_data16_dec(uint8_t const * const p_buf,
 
     if (!is_present)
     {
+        *p_count = count;
         *pp_data = NULL;
         return NRF_SUCCESS;
     }

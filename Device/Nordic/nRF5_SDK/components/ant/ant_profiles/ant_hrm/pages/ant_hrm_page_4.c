@@ -9,9 +9,21 @@
  * the file.
  *
  */
+
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_HRM)
+
 #include "ant_hrm_page_4.h"
 #include "ant_hrm_utils.h"
-#include "ant_hrm_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_HRM_PAGE_4"
+#if ANT_HRM_PAGE_4_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_HRM_PAGE_4_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_HRM_PAGE_4_INFO_COLOR
+#else // ANT_HRM_PAGE_4_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_HRM_PAGE_4_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief HRM page 4 data layout structure. */
 typedef struct
@@ -29,9 +41,9 @@ typedef struct
  */
 static void page4_data_log(ant_hrm_page4_data_t const * p_page_data)
 {
-    LOG_PAGE4("Previous heart beat event time:   %u.",
-              (unsigned int)ANT_HRM_BEAT_TIME_SEC(p_page_data->prev_beat));
-    LOG_PAGE4("%03us\n\r", (unsigned int)ANT_HRM_BEAT_TIME_MSEC(p_page_data->prev_beat));
+    NRF_LOG_INFO("Previous heart beat event time:   %u.%03us\r\n\n",
+                 (unsigned int)ANT_HRM_BEAT_TIME_SEC(p_page_data->prev_beat),
+                 (unsigned int)ANT_HRM_BEAT_TIME_MSEC(p_page_data->prev_beat));
 }
 
 
@@ -64,4 +76,4 @@ void ant_hrm_page_4_decode(uint8_t const        * p_page_buffer,
     page4_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_HRM)

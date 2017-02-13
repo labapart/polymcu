@@ -38,6 +38,10 @@
 #include "sensorsim.h"
 #include "ant_bpwr_simulator_local.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief BPWR simulator configuration structure. */
 typedef struct
 {
@@ -82,6 +86,11 @@ void ant_bpwr_simulator_increment(ant_bpwr_simulator_t * p_simulator);
  * @param[in]  p_simulator      Pointer to the simulator instance.
  */
 void ant_bpwr_simulator_decrement(ant_bpwr_simulator_t * p_simulator);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_SIMULATOR_H__
 /** @} */

@@ -22,6 +22,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief BPWR Calibration ID.
  */
 typedef enum
@@ -95,6 +99,11 @@ void ant_bpwr_page_1_encode(uint8_t                     * p_page_buffer,
 void ant_bpwr_page_1_decode(uint8_t const         * p_page_buffer,
                             ant_bpwr_page1_data_t * p_page_data);
 
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_PAGE_1_H__
 /** @} */

@@ -22,6 +22,10 @@
 #include "ser_conn_cmd_decoder.h"
 #include "ser_conn_dtm_cmd_decoder.h"
 #include "ser_conn_reset_cmd_decoder.h"
+#include "ser_dbg_sd_str.h"
+
+#define NRF_LOG_MODULE_NAME "SER_CONN"
+#include "nrf_log.h"
 
 
 uint32_t ser_conn_received_pkt_process(
@@ -34,6 +38,9 @@ uint32_t ser_conn_received_pkt_process(
         /* For further processing pass only command (opcode + data).  */
         uint8_t * p_command   = &p_rx_pkt_params->p_buffer[SER_PKT_OP_CODE_POS];
         uint16_t  command_len = p_rx_pkt_params->num_of_bytes - SER_PKT_TYPE_SIZE;
+
+        NRF_LOG_DEBUG("[SD_CALL]:%s\r\n",
+            (uint32_t)ser_dbg_sd_call_str_get(*p_command));
 
         switch (p_rx_pkt_params->p_buffer[SER_PKT_TYPE_POS])
         {
@@ -48,7 +55,7 @@ uint32_t ser_conn_received_pkt_process(
                 err_code = ser_conn_dtm_command_process(p_command, command_len);
                 break;
             }
-            
+
             case SER_PKT_TYPE_RESET_CMD:
             {
                 ser_conn_reset_command_process();

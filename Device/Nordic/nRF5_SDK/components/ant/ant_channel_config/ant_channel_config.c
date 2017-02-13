@@ -10,27 +10,28 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_CHANNEL_CONFIG)
 #include "nrf_error.h"
 #include "ant_channel_config.h"
 #include "ant_interface.h"
 #include "ant_parameters.h"
-#include "sdk_common.h"
 
 uint32_t ant_channel_init(ant_channel_config_t const * p_config)
 {
     uint32_t err_code;
     // Set Channel Number.
-    err_code = sd_ant_channel_assign(p_config->channel_number, 
-                                     p_config->channel_type, 
+    err_code = sd_ant_channel_assign(p_config->channel_number,
+                                     p_config->channel_type,
                                      p_config->network_number,
                                      p_config->ext_assign);
 
     VERIFY_SUCCESS(err_code);
 
     // Set Channel ID.
-    err_code = sd_ant_channel_id_set(p_config->channel_number, 
-                                     p_config->device_number, 
-                                     p_config->device_type, 
+    err_code = sd_ant_channel_id_set(p_config->channel_number,
+                                     p_config->device_number,
+                                     p_config->device_type,
                                      p_config->transmission_type);
 
     VERIFY_SUCCESS(err_code);
@@ -44,13 +45,15 @@ uint32_t ant_channel_init(ant_channel_config_t const * p_config)
     {
         err_code = sd_ant_channel_period_set(p_config->channel_number, p_config->channel_period);
     }
-    
-    
+
+
 #if ANT_CONFIG_ENCRYPTED_CHANNELS > 0
     VERIFY_SUCCESS(err_code);
-    
+
     err_code = ant_channel_encrypt_config(p_config->channel_type , p_config->channel_number, p_config->p_crypto_settings);
 #endif
-    
+
     return err_code;
 }
+
+#endif // NRF_MODULE_ENABLED(ANT_CHANNEL_CONFIG)

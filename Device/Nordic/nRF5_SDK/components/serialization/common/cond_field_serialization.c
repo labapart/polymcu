@@ -11,7 +11,7 @@ uint32_t cond_field_enc(void const * const      p_field,
 {
     uint32_t err_code = NRF_SUCCESS;
 
-    SER_ASSERT_LENGTH_LEQ(1, buf_len - *p_index);
+    SER_ASSERT_LENGTH_LEQ(*p_index + 1, buf_len);
     p_buf[*p_index] = (p_field == NULL) ? SER_FIELD_NOT_PRESENT : SER_FIELD_PRESENT;
     *p_index       += 1;
 
@@ -28,7 +28,7 @@ uint32_t cond_field_dec(uint8_t const * const   p_buf,
                         uint32_t                buf_len,
                         uint32_t * const        p_index,
                         void * * const          pp_field,
-                        field_decoder_handler_t fp_field_parser)
+                        field_decoder_handler_t fp_field_decoder)
 {
     uint32_t err_code = NRF_SUCCESS;
     uint8_t  is_present;
@@ -41,9 +41,9 @@ uint32_t cond_field_dec(uint8_t const * const   p_buf,
         SER_ASSERT_NOT_NULL(pp_field);
         SER_ASSERT_NOT_NULL(*pp_field);
 
-        if (fp_field_parser != NULL)
+        if (fp_field_decoder != NULL)
         {
-            err_code = fp_field_parser(p_buf, buf_len, p_index, *pp_field);
+            err_code = fp_field_decoder(p_buf, buf_len, p_index, *pp_field);
         }
     }
     else if (is_present == SER_FIELD_NOT_PRESENT)

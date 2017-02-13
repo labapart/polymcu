@@ -19,7 +19,11 @@
 #include "ant_bpwr.h"
 #include "sensorsim.h"
 
-/** 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
  * @ingroup ant_sdk_bpwr_simulator
  * @brief BPWR simulator control block structure. */
 typedef struct
@@ -34,5 +38,10 @@ typedef struct
     sensorsim_cfg_t   pedal_sensorsim_cfg;     ///< Pedal configuration of the simulated sensor.
 }ant_bpwr_simulator_cb_t;
 
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_SIMULATOR_LOCAL_H__

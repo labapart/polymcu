@@ -21,9 +21,13 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for BSC data page 3.
  *
- * This structure implements only page 3 specific data.  
+ * This structure implements only page 3 specific data.
  */
 typedef struct
 {
@@ -55,6 +59,11 @@ void ant_bsc_page_3_encode(uint8_t * p_page_buffer, ant_bsc_page3_data_t const *
  * @param[out] p_page_data      Pointer to the page data.
  */
 void ant_bsc_page_3_decode(uint8_t const * p_page_buffer, ant_bsc_page3_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BSC_PAGE_3_H__
 /** @} */

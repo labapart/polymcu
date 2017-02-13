@@ -12,7 +12,7 @@
 
 /**
  * @file
- * @defgroup ant_sdk_profiles_bpwr Bicycle Power profile
+ * @defgroup ant_bpwr Bicycle Power profile
  * @{
  * @ingroup ant_sdk_profiles
  * @brief This module implements the Bicycle Power profile.
@@ -172,6 +172,10 @@ typedef void (* ant_bpwr_evt_handler_t) (ant_bpwr_profile_t *, ant_bpwr_evt_t);
 typedef void (* ant_bpwr_calib_handler_t) (ant_bpwr_profile_t *, ant_bpwr_page1_data_t *);
 
 #include "ant_bpwr_local.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**@brief Bicycle Power Sensor configuration structure. */
 typedef struct
@@ -334,5 +338,10 @@ uint32_t ant_bpwr_calib_request(ant_bpwr_profile_t * p_profile, ant_bpwr_page1_d
 /**
  * @}
  */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // ANT_BICYCLE_POWER_H__
 

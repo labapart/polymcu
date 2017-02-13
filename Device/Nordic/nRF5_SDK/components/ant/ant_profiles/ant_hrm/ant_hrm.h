@@ -12,7 +12,7 @@
 
 /** @file
  *
- * @defgroup ant_sdk_profiles_hrm Heart Rate Monitor profile
+ * @defgroup ant_hrm Heart Rate Monitor profile
  * @{
  * @ingroup ant_sdk_profiles
  * @brief This module implements the Heart Rate Monitor profile.
@@ -148,6 +148,10 @@ typedef void (* ant_hrm_evt_handler_t) (ant_hrm_profile_t *, ant_hrm_evt_t);
 
 #include "ant_hrm_local.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief HRM sensor configuration structure. */
 typedef struct
 {
@@ -249,6 +253,11 @@ void ant_hrm_sens_evt_handler(ant_hrm_profile_t * p_profile, ant_evt_t * p_ant_e
  * @param[in]   p_ant_event     Event received from the ANT stack.
  */
 void ant_hrm_disp_evt_handler(ant_hrm_profile_t * p_profile, ant_evt_t * p_ant_event);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // ANT_HRM_H__
 /** @} */
 

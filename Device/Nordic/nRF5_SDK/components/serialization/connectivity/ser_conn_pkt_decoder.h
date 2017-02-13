@@ -17,11 +17,11 @@
 
 /** @file
  *
- * @defgroup ser_pkt_decoder Packets decoder in the connectivity chip
+ * @defgroup ser_pkt_decoder Packets decoder in the Connectivity Chip
  * @{
  * @ingroup ser_conn
  *
- * @brief   Decoder for serialized packets from an Application Chip.
+ * @brief   Decoder for serialized packets from the Application Chip.
  *
  * @details This file contains declaration of common function used for processing packets (packets
  *          dispatcher) received by the transport layer.
@@ -33,7 +33,11 @@
 #include <stdint.h>
 #include "ser_hal_transport.h"
 
-/**@brief A function for dispatching packets from an Application Chip to an appropriate decoder.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**@brief A function for dispatching packets from the Application Chip to an appropriate decoder.
  *
  * @details    The function is called to process received packets from a transport layer.
  *             The function analyzes packet type and calls appropriate command decoder which among
@@ -48,6 +52,11 @@
  */
 uint32_t ser_conn_received_pkt_process(
         ser_hal_transport_evt_rx_pkt_received_params_t * p_rx_pkt_params);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SER_CONN_PKT_DECODER_H__ */
 

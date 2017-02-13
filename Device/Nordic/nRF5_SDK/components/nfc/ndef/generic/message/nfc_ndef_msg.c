@@ -10,11 +10,19 @@
  *
  */
 
+#include "sdk_config.h"
+#if NFC_NDEF_MSG_ENABLED
+
+#include "app_util.h"
 #include "nfc_ndef_msg.h"
+#include "nordic_common.h"
 #include "nrf.h"
 
+#define TYPE_4_TAG      4U ///< Type 4 Tag identifier.
+#define NLEN_FIELD_SIZE 2U ///< Size of NLEN field, used to encode NDEF message for Type 4 Tag.
+
 /**
- * @brief Resolve the value of record location flags of the NFC NDEF record within a NFC NDEF message.
+ * @brief Resolve the value of record location flags of the NFC NDEF record within an NFC NDEF message.
  */
 __STATIC_INLINE nfc_ndef_record_location_t record_location_get(uint32_t index,
                                                                uint32_t record_count)
@@ -56,7 +64,32 @@ ret_code_t nfc_ndef_msg_encode(nfc_ndef_msg_desc_t const * p_ndef_msg_desc,
 
     uint32_t sum_of_len = 0;
 
+    if ((p_ndef_msg_desc == NULL) || p_msg_len == NULL)
+    {
+        return NRF_ERROR_NULL;
+    }
+
     nfc_ndef_record_desc_t * * pp_record_rec_desc = p_ndef_msg_desc->pp_record;
+
+    if (p_ndef_msg_desc->pp_record == NULL)
+    {
+        return NRF_ERROR_NULL;
+    }
+
+#if NFC_NDEF_MSG_TAG_TYPE == TYPE_4_TAG
+    uint8_t * p_root_msg_buffer = p_msg_buffer;
+
+    if (p_msg_buffer != NULL)
+    {
+        if (*p_msg_len < NLEN_FIELD_SIZE)
+        {
+            return NRF_ERROR_NO_MEM;
+        }
+
+        p_msg_buffer += NLEN_FIELD_SIZE;
+    }
+    sum_of_len += NLEN_FIELD_SIZE;
+#endif
 
     for (i = 0; i < p_ndef_msg_desc->record_count; i++)
     {
@@ -74,12 +107,27 @@ ret_code_t nfc_ndef_msg_encode(nfc_ndef_msg_desc_t const * p_ndef_msg_desc,
             return err_code;
         }
 
-        sum_of_len   += temp_len;
-        p_msg_buffer += temp_len;
+        sum_of_len += temp_len;
+        if (p_msg_buffer != NULL)
+        {
+            p_msg_buffer += temp_len;
+        }
 
         /* next record */
         pp_record_rec_desc++;
     }
+
+#if NFC_NDEF_MSG_TAG_TYPE == TYPE_4_TAG
+    if (p_msg_buffer != NULL)
+    {
+        if (sum_of_len - NLEN_FIELD_SIZE > UINT16_MAX)
+        {
+            return NRF_ERROR_NOT_SUPPORTED;
+        }
+
+        UNUSED_RETURN_VALUE(uint16_big_encode(sum_of_len - NLEN_FIELD_SIZE, p_root_msg_buffer));
+    }
+#endif
 
     *p_msg_len = sum_of_len;
 
@@ -100,11 +148,11 @@ ret_code_t nfc_ndef_msg_record_add(nfc_ndef_msg_desc_t * const    p_msg,
     {
         return NRF_ERROR_NO_MEM;
     }
-    
+
     p_msg->pp_record[p_msg->record_count] = p_record;
     p_msg->record_count++;
 
     return NRF_SUCCESS;
 }
 
-
+#endif // NFC_NDEF_MSG_ENABLED

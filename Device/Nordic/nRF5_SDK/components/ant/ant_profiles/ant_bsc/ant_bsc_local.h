@@ -18,8 +18,12 @@
 #include <stdbool.h>
 #include "ant_bsc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @addtogroup ant_sdk_profiles_bsc
+ * @addtogroup ant_bsc
  * @{
  */
 
@@ -44,5 +48,10 @@ typedef struct
 /**
  * @}
  */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BSC_LOCAL_H__

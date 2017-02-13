@@ -9,8 +9,20 @@
  * the file.
  *
  */
+
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BSC)
+
 #include "ant_bsc_page_2.h"
-#include "ant_bsc_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BCS_PAGE_2"
+#if ANT_BSC_PAGE_2_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BSC_PAGE_2_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BSC_PAGE_2_INFO_COLOR
+#else // ANT_BSC_PAGE_2_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BSC_PAGE_2_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief BSC page 2 data layout structure. */
 typedef struct
@@ -24,9 +36,8 @@ typedef struct
 /**@brief Function for printing speed or cadence page2 data. */
 static void page2_data_log(ant_bsc_page2_data_t const * p_page_data)
 {
-    LOG_PAGE2("%-30s %u\n\r", "Manufacturer ID:", (unsigned int)p_page_data->manuf_id);
-    LOG_PAGE2("%-30s 0x%X\n\r",
-              "Serial No (upper 16-bits):",
+    NRF_LOG_INFO("Manufacturer ID:           %u\r\n", (unsigned int)p_page_data->manuf_id);
+    NRF_LOG_INFO("Serial No (upper 16-bits): 0x%X\r\n",
               (unsigned int)p_page_data->serial_num);
 }
 
@@ -38,14 +49,14 @@ void ant_bsc_page_2_encode(uint8_t * p_page_buffer, ant_bsc_page2_data_t const *
     p_outcoming_data->manuf_id       = (uint8_t)p_page_data->manuf_id;
     p_outcoming_data->serial_num_LSB = (uint8_t)(serial_num & UINT8_MAX);
     p_outcoming_data->serial_num_MSB = (uint8_t)((serial_num >> 8) & UINT8_MAX);
-    
+
     page2_data_log( p_page_data);
 }
 
 void ant_bsc_page_2_decode(uint8_t const * p_page_buffer, ant_bsc_page2_data_t * p_page_data)
 {
     ant_bsc_page2_data_layout_t const * p_incoming_data = (ant_bsc_page2_data_layout_t *)p_page_buffer;
-    uint32_t serial_num = (uint32_t)((p_incoming_data->serial_num_MSB << 8) 
+    uint32_t serial_num = (uint32_t)((p_incoming_data->serial_num_MSB << 8)
                           + p_incoming_data->serial_num_LSB);
 
     p_page_data->manuf_id            = (uint32_t)p_incoming_data->manuf_id;
@@ -54,3 +65,4 @@ void ant_bsc_page_2_decode(uint8_t const * p_page_buffer, ant_bsc_page2_data_t *
     page2_data_log( p_page_data);
 }
 
+#endif // NRF_MODULE_ENABLED(ANT_BSC)

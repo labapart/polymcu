@@ -13,11 +13,12 @@
 /**
  * @addtogroup ser_conn Connectivity application code
  * @ingroup ble_sdk_lib_serialization
+ * @brief @tagAPI52832 Encoders, decoders, and event handlers related to the Connectivity Chip.
  */
 
 /** @file
  *
- * @defgroup ser_event_encoder Events encoder in the connectivity chip
+ * @defgroup ser_event_encoder Events encoder in the Connectivity Chip
  * @{
  * @ingroup ser_conn
  *
@@ -32,18 +33,27 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief A function for encoding a @ref ble_evt_t. The function passes the serialized byte stream
  *        to the transport layer after encoding.
  *
  * @details The function is called by the application scheduler to process an event previously
  *          pulled from BLE SoftDevice.
  *          The function creates a new packet, calls an appropriate event encoder and sends the
- *          packet to an Application Chip.
+ *          packet to the Application Chip.
  *
  * @param[in]   p_event_data   Pointer to event data of type @ref ble_evt_t.
  * @param[in]   event_size     Event data size.
  */
 void ser_conn_ble_event_encoder(void * p_event_data, uint16_t event_size);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SER_CONN_EVENT_ENCODER_H__ */
 

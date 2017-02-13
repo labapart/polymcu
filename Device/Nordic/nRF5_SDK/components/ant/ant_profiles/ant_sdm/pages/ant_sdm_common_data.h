@@ -22,6 +22,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for SDM common data.
  *
  * @details This structure stores data that is not associated with a particular page.
@@ -62,6 +66,11 @@ void ant_sdm_speed_encode(uint8_t                     * p_page_buffer,
  */
 void ant_sdm_speed_decode(uint8_t const         * p_page_buffer,
                           ant_sdm_common_data_t * p_common_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_SDM_COMMON_DATA_H__
 /** @} */

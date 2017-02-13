@@ -10,9 +10,21 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_SDM)
+
 #include "ant_sdm_page_2.h"
 #include "ant_sdm_utils.h"
-#include "ant_sdm_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_SDM_PAGE_2"
+#if ANT_SDM_PAGE_2_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_SDM_PAGE_2_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_SDM_PAGE_2_INFO_COLOR
+#else // ANT_SDM_PAGE_2_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_SDM_PAGE_2_LOG_ENABLED
+#include "nrf_log.h"
+
 
 /**@brief SDM page 2 data layout structure. */
 typedef struct
@@ -32,24 +44,23 @@ typedef struct
  */
 static void page_2_data_log(ant_sdm_page2_data_t const * p_page_data)
 {
-#if (defined TRACE_SDM_PAGE_2_ENABLE) && (defined ENABLE_DEBUG_LOG_SUPPORT)
     static const char * p_location[4] = {"Laces", "Midsole", "Other", "Ankle"};
     static const char * p_battery[4]  = {"New", "Good", "OK", "Low"};
     static const char * p_health[4]   = {"OK", "Error", "Warning", ""};
     static const char * p_state[4]    = {"Inactive", "Active", "", ""};
 
     uint16_t cadence = ANT_SDM_CADENCE_RESCALE(p_page_data->cadence);
-#endif // (defined TRACE_SDM_PAGE_2_ENABLE) && (defined ENABLE_DEBUG_LOG_SUPPORT)
 
-    LOG_PAGE2("Status:                           state:    %s\n\r",
-                p_state[p_page_data->status.items.state]);
-    LOG_PAGE2("                                  health:   %s\n\r",
-                p_health[p_page_data->status.items.health]);
-    LOG_PAGE2("                                  battery:  %s\n\r",
-                p_battery[p_page_data->status.items.battery]);
-    LOG_PAGE2("                                  location: %s\n\r",
-                p_location[p_page_data->status.items.location]);
-    LOG_PAGE2("Cadence                           %u.%01u strides/min\n\r",
+    NRF_LOG_INFO("Status:\r\n");
+    NRF_LOG_INFO("state:                                %s\r\n",
+                (uint32_t)p_state[p_page_data->status.items.state]);
+    NRF_LOG_INFO("health:                               %s\r\n",
+                (uint32_t)p_health[p_page_data->status.items.health]);
+    NRF_LOG_INFO("battery:                              %s\r\n",
+                (uint32_t)p_battery[p_page_data->status.items.battery]);
+    NRF_LOG_INFO("location:                             %s\r\n",
+                (uint32_t)p_location[p_page_data->status.items.location]);
+    NRF_LOG_INFO("Cadence                               %u.%01u strides/min\r\n",
                 cadence / ANT_SDM_CADENCE_DISP_PRECISION,
                 cadence % ANT_SDM_CADENCE_DISP_PRECISION);
 }
@@ -88,4 +99,4 @@ void ant_sdm_page_2_decode(uint8_t const        * p_page_buffer,
     page_2_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_SDM)

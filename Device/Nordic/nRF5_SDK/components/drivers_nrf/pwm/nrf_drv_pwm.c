@@ -10,16 +10,27 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(PWM)
+#define ENABLED_PWM_COUNT (PWM0_ENABLED+PWM1_ENABLED+PWM2_ENABLED)
+#if ENABLED_PWM_COUNT
 #include <string.h>
 #include "nrf_drv_pwm.h"
 #include "nrf_drv_common.h"
 #include "nrf_gpio.h"
 #include "app_util_platform.h"
 
-#if (PWM_COUNT == 0)
-    #error "No PWM instances enabled in the driver configuration file."
-#endif
+#define NRF_LOG_MODULE_NAME "PWM"
 
+#if PWM_CONFIG_LOG_ENABLED
+#define NRF_LOG_LEVEL       PWM_CONFIG_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  PWM_CONFIG_INFO_COLOR
+#define NRF_LOG_DEBUG_COLOR PWM_CONFIG_DEBUG_COLOR
+#else //PWM_CONFIG_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif //PWM_CONFIG_LOG_ENABLED
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
 
 // Control block - driver instance local data.
 typedef struct
@@ -27,20 +38,7 @@ typedef struct
     nrf_drv_pwm_handler_t    handler;
     nrf_drv_state_t volatile state;
 } pwm_control_block_t;
-static pwm_control_block_t m_cb[PWM_COUNT];
-
-static nrf_drv_pwm_config_t const m_default_config[PWM_COUNT] = {
-#if PWM0_ENABLED
-    NRF_DRV_PWM_DEFAULT_CONFIG(0),
-#endif
-#if PWM1_ENABLED
-    NRF_DRV_PWM_DEFAULT_CONFIG(1),
-#endif
-#if PWM2_ENABLED
-    NRF_DRV_PWM_DEFAULT_CONFIG(2),
-#endif
-};
-
+static pwm_control_block_t m_cb[ENABLED_PWM_COUNT];
 
 static void configure_pins(nrf_drv_pwm_t const * const p_instance,
                            nrf_drv_pwm_config_t const * p_config)
@@ -81,16 +79,17 @@ ret_code_t nrf_drv_pwm_init(nrf_drv_pwm_t const * const p_instance,
                             nrf_drv_pwm_config_t const * p_config,
                             nrf_drv_pwm_handler_t        handler)
 {
+    ASSERT(p_config);
+
+    ret_code_t err_code;
+    
     pwm_control_block_t * p_cb  = &m_cb[p_instance->drv_inst_idx];
 
     if (p_cb->state != NRF_DRV_STATE_UNINITIALIZED)
     {
-        return NRF_ERROR_INVALID_STATE;
-    }
-
-    if (p_config == NULL)
-    {
-        p_config = &m_default_config[p_instance->drv_inst_idx];
+        err_code = NRF_ERROR_INVALID_STATE;
+        NRF_LOG_WARNING("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+        return err_code;
     }
 
     p_cb->handler = handler;
@@ -118,7 +117,9 @@ ret_code_t nrf_drv_pwm_init(nrf_drv_pwm_t const * const p_instance,
 
     p_cb->state = NRF_DRV_STATE_INITIALIZED;
 
-    return NRF_SUCCESS;
+    err_code = NRF_SUCCESS;
+    NRF_LOG_INFO("Function: %s, error code: %s.\r\n", (uint32_t)__func__, (uint32_t)ERR_TO_STR(err_code));
+    return err_code;
 }
 
 
@@ -187,7 +188,7 @@ void nrf_drv_pwm_simple_playback(nrf_drv_pwm_t const * const p_instance,
     nrf_pwm_sequence_set(p_instance->p_registers, 0, p_sequence);
     nrf_pwm_sequence_set(p_instance->p_registers, 1, p_sequence);
     bool odd = (playback_count & 1);
-    nrf_pwm_loop_set(p_instance->p_registers, playback_count/2 + (odd ? 1 : 0));
+    nrf_pwm_loop_set(p_instance->p_registers, playback_count / 2 + (odd ? 1 : 0));
 
     uint32_t shorts_mask;
     if (flags & NRF_DRV_PWM_FLAG_STOP)
@@ -205,6 +206,10 @@ void nrf_drv_pwm_simple_playback(nrf_drv_pwm_t const * const p_instance,
     }
     nrf_pwm_shorts_set(p_instance->p_registers, shorts_mask);
 
+    NRF_LOG_INFO("Function: %s, sequence length: %d.\r\n", (uint32_t)__func__,
+                    p_sequence->length * sizeof(p_sequence->values));
+    NRF_LOG_DEBUG("Sequence data:\r\n");
+    NRF_LOG_HEXDUMP_DEBUG((uint8_t *)p_sequence->values.p_raw,  p_sequence->length * sizeof(p_sequence->values));
     start_playback(p_instance, p_cb, flags, odd ? NRF_PWM_TASK_SEQSTART1
                                                 : NRF_PWM_TASK_SEQSTART0);
 }
@@ -241,6 +246,16 @@ void nrf_drv_pwm_complex_playback(nrf_drv_pwm_t const * const p_instance,
     }
     nrf_pwm_shorts_set(p_instance->p_registers, shorts_mask);
 
+    NRF_LOG_INFO("Function: %s, sequence 0 length: %d.\r\n", (uint32_t)__func__,
+                    p_sequence_0->length * sizeof(p_sequence_0->values));
+    NRF_LOG_INFO("Function: %s, sequence 1 length: %d.\r\n", (uint32_t)__func__,
+                    p_sequence_1->length * sizeof(p_sequence_1->values));
+    NRF_LOG_DEBUG("Sequence 0 data:\r\n");
+    NRF_LOG_HEXDUMP_DEBUG((uint8_t *)p_sequence_0->values.p_raw,
+                            p_sequence_0->length * sizeof(p_sequence_0->values));
+    NRF_LOG_DEBUG("Sequence 1 data:\r\n");
+    NRF_LOG_HEXDUMP_DEBUG((uint8_t *)p_sequence_1->values.p_raw,
+                            p_sequence_1->length * sizeof(p_sequence_1->values));
     start_playback(p_instance, p_cb, flags, NRF_PWM_TASK_SEQSTART0);
 }
 
@@ -250,21 +265,27 @@ bool nrf_drv_pwm_stop(nrf_drv_pwm_t const * const p_instance,
 {
     ASSERT(m_cb[p_instance->drv_inst_idx].state != NRF_DRV_STATE_UNINITIALIZED);
 
+    bool ret_val = false;
+
     if (nrf_drv_pwm_is_stopped(p_instance))
     {
-        return true;
+        ret_val = true;
+    }
+    else
+    {
+        nrf_pwm_task_trigger(p_instance->p_registers, NRF_PWM_TASK_STOP);
+
+        do {
+            if (nrf_drv_pwm_is_stopped(p_instance))
+            {
+                ret_val = true;
+                break;
+            }
+        } while (wait_until_stopped);
     }
 
-    nrf_pwm_task_trigger(p_instance->p_registers, NRF_PWM_TASK_STOP);
-
-    do {
-        if (nrf_drv_pwm_is_stopped(p_instance))
-        {
-            return true;
-        }
-    } while (wait_until_stopped);
-
-    return false;
+    NRF_LOG_INFO("%s returned %d.\r\n", (uint32_t)__func__, ret_val);
+    return ret_val;
 }
 
 
@@ -273,20 +294,24 @@ bool nrf_drv_pwm_is_stopped(nrf_drv_pwm_t const * const p_instance)
     pwm_control_block_t * p_cb  = &m_cb[p_instance->drv_inst_idx];
     ASSERT(p_cb->state != NRF_DRV_STATE_UNINITIALIZED);
 
+    bool ret_val = false;
+
     // If the event handler is used (interrupts are enabled), the state will
     // be changed in interrupt handler when the STOPPED event occurs.
     if (p_cb->state != NRF_DRV_STATE_POWERED_ON)
     {
-        return true;
+        ret_val = true;
     }
     // If interrupts are disabled, we must check the STOPPED event here.
     if (nrf_pwm_event_check(p_instance->p_registers, NRF_PWM_EVENT_STOPPED))
     {
         p_cb->state = NRF_DRV_STATE_INITIALIZED;
-        return true;
+        NRF_LOG_INFO("Disabled.\r\n");
+        ret_val = true;
     }
 
-    return false;
+    NRF_LOG_INFO("%s returned %d.\r\n", (uint32_t)__func__, ret_val);
+    return ret_val;
 }
 
 
@@ -328,23 +353,32 @@ static void irq_handler(NRF_PWM_Type * p_pwm, pwm_control_block_t * p_cb)
 }
 
 
-#if PWM0_ENABLED
+#if NRF_MODULE_ENABLED(PWM0)
 void PWM0_IRQHandler(void)
 {
     irq_handler(NRF_PWM0, &m_cb[PWM0_INSTANCE_INDEX]);
 }
 #endif
 
-#if PWM1_ENABLED
+#if NRF_MODULE_ENABLED(PWM1)
 void PWM1_IRQHandler(void)
 {
     irq_handler(NRF_PWM1, &m_cb[PWM1_INSTANCE_INDEX]);
 }
 #endif
 
-#if PWM2_ENABLED
+#if NRF_MODULE_ENABLED(PWM2)
 void PWM2_IRQHandler(void)
 {
     irq_handler(NRF_PWM2, &m_cb[PWM2_INSTANCE_INDEX]);
 }
 #endif
+
+#if PWM3_ENABLED
+void PWM3_IRQHandler(void)
+{
+    irq_handler(NRF_PWM3, &m_cb[PWM3_INSTANCE_INDEX]);
+}
+#endif
+#endif //ENABLED_PWM_COUNT
+#endif //NRF_MODULE_ENABLED(PWM)

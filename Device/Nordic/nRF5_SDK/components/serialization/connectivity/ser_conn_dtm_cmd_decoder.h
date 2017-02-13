@@ -17,14 +17,14 @@
 
 /** @file
  *
- * @defgroup ser_dtm_decoder DTM Command Decoder in the connectivity chip
+ * @defgroup ser_dtm_decoder DTM Command Decoder in the Connectivity Chip
  * @{
  * @ingroup ser_conn
  *
- * @brief   Decoder for serialized DTM commands from an Application Chip.
+ * @brief   Decoder for serialized DTM commands from the Application Chip.
  *
  * @details This file contains declaration of common function used for DTM commands decoding and
- *          sending responses back to an Application Chip after a DTM command is processed.
+ *          sending responses back to the Application Chip after a DTM command is processed.
  */
 
 #ifndef SER_CONN_DTM_CMD_DECODER_H__
@@ -32,11 +32,15 @@
 
 #include <stdint.h>
 
-/**@brief A function for processing the encoded DTM commands from an Application Chip.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**@brief A function for processing the encoded DTM commands from the Application Chip.
  *
  * @details     The function decodes encoded DTM commands and calls the appropriate DTM API.
  *              Then creates a DTM Command Response packet with the return value from the
- *              DTM API encoded in it and sends it to an Application Chip.
+ *              DTM API encoded in it and sends it to the Application Chip.
  *
  * @param[in]   p_command      The encoded command.
  * @param[in]   command_len    Length of the encoded command.
@@ -48,13 +52,18 @@
 uint32_t ser_conn_dtm_command_process(uint8_t * p_command, uint16_t command_len);
 
 
-/**@brief A function for checking if Connectivity Chip is ready to enter the DTM mode.
+/**@brief A function for checking if the Connectivity Chip is ready to enter the DTM mode.
  *
- * @details     The function checks if Connectivity Chip is ready to enter into DTM mode.
- *              If it is ready then it disables SoftDevice, closes HAL Transport Layer
+ * @details     The function checks if the Connectivity Chip is ready to enter into DTM mode.
+ *              If it is ready, then it disables the SoftDevice, closes HAL Transport Layer,
  *              and starts DTM mode.
  */
 void ser_conn_is_ready_to_enter_dtm(void);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SER_CONN_DTM_CMD_DECODER_H__ */
 

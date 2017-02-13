@@ -10,12 +10,21 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BPWR)
+
 #include <stdio.h>
 #include "ant_bpwr_page_torque.h"
 #include "ant_bpwr_utils.h"
-#include "app_util.h"
-#include "app_trace.h"
-#include "nordic_common.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BPWR_PAGE_TORQUE"
+#if ANT_BPWR_PAGE_TORQUE_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BPWR_PAGE_TORQUE_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BPWR_PAGE_TORQUE_INFO_COLOR
+#else // ANT_BPWR_PAGE_TORQUE_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BPWR_PAGE_TORQUE_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief bicycle power page torque data layout structure. */
 typedef struct
@@ -32,17 +41,15 @@ STATIC_ASSERT(ANT_BPWR_ACC_TORQUE_DISP_PRECISION == 10);      ///< Display forma
 
 void ant_bpwr_page_torque_log(ant_bpwr_page_torque_data_t const * p_page_data)
 {
-#ifdef ENABLE_DEBUG_LOG_SUPPORT
     uint16_t period     = ANT_BPWR_TORQUE_PERIOD_RESCALE(p_page_data->period);
     uint32_t acc_torque = ANT_BPWR_ACC_TORQUE_RESCALE(p_page_data->accumulated_torque);
-#endif // ENABLE_DEBUG_LOG_SUPPORT
 
-    app_trace_log("event count:                      %u\n\r", p_page_data->update_event_count);
-    app_trace_log("tick:                             %u\n\r", p_page_data->tick);
-    app_trace_log("period:                           %u.%03us\n\r",
+    NRF_LOG_INFO("event count:                    %u\r\n", p_page_data->update_event_count);
+    NRF_LOG_INFO("tick:                           %u\r\n", p_page_data->tick);
+    NRF_LOG_INFO("period:                         %u.%03us\r\n",
                   (unsigned int)(period / ANT_BPWR_TORQUE_PERIOD_DISP_PRECISION),
                   (unsigned int)(period % ANT_BPWR_TORQUE_PERIOD_DISP_PRECISION));
-    app_trace_log("accumulated torque:               %u.%01uNm\n\r",
+    NRF_LOG_INFO("accumulated torque:             %u.%01uNm\r\n",
                   (unsigned int)(acc_torque / ANT_BPWR_ACC_TORQUE_DISP_PRECISION),
                   (unsigned int)(acc_torque % ANT_BPWR_ACC_TORQUE_DISP_PRECISION));
 }
@@ -75,4 +82,4 @@ void ant_bpwr_page_torque_decode(uint8_t const               * p_page_buffer,
     p_page_data->accumulated_torque    = uint16_decode(p_incoming_data->accumulated_torque);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_BPWR)

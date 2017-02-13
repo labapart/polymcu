@@ -18,8 +18,12 @@
 #include <stdbool.h>
 #include "ant_hrm.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @addtogroup ant_sdk_profiles_hrm
+ * @addtogroup ant_hrm
  * @{
  */
 
@@ -36,5 +40,10 @@ typedef struct
 /**
  * @}
  */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_HRM_LOCAL_H__

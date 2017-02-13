@@ -15,18 +15,22 @@
 
 /** @file
  *
- * @defgroup ant_sdk_common_page81 ANT+ common page 81
+ * @defgroup ant_common_page_81 ANT+ common page 81
  * @{
  * @ingroup ant_sdk_common_pages
  */
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ANT_COMMON_PAGE_81 (81) ///< @brief ID value of common page 81.
 
 /**@brief Data structure for ANT+ common data page 81.
  *
- * @note This structure implements only page 81 specific data. 
+ * @note This structure implements only page 81 specific data.
  */
 typedef struct
 {
@@ -70,6 +74,11 @@ void ant_common_page_81_encode(uint8_t * p_page_buffer,
  */
 void ant_common_page_81_decode(uint8_t const * p_page_buffer,
                                volatile ant_common_page81_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_COMMON_PAGE_81_H__
 /** @} */

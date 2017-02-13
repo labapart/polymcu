@@ -37,7 +37,7 @@
  * @param[in] line_num    Line number where the handler is called.
  * @param[in] p_file_name Pointer to the file name.
  */
- 
+
 #include "app_util_platform.h"
 #include "nrf_soc.h"
 
@@ -47,23 +47,23 @@
 
 void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
 {
-	// disable INTs
+    // disable INTs
     CRITICAL_REGION_ENTER();
 
-		#if LEDS_NUMBER > 0
-	
-			/* Light a LED on error or warning. */
+    #if LEDS_NUMBER > 0
+
+    /* Light a LED on error or warning. */
     // nrf_gpio_cfg_output(SER_CONN_ASSERT_LED_PIN);
     // nrf_gpio_pin_set(SER_CONN_ASSERT_LED_PIN);
-	
-		#endif
 
-   	// m_p_error_file_name = p_file_name;
+    #endif
+
+    // m_p_error_file_name = p_file_name;
     // m_error_code = error_code;
     // m_error_line_num = line_num;
 
     /* Do not reset when warning. */
-    if(SER_WARNING_CODE != id)
+    if (SER_WARNING_CODE != id)
     {
         /* This call can be used for debug purposes during application development.
         * @note CAUTION: Activating code below will write the stack to flash on an error.
@@ -80,7 +80,7 @@ void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
 #else   /* Debug version. */
         /* To be able to see function parameters in a debugger. */
         uint32_t temp = 1;
-        while(temp);
+        while (temp);
 #endif
 
     }

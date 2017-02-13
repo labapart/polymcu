@@ -31,6 +31,10 @@
 #include "ant_stack_handler_types.h"
 #include "ant_encrypt_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Encryption negotiation states for a slave channel. */
 typedef enum
 {
@@ -100,5 +104,10 @@ void ant_slave_encrypt_negotiation(ant_evt_t * p_ant_evt);
 
 /**
  * @}
- */                                   
+ */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // ANT_ENCRYPT_NEGOTIATION_SLAVE_H__

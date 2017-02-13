@@ -9,9 +9,21 @@
  * the file.
  *
  */
+
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_BSC)
+
 #include "ant_bsc_page_5.h"
 #include "ant_bsc_utils.h"
-#include "ant_bsc_page_logger.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_BCS_PAGE_5"
+#if ANT_BSC_PAGE_5_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_BSC_PAGE_5_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_BSC_PAGE_5_INFO_COLOR
+#else // ANT_BSC_PAGE_5_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_BSC_PAGE_5_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief BSC profile page 5 bitfields definitions. */
 #define ANT_BSC_STOP_IND_MASK       0x01
@@ -28,11 +40,11 @@ static void page5_data_log(ant_bsc_page5_data_t const * p_page_data)
 {
     if (p_page_data->stop_indicator)
     {
-        LOG_PAGE5("Bicycle stopped.\r\n");
+        NRF_LOG_INFO("Bicycle stopped.\r\n");
     }
     else
     {
-        LOG_PAGE5("Bicycle moving.\r\n");
+        NRF_LOG_INFO("Bicycle moving.\r\n");
     }
 }
 
@@ -41,7 +53,7 @@ void ant_bsc_page_5_encode(uint8_t * p_page_buffer, ant_bsc_page5_data_t const *
     ant_bsc_page5_data_layout_t * p_outcoming_data = (ant_bsc_page5_data_layout_t *)p_page_buffer;
 
     p_outcoming_data->flags = (uint8_t)p_page_data->stop_indicator;
-    
+
     page5_data_log( p_page_data);
 }
 
@@ -54,3 +66,4 @@ void ant_bsc_page_5_decode(uint8_t const * p_page_buffer, ant_bsc_page5_data_t *
     page5_data_log( p_page_data);
 }
 
+#endif // NRF_MODULE_ENABLED(ANT_BSC)

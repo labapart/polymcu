@@ -17,13 +17,15 @@
 #include "app_util.h"
 #include "app_util_platform.h"
 #include "app_timer.h"
-#include "app_mailbox.h"
+#include "nrf_queue.h"
 #include "ser_phy.h"
 #include "ser_phy_hci.h"
 #include "crc16.h"
 #include "nrf_soc.h"
 #include "ser_config.h"
 #include "ser_phy_debug_comm.h"
+#define NRF_LOG_MODULE_NAME "SPHY_HCI"
+#include "nrf_log.h"
 // hide globals for release version, expose for debug version
 #if defined(SER_PHY_HCI_DEBUG_ENABLE)
 #define _static
@@ -176,9 +178,15 @@ _static uint32_t m_tx_retry_count;
 // _static uint32_t m_tx_retx_counter = 0;
 // _static uint32_t m_rx_drop_counter = 0;
 
+NRF_QUEUE_DEF(hci_evt_t,
+              m_tx_evt_queue,
+              TX_EVT_QUEUE_SIZE,
+              NRF_QUEUE_MODE_NO_OVERFLOW);
 
-APP_MAILBOX_DEF(tx_evt_queue, TX_EVT_QUEUE_SIZE, sizeof(hci_evt_t));
-APP_MAILBOX_DEF(rx_evt_queue, RX_EVT_QUEUE_SIZE, sizeof(hci_evt_t));
+NRF_QUEUE_DEF(hci_evt_t,
+              m_rx_evt_queue,
+              RX_EVT_QUEUE_SIZE,
+              NRF_QUEUE_MODE_NO_OVERFLOW);
 
 _static hci_tx_fsm_state_t m_hci_tx_fsm_state = HCI_TX_STATE_DISABLE;
 _static hci_rx_fsm_state_t m_hci_rx_fsm_state = HCI_RX_STATE_DISABLE;
@@ -230,7 +238,7 @@ static void hci_signal_timeout_event(void)
     hci_tx_event_handler(&event);
 #else
     hci_link_control_event_handler(&event);
-    if((m_hci_mode == HCI_MODE_ACTIVE) && m_hci_other_side_active)
+    if ((m_hci_mode == HCI_MODE_ACTIVE) && m_hci_other_side_active)
     {
         hci_tx_event_handler(&event);
     }
@@ -715,6 +723,8 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
 
     if ( p_event->evt_type == SER_PHY_HCI_SLIP_EVT_PKT_SENT )
     {
+        NRF_LOG_DEBUG("EVT_PKT_SENT\r\n");
+
         DEBUG_EVT_SLIP_PACKET_TXED(0);
         event.evt_source                    = HCI_SLIP_EVT;
         event.evt.ser_phy_slip_evt.evt_type = p_event->evt_type;
@@ -729,6 +739,8 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
     }
     else if ( p_event->evt_type == SER_PHY_HCI_SLIP_EVT_ACK_SENT )
     {
+        NRF_LOG_DEBUG("EVT_ACK_SENT\r\n");
+
         DEBUG_EVT_SLIP_ACK_TXED(0);
         event.evt_source                    = HCI_SLIP_EVT;
         event.evt.ser_phy_slip_evt.evt_type = p_event->evt_type;
@@ -755,6 +767,9 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
         packet_type = packet_type_decode(
             event.evt.ser_phy_slip_evt.evt_params.received_pkt.p_buffer,
             event.evt.ser_phy_slip_evt.evt_params.received_pkt.num_of_bytes);
+
+        NRF_LOG_DEBUG("EVT_PKT_RECEIVED 0x%X/%u\r\n", packet_type,
+            p_event->evt_params.received_pkt.num_of_bytes);
 
         if (packet_type == PKT_TYPE_ACK )
         {
@@ -817,7 +832,10 @@ static void hci_slip_event_handler(ser_phy_hci_slip_evt_t * p_event)
             DEBUG_EVT_SLIP_ERR_RXED(0);
         }
     }
-
+    else
+    {
+        NRF_LOG_DEBUG("EVT_HW_ERROR\r\n");
+    }
 }
 
 
@@ -1181,7 +1199,7 @@ static void hci_tx_fsm(void)
     {
 
         CRITICAL_REGION_ENTER();
-        err_code = app_mailbox_get(&tx_evt_queue, &event);
+        err_code = nrf_queue_pop(&m_tx_evt_queue, &event);
 
         if (err_code != NRF_SUCCESS)
         {
@@ -1207,7 +1225,7 @@ static void hci_rx_fsm(void)
     while (err_code == NRF_SUCCESS)
     {
         CRITICAL_REGION_ENTER();
-        err_code = app_mailbox_get(&rx_evt_queue, &event);
+        err_code = nrf_queue_pop(&m_rx_evt_queue, &event);
 
         if (err_code != NRF_SUCCESS)
         {
@@ -1231,7 +1249,7 @@ static void hci_tx_reschedule()
     uint32_t tx_queue_length;
 
     CRITICAL_REGION_ENTER();
-    tx_queue_length = app_mailbox_length_get(&tx_evt_queue);
+    tx_queue_length = nrf_queue_utilization_get(&m_tx_evt_queue);
 
 #ifndef HCI_LINK_CONTROL
     if (m_tx_fsm_idle_flag && m_hci_global_enable_flag && tx_queue_length)
@@ -1260,7 +1278,7 @@ static void hci_tx_event_handler(hci_evt_t * p_event)
     uint32_t err_code;
 
     CRITICAL_REGION_ENTER();
-    err_code = app_mailbox_put(&tx_evt_queue, p_event);
+    err_code = nrf_queue_push(&m_tx_evt_queue, p_event);
     ser_phy_hci_assert(err_code == NRF_SUCCESS);
 
     // CRITICAL_REGION_ENTER();
@@ -1287,7 +1305,7 @@ static void hci_rx_reschedule()
     uint32_t rx_queue_length;
 
     CRITICAL_REGION_ENTER();
-    rx_queue_length = app_mailbox_length_get(&rx_evt_queue);
+    rx_queue_length = nrf_queue_utilization_get(&m_rx_evt_queue);
 
 #ifndef HCI_LINK_CONTROL
     if (m_rx_fsm_idle_flag && m_hci_global_enable_flag && rx_queue_length)
@@ -1316,7 +1334,7 @@ static void hci_rx_event_handler(hci_evt_t * p_event)
     uint32_t err_code;
 
     CRITICAL_REGION_ENTER();
-    err_code = app_mailbox_put(&rx_evt_queue, p_event);
+    err_code = nrf_queue_push(&m_rx_evt_queue, p_event);
     ser_phy_hci_assert(err_code == NRF_SUCCESS);
 
     /* only one process can acquire rx_exec_flag */
@@ -1339,13 +1357,13 @@ static void hci_rx_event_handler(hci_evt_t * p_event)
 #ifdef HCI_LINK_CONTROL
 /* Link control event handler - used only for Link Control packets */
 /* This handler will be called only in 2 cases:
-   - when SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED event is received 
+   - when SER_PHY_HCI_SLIP_EVT_PKT_RECEIVED event is received
    - when HCI_TIMER_EVT event is reveived */
 static void hci_link_control_event_handler(hci_evt_t * p_event)
 {
     uint16_t pkt_type = HCI_LINK_CONTROL_PKT_INVALID;
 
-    switch(p_event->evt_source)
+    switch (p_event->evt_source)
     {
         case HCI_SLIP_EVT:
             pkt_type = link_control_packet_decode(
@@ -1390,7 +1408,7 @@ static void hci_link_control_event_handler(hci_evt_t * p_event)
                     {
                         m_hci_mode          = HCI_MODE_ACTIVE;
                         m_hci_tx_fsm_state  = HCI_TX_STATE_SEND;
-                        m_hci_rx_fsm_state  = HCI_RX_STATE_RECEIVE;                        
+                        m_hci_rx_fsm_state  = HCI_RX_STATE_RECEIVE;
                     }
                     break;
             }
@@ -1594,19 +1612,8 @@ uint32_t ser_phy_open(ser_phy_events_handler_t events_handler)
         return NRF_ERROR_INTERNAL;
     }
 
-    err_code = app_mailbox_create(&tx_evt_queue);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        return NRF_ERROR_INTERNAL;
-    }
-
-    err_code = app_mailbox_create(&rx_evt_queue);
-
-    if (err_code != NRF_SUCCESS)
-    {
-        return NRF_ERROR_INTERNAL;
-    }
+    nrf_queue_reset(&m_tx_evt_queue);
+    nrf_queue_reset(&m_rx_evt_queue);
 
     err_code = ser_phy_hci_slip_open(hci_slip_event_handler);
 

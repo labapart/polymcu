@@ -20,6 +20,10 @@
 #include "ble_gap.h"
 #include "peer_manager_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 
 /**
@@ -72,12 +76,10 @@ typedef void (*gscm_evt_handler_t)(gscm_evt_t const * p_event);
 
 /**@brief Function for initializing the GATT Server Cache Manager module.
  *
- * @param[in]  evt_handler  Callback for events from the GATT Server Cache Manager module.
- *
  * @retval NRF_SUCCESS         Initialization was successful.
- * @retval NRF_ERROR_NULL      evt_handler was NULL.
+ * @retval NRF_ERROR_INTERNAL  If an internal error occurred.
  */
-ret_code_t gscm_init(gscm_evt_handler_t evt_handler);
+ret_code_t gscm_init(void);
 
 
 /**@brief Function for triggering local GATT database data to be stored persistently. Values are
@@ -91,9 +93,9 @@ ret_code_t gscm_init(gscm_evt_handler_t evt_handler);
  * @retval NRF_ERROR_BUSY                 Unable to perform operation at this time. Reattempt later.
  * @retval NRF_ERROR_DATA_SIZE            Write buffer not large enough. Call will never work with
  *                                        this GATT database.
- * @retval NRF_ERROR_NO_MEM               No room in persistent_storage. Free up space; the
+ * @retval NRF_ERROR_STORAGE_FULL         No room in persistent_storage. Free up space; the
  *                                        operation will be automatically reattempted after the
- *                                        next compression procedure
+ *                                        next FDS garbage collection procedure.
  * @retval NRF_ERROR_INVALID_STATE        Module is not initialized.
  */
 ret_code_t gscm_local_db_cache_update(uint16_t conn_handle);
@@ -194,8 +196,13 @@ ret_code_t gscm_service_changed_ind_send(uint16_t conn_handle);
  */
 void gscm_db_change_notification_done(pm_peer_id_t peer_id);
 
-/** @} 
+/** @}
  * @endcond
 */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* GATTS_CACHE_MANAGER_H__ */

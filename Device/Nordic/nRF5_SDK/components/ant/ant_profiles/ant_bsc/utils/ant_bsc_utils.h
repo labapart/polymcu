@@ -14,11 +14,15 @@
 
 #include "nrf.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @file
  *
  * @defgroup ant_sdk_profiles_bsc_utils Bicycle Speed and Cadence profile utilities
  * @{
- * @ingroup ant_sdk_profiles_bsc
+ * @ingroup ant_bsc
  * @brief This module implements utilities for the Bicycle Speed and Cadence profile.
  *
  */
@@ -86,6 +90,11 @@
                                                     / ANT_BSC_BAT_VOLTAGE_FRACTION_PER_VOLT)
 
 /** @} */
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BSC_UTILS_H__
 

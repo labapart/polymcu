@@ -21,6 +21,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for HRM data page 0.
  *
  * This structure is used as a common page.
@@ -57,6 +61,11 @@ void ant_hrm_page_0_encode(uint8_t                    * p_page_buffer,
  */
 void ant_hrm_page_0_decode(uint8_t const        * p_page_buffer,
                            ant_hrm_page0_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_HRM_PAGE_0_H__
 /** @} */

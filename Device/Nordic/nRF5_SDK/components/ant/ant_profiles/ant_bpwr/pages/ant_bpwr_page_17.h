@@ -23,6 +23,10 @@
 #include <stdint.h>
 #include "ant_bpwr_page_torque.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for Bicycle Power data page 17.
  *
  * @note This structure implements only page 17 specific data.
@@ -48,6 +52,11 @@ void ant_bpwr_page_17_encode(uint8_t                      * p_page_buffer,
  */
 void ant_bpwr_page_17_decode(uint8_t const          * p_page_buffer,
                              ant_bpwr_page17_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_BPWR_PAGE_17_H__
 /** @} */

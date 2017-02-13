@@ -111,7 +111,6 @@ uint32_t ser_conn_rx_process(void)
     return err_code;
 }
 
-
 void ser_conn_ble_event_handle(ble_evt_t * p_ble_evt)
 {
     uint32_t err_code = NRF_SUCCESS;
@@ -124,6 +123,12 @@ void ser_conn_ble_event_handle(ble_evt_t * p_ble_evt)
     err_code = app_sched_event_put(p_ble_evt, sizeof (ble_evt_hdr_t) + p_ble_evt->header.evt_len,
                                    ser_conn_ble_event_encoder);
     APP_ERROR_CHECK(err_code);
+    uint16_t free_space = app_sched_queue_space_get();
+    if (!free_space)
+    {
+        // Queue is full. Do not pull new events.
+        softdevice_handler_suspend();
+    }
 }
 
 /** @} */

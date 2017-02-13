@@ -10,10 +10,19 @@
  *
  */
 
+#include "sdk_common.h"
+#if NRF_MODULE_ENABLED(ANT_COMMON_PAGE_81)
+
 #include "ant_common_page_81.h"
-#include "ant_common_page_logger.h"
-#include "app_util.h"
-#include "nordic_common.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_COMMON_PAGE_81"
+#if ANT_COMMON_PAGE_81_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_COMMON_PAGE_81_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_COMMON_PAGE_81_INFO_COLOR
+#else // ANT_COMMON_PAGE_81_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_COMMON_PAGE_81_LOG_ENABLED
+#include "nrf_log.h"
 
 /**@brief ant+ common page 81 data layout structure. */
 typedef struct
@@ -33,16 +42,16 @@ static void page81_data_log(volatile ant_common_page81_data_t const * p_page_dat
 {
     if (p_page_data->sw_revision_minor != UINT8_MAX)
     {
-        LOG_PAGE81("sw revision:                      %u.%u\n\r",
+        NRF_LOG_INFO("sw revision:                      %u.%u\r\n",
                    ((ant_common_page81_data_t const *) p_page_data)->sw_revision_major,
                    ((ant_common_page81_data_t const *) p_page_data)->sw_revision_minor);
     }
     else
     {
-        LOG_PAGE81("sw revision:                      %u\n\r", p_page_data->sw_revision_major);
+        NRF_LOG_INFO("sw revision:                      %u\r\n", p_page_data->sw_revision_major);
     }
 
-    LOG_PAGE81("serial number:                    %u\n\r", (unsigned int) p_page_data->serial_number);
+    NRF_LOG_INFO("serial number:                    %u\r\n\n", (unsigned int) p_page_data->serial_number);
 }
 
 
@@ -77,4 +86,4 @@ void ant_common_page_81_decode(uint8_t const                     * p_page_buffer
     page81_data_log(p_page_data);
 }
 
-
+#endif // NRF_MODULE_ENABLED(ANT_COMMON_PAGE_81)

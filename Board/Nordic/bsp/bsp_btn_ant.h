@@ -9,7 +9,7 @@
  * the file.
  *
  */
- 
+
  /**@file
  *
  * @defgroup bsp_btn_ant BSP: ANT Button Module
@@ -24,12 +24,16 @@
  * handled by the application's BSP event handler.
  *
  */
- 
+
 #ifndef BSP_BTN_ANT_H__
 #define BSP_BTN_ANT_H__
 
 #include <stdint.h>
 #include "ant_stack_handler_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
  /**@brief Function for initializing the ANT Button Module.
  *
@@ -54,6 +58,11 @@ uint32_t bsp_btn_ant_sleep_mode_prepare(void);
  * @param[in] p_ant_evt ANT stack event.
  */
 void bsp_btn_ant_on_ant_evt(ant_evt_t * p_ant_evt);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BSP_BTN_ANT_H__ */
 

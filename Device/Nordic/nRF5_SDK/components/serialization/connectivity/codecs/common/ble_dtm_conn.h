@@ -29,19 +29,23 @@
  * @{
  * @ingroup  ser_conn_common_codecs
  *
- * @brief   DTM Connectivity command request decoder and command response encoder
+ * @brief   DTM Connectivity command request decoder and command response encoder.
  */
 
 #include "dtm_uart.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Decodes @ref ble_dtm_init command request.
  *
- * @sa @ref nrf51_dtm_init_encoding_sec for packet format,
+ * @sa @ref encoding_data for packet format,
  *     @ref ble_dtm_init_rsp_enc for response encoding.
  *
  * @param[in] p_buf               Pointer to beginning of command request packet.
- * @param[in] packet_len             Length (in bytes) of request packet.
- * @param[in] p_comm_params       Pointer to the structure with DTM Uart configuration.
+ * @param[in] packet_len          Length (in bytes) of request packet.
+ * @param[in] p_comm_params       Pointer to the structure with DTM UART configuration.
 
  *
  * @retval NRF_SUCCESS                Decoding success.
@@ -55,7 +59,7 @@ uint32_t ble_dtm_init_req_dec(uint8_t const * const           p_buf,
 
 /**@brief Encodes @ref ble_dtm_init command response.
  *
- * @sa @ref nrf51_dtm_init_encoding_sec for packet format.
+ * @sa @ref encoding_data for packet format.
  *     @ref ble_dtm_init_req_dec for request decoding.
  *
  * @param[in] return_code         Return code indicating if command was successful or not.
@@ -73,5 +77,10 @@ uint32_t ble_dtm_init_rsp_enc(uint32_t         return_code,
                               uint32_t * const p_buf_len);
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // BLE_DTM_CONN_H__
 

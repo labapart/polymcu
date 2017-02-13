@@ -15,12 +15,16 @@
 
 /** @file
  *
- * @defgroup ant_sdk_common_page70 ANT+ common page 70
+ * @defgroup ant_common_page_70 ANT+ common page 70
  * @{
  * @ingroup ant_sdk_common_pages
  */
 
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define ANT_COMMON_PAGE_70              (70)        ///< @brief ID value of common page 70.
 #define ANT_PAGE70_INVALID_DESCRIPTOR   UINT16_MAX  ///< Invalid descriptor.
@@ -94,6 +98,11 @@ void ant_common_page_70_encode(uint8_t                                 * p_page_
  */
 void ant_common_page_70_decode(uint8_t const                     * p_page_buffer,
                                volatile ant_common_page70_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_COMMON_PAGE_70_H__
 /** @} */

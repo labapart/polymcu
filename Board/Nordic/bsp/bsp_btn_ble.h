@@ -32,6 +32,10 @@
 #include "ble.h"
 #include "bsp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief BLE Button Module error handler type. */
 typedef void (*bsp_btn_ble_error_handler_t) (uint32_t nrf_error);
 
@@ -66,6 +70,11 @@ uint32_t bsp_btn_ble_sleep_mode_prepare(void);
  * @param[in] p_ble_evt BLE stack event.
  */
 void bsp_btn_ble_on_ble_evt(ble_evt_t * p_ble_evt);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BSP_BTN_BLE_H__ */
 

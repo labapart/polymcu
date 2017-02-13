@@ -21,6 +21,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief Data structure for HRM data page 1.
  *
  * This structure implements only page 1 specific data.
@@ -53,6 +57,11 @@ void ant_hrm_page_1_encode(uint8_t                    * p_page_buffer,
  */
 void ant_hrm_page_1_decode(uint8_t const        * p_page_buffer,
                            ant_hrm_page1_data_t * p_page_data);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ANT_HRM_PAGE_1_H__
 /** @} */

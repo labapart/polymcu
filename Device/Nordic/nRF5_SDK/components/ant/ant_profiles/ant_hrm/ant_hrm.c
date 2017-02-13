@@ -9,14 +9,26 @@
  * the file.
  *
  */
+
+#include "sdk_config.h"
+#if ANT_HRM_ENABLED
+
 #include "nrf_assert.h"
 #include "app_error.h"
 #include "ant_interface.h"
 #include "app_util.h"
 #include "ant_hrm.h"
 #include "ant_hrm_utils.h"
-#include "ant_hrm_page_logger.h"
 #include "app_error.h"
+
+#define NRF_LOG_MODULE_NAME "ANT_HRM"
+#if ANT_HRM_LOG_ENABLED
+#define NRF_LOG_LEVEL       ANT_HRM_LOG_LEVEL
+#define NRF_LOG_INFO_COLOR  ANT_HRM_INFO_COLOR
+#else // ANT_HRM_LOG_ENABLED
+#define NRF_LOG_LEVEL       0
+#endif // ANT_HRM_LOG_ENABLED
+#include "nrf_log.h"
 
 #define BACKGROUND_DATA_INTERVAL 64 /**< The number of main data pages sent between background data page.
                                          Background data page is sent every 65th message. */
@@ -48,7 +60,7 @@ static ret_code_t ant_hrm_init(ant_hrm_profile_t          * p_profile,
     p_profile->page_3 = DEFAULT_ANT_HRM_PAGE3();
     p_profile->page_4 = DEFAULT_ANT_HRM_PAGE4();
 
-    LOG_HRM("ANT HRM channel %u init\n\r", p_profile->channel_number);
+    NRF_LOG_INFO("ANT HRM channel %u init\r\n", p_profile->channel_number);
     return ant_channel_init(p_channel_config);
 }
 
@@ -147,7 +159,7 @@ static void sens_message_encode(ant_hrm_profile_t * p_profile, uint8_t * p_messa
     p_hrm_message_payload->page_number = next_page_number_get(p_profile);
     p_hrm_message_payload->toggle_bit  = p_hrm_cb->toggle_bit;
 
-    LOG_HRM("HRM TX Page number:               %u\n\r", p_hrm_message_payload->page_number);
+    NRF_LOG_INFO("HRM TX Page number: %u\r\n", p_hrm_message_payload->page_number);
 
     ant_hrm_page_0_encode(p_hrm_message_payload->page_payload, &(p_profile->page_0)); // Page 0 is present in each message
 
@@ -174,10 +186,9 @@ static void sens_message_encode(ant_hrm_profile_t * p_profile, uint8_t * p_messa
             break;
 
         default:
-            LOG_HRM("\r\n");
             return;
     }
-    LOG_HRM("\r\n");
+
     p_profile->evt_handler(p_profile, (ant_hrm_evt_t)p_hrm_message_payload->page_number);
 }
 
@@ -221,7 +232,7 @@ ret_code_t ant_hrm_disp_open(ant_hrm_profile_t * p_profile)
 {
     ASSERT(p_profile != NULL);
 
-    LOG_HRM("ANT HRM channel %u open\n\r", p_profile->channel_number);
+    NRF_LOG_INFO("ANT HRM channel %u open\r\n", p_profile->channel_number);
     return sd_ant_channel_open(p_profile->channel_number);
 }
 
@@ -233,7 +244,7 @@ ret_code_t ant_hrm_sens_open(ant_hrm_profile_t * p_profile)
     // Fill tx buffer for the first frame
     ant_message_send(p_profile);
 
-    LOG_HRM("ANT HRM channel %u open\n\r", p_profile->channel_number);
+    NRF_LOG_INFO("ANT HRM channel %u open\r\n", p_profile->channel_number);
     return sd_ant_channel_open(p_profile->channel_number);
 }
 
@@ -247,7 +258,7 @@ static void disp_message_decode(ant_hrm_profile_t * p_profile, uint8_t * p_messa
     const ant_hrm_message_layout_t * p_hrm_message_payload =
         (ant_hrm_message_layout_t *)p_message_payload;
 
-    LOG_HRM("HRM RX Page Number:               %u\n\r", p_hrm_message_payload->page_number);
+    NRF_LOG_INFO("HRM RX Page Number: %u\r\n", p_hrm_message_payload->page_number);
 
     ant_hrm_page_0_decode(p_hrm_message_payload->page_payload, &(p_profile->page_0)); // Page 0 is present in each message
 
@@ -274,10 +285,8 @@ static void disp_message_decode(ant_hrm_profile_t * p_profile, uint8_t * p_messa
             break;
 
         default:
-            LOG_HRM("\r\n");
             return;
     }
-    LOG_HRM("\r\n");
 
     p_profile->evt_handler(p_profile, (ant_hrm_evt_t)p_hrm_message_payload->page_number);
 }
@@ -307,4 +316,4 @@ void ant_hrm_disp_evt_handler(ant_hrm_profile_t * p_profile, ant_evt_t * p_ant_e
     }
 }
 
-
+#endif // ANT_HRM_ENABLED
