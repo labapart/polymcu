@@ -24,8 +24,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# This application is only supported on 'Nordic/nRF52DK'
-TEST_SUPPORTED_BOARD(Nordic/nRF52DK)
+# This application is only supported on Nordic boards
+TEST_SUPPORTED_BOARD(Nordic/*)
 
 # List of modules needed by the application
 set(LIST_MODULES CMSIS Lib/PolyMCU)

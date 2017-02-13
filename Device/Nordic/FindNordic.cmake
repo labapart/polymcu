@@ -29,21 +29,36 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG_NRF -DDEBUG_NRF_USER -DN
 
 set(NORDIC_SDK_ROOT ${CMAKE_CURRENT_LIST_DIR}/nRF5_SDK/components)
 
-if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
-  # Enable Nordic SoftDevice
-  set(NORDIC_SOFT_DEVICE_VERSION s132)
-endif()
-
 set(NORDIC_SOFT_DEVICE_ROOT ${NORDIC_SDK_ROOT}/softdevice/${NORDIC_SOFT_DEVICE_VERSION})
-if (NORDIC_SOFT_DEVICE_VERSION)
-  add_definitions(-DSOFTDEVICE_PRESENT -DS132)
+if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
+  if (NORDIC_SOFT_DEVICE_VERSION STREQUAL "s130")
+    add_definitions(-DSOFTDEVICE_PRESENT -DS130)
+  elseif (NORDIC_SOFT_DEVICE_VERSION STREQUAL "s132")
+    add_definitions(-DSOFTDEVICE_PRESENT -DS132)
+  endif()
 endif()
 
-if (NORDIC_NRF52)
+if (NORDIC_NRF51)
+  # MCU definitions
+  add_definitions(-DNRF51)
+
+  if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
+    set(LINKER_SCRIPT ${CMAKE_BINARY_DIR}/${NORDIC_NRF51_SOFTDEVICE_LINKER_SCRIPT})
+    set(Board_INSTALL_SCRIPT_ARG "${NORDIC_SOFT_DEVICE_ROOT}/hex/s130_nrf51_2.0.0_softdevice.hex")
+  else()
+    if (NORDIC_NRF51_SOFTDEVICE_LINKER_SCRIPT MATCHES "_xxaa.ld")
+      set(LINKER_SCRIPT ${NORDIC_SDK_ROOT}/toolchain/gcc/nrf51_xxaa.ld)
+    elseif (NORDIC_NRF51_SOFTDEVICE_LINKER_SCRIPT MATCHES "_xxab.ld")
+      set(LINKER_SCRIPT ${NORDIC_SDK_ROOT}/toolchain/gcc/nrf51_xxab.ld)
+    elseif (NORDIC_NRF51_SOFTDEVICE_LINKER_SCRIPT MATCHES "_xxac.ld")
+      set(LINKER_SCRIPT ${NORDIC_SDK_ROOT}/toolchain/gcc/nrf51_xxac.ld)
+    endif()
+  endif()
+elseif (NORDIC_NRF52)
   # MCU definitions
   add_definitions(-DNRF52)
-  
-  if (NORDIC_SOFT_DEVICE_VERSION)
+
+  if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
     set(LINKER_SCRIPT ${CMAKE_BINARY_DIR}/armgcc_s132_nrf52832_xxaa.ld)
     set(Board_INSTALL_SCRIPT_ARG "${NORDIC_SOFT_DEVICE_ROOT}/hex/s132_nrf52_2.0.0_softdevice.hex")
   else()
@@ -120,8 +135,13 @@ endif()
 if (NORDIC_SOFT_DEVICE_VERSION)
   include_directories(${NORDIC_SDK_ROOT}/libraries/fstorage
                       ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler
-                      ${NORDIC_SOFT_DEVICE_ROOT}/headers
-                      ${NORDIC_SOFT_DEVICE_ROOT}/headers/nrf52)
+                      ${NORDIC_SOFT_DEVICE_ROOT}/headers)
+
+  if (NORDIC_NRF51)
+    include_directories(${NORDIC_SOFT_DEVICE_ROOT}/headers/nrf51)
+  elseif (NORDIC_NRF52)
+    include_directories(${NORDIC_SOFT_DEVICE_ROOT}/headers/nrf52)
+  endif()
 else()
   include_directories(${NORDIC_SDK_ROOT}/drivers_nrf/nrf_soc_nosd)
 endif()

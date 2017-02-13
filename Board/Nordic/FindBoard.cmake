@@ -28,8 +28,13 @@ find_package(Nordic)
 
 add_definitions(-DBSP_UART_SUPPORT -DBLE_STACK_SUPPORT_REQD)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/nRF52DK
-					${CMAKE_CURRENT_LIST_DIR}/bsp)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/bsp)
+
+if (BOARD STREQUAL "Nordic/nRF51DK")
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/nRF51DK)
+elseif (BOARD STREQUAL "Nordic/nRF52DK")
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/nRF52DK)
+endif()
 
 set(Board_LIBRARIES board_nordic ${NORDIC_LIBRARIES})
 

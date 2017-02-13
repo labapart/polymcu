@@ -32,7 +32,7 @@ if (SUPPORT_RTOS)
   find_package(RTOS)
 endif()
 
-set(board_nordic_SRCS bsp/bsp.c nRF52DK/board.c)
+set(board_nordic_SRCS bsp/bsp.c)
 
 if(SUPPORT_TIMER)
   find_package(PolyMCU)
@@ -44,10 +44,20 @@ if (NORDIC_SOFT_DEVICE_VERSION)
   list(APPEND board_nordic_SRCS bsp/bsp_btn_ble.c)
 endif()
 
+if (BOARD STREQUAL "Nordic/nRF51DK")
+  list(APPEND board_nordic_SRCS nRF51DK/board.c)
+elseif (BOARD STREQUAL "Nordic/nRF52DK")
+  list(APPEND board_nordic_SRCS nRF52DK/board.c)
+endif()
+
 if(SUPPORT_RTOS STREQUAL "RTX")
   add_definitions(-DRTC1_CONFIG_FREQUENCY=${RTOS_CLOCK})
 
-  list(APPEND board_nordic_SRCS nRF52DK/rtx.c nRF52DK/rtx_helper.s)
+  if (BOARD STREQUAL "Nordic/nRF51DK")
+    list(APPEND board_nordic_SRCS nRF51DK/rtx.c nRF51DK/rtx_helper.s)
+  elseif (BOARD STREQUAL "Nordic/nRF51DK")
+    list(APPEND board_nordic_SRCS nRF52DK/rtx.c nRF52DK/rtx_helper.s)
+  endif()
 endif()
 
 add_library(board_nordic STATIC ${board_nordic_SRCS})

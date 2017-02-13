@@ -38,9 +38,7 @@ include_directories(${NORDIC_SDK_ROOT}
                     ${NORDIC_SDK_ROOT}/libraries/fstorage/config
                     ${NORDIC_SDK_ROOT}/libraries/util)
 
-set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
-				${NORDIC_SDK_ROOT}/toolchain/system_nrf52.c
-				${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
+set(nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/clock/nrf_drv_clock.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/rtc/nrf_drv_rtc.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/gpiote/nrf_drv_gpiote.c
@@ -51,6 +49,14 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
 				${NORDIC_SDK_ROOT}/libraries/sensorsim/sensorsim.c
 				${NORDIC_SDK_ROOT}/libraries/util/app_util_platform.c
 				${NORDIC_SDK_ROOT}/libraries/util/nrf_log.c)
+
+if (NORDIC_NRF51)
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf51.s
+				          ${NORDIC_SDK_ROOT}/toolchain/system_nrf51.c)
+elseif (NORDIC_NRF52)
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf52.s
+				          ${NORDIC_SDK_ROOT}/toolchain/system_nrf52.c)
+endif()
 
 # Timer support
 if(SUPPORT_RTOS STREQUAL "RTX")
@@ -69,19 +75,15 @@ if (NORDIC_SOFT_DEVICE_VERSION)
 endif()
 
 #
-# Nordic SoftDevice Support
+# BLE support
 #
-if (NORDIC_SOFT_DEVICE_VERSION)
+if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
   list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/libraries/fstorage/fstorage.c
                           ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler.c
-                          ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler_appsh.c)
-endif()
-
-# BLE support
-if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
-  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/ble/common/ble_advdata.c
-	  					  ${NORDIC_SDK_ROOT}/ble/common/ble_conn_params.c
-	  					  ${NORDIC_SDK_ROOT}/ble/common/ble_srv_common.c)
+                          ${NORDIC_SDK_ROOT}/softdevice/common/softdevice_handler/softdevice_handler_appsh.c
+                          ${NORDIC_SDK_ROOT}/ble/common/ble_advdata.c
+                          ${NORDIC_SDK_ROOT}/ble/common/ble_conn_params.c
+                          ${NORDIC_SDK_ROOT}/ble/common/ble_srv_common.c)
 
   #
   # Generate Linker file
@@ -90,9 +92,11 @@ if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
     message(FATAL_ERROR "Set 'NORDIC_SOFTDEVICE_RAM_SIZE' with the size of the memory consumed by SoftDevice.")
   endif()
 
-  if(BOARD_PCA10036)
+  if(BOARD_PCA10028)
+    configure_file(${NORDIC_SOFT_DEVICE_ROOT}/toolchain/armgcc/${NORDIC_NRF51_SOFTDEVICE_LINKER_SCRIPT}.in ${CMAKE_BINARY_DIR}/${NORDIC_NRF51_SOFTDEVICE_LINKER_SCRIPT})
+  elseif(BOARD_PCA10036)
     configure_file(${NORDIC_SOFT_DEVICE_ROOT}/toolchain/armgcc/armgcc_s132_nrf52832_xxaa_pca10036.ld.in ${CMAKE_BINARY_DIR}/armgcc_s132_nrf52832_xxaa.ld)
-  else()
+  elseif(BOARD_PCA10040)
     configure_file(${NORDIC_SOFT_DEVICE_ROOT}/toolchain/armgcc/armgcc_s132_nrf52832_xxaa.ld.in ${CMAKE_BINARY_DIR}/armgcc_s132_nrf52832_xxaa.ld)
   endif()
 
