@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ TEST_SUPPORTED_BOARD(Nordic/nRF52DK)
 set(LIST_MODULES CMSIS Lib/PolyMCU)
 
 set(SUPPORT_BLE_PERIPHERAL 1)
+set(NORDIC_SOFTDEVICE_RAM_SIZE 0x2080)
 
 # Required by buttons_leds_init()
 add_definitions(-DGPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=4)

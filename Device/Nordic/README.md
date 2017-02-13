@@ -4,6 +4,11 @@ Systick
 _Important Note:_ On nRF52, Nordic turns off Systick during sleep to ensure that the power consumption is low. 
 It means the CPU would not be able to be woken up for a Systick interrupt.
 
+Configure Nordic SoftDevice Memory Consumption
+----------------------------------------------
+
+Set `NORDIC_SOFTDEVICE_RAM_SIZE` to define how much memory Nordic SoftDevice consumes.
+
 Requirements
 ------------
 

@@ -83,6 +83,19 @@ if (SUPPORT_BLE_PERIPHERAL OR SUPPORT_BLE_CENTRAL)
 	  					  ${NORDIC_SDK_ROOT}/ble/common/ble_conn_params.c
 	  					  ${NORDIC_SDK_ROOT}/ble/common/ble_srv_common.c)
 
+  #
+  # Generate Linker file
+  #
+  if (NOT DEFINED NORDIC_SOFTDEVICE_RAM_SIZE)
+    message(FATAL_ERROR "Set 'NORDIC_SOFTDEVICE_RAM_SIZE' with the size of the memory consumed by SoftDevice.")
+  endif()
+
+  if(BOARD_PCA10036)
+    configure_file(${NORDIC_SOFT_DEVICE_ROOT}/toolchain/armgcc/armgcc_s132_nrf52832_xxaa_pca10036.ld.in ${CMAKE_BINARY_DIR}/armgcc_s132_nrf52832_xxaa.ld)
+  else()
+    configure_file(${NORDIC_SOFT_DEVICE_ROOT}/toolchain/armgcc/armgcc_s132_nrf52832_xxaa.ld.in ${CMAKE_BINARY_DIR}/armgcc_s132_nrf52832_xxaa.ld)
+  endif()
+
   if (SUPPORT_BLE_PERIPHERAL)
     include_directories(${NORDIC_SDK_ROOT}/ble/ble_racp)
 
