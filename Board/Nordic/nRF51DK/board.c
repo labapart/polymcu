@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #include "app_error.h"
 #if defined(__CMSIS_RTOS) && defined(SOFTDEVICE_PRESENT)
 #include "softdevice_handler.h"
+#include "app_util_platform.h"
 #endif
 
 extern const ARM_DRIVER_USART Driver_UART_DEBUG;
@@ -48,10 +49,13 @@ void hardware_init_hook(void) {
 
 #if defined(__CMSIS_RTOS) && defined(SOFTDEVICE_PRESENT)
     // Initialize the SoftDevice handler module.
-    SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
+    nrf_clock_lf_cfg_t clock_lf_cfg = NRF_CLOCK_LFCLKSRC;
+
+    // Initialize the SoftDevice handler module.
+    SOFTDEVICE_HANDLER_INIT(&clock_lf_cfg, NULL);
 
     // We need to configure the interrupt before starting the kernel as we cannot call an SVC in an SVC Handler
-    uint32_t err_code = sd_nvic_SetPriority(RTC1_IRQn, NRF_APP_PRIORITY_LOW);
+    uint32_t err_code = sd_nvic_SetPriority(RTC1_IRQn, APP_IRQ_PRIORITY_LOW);
     assert(err_code == NRF_SUCCESS);
 
     err_code = sd_nvic_EnableIRQ(RTC1_IRQn);
