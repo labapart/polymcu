@@ -30,6 +30,9 @@ TEST_SUPPORTED_BOARD(Nordic/*)
 # List of modules needed by the board support and the application
 set(LIST_MODULES CMSIS Lib/PolyMCU)
 
+# Required by buttons_leds_init()
+add_definitions(-DGPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=4)
+
 # This example requires BLE Peripheral support
 set(SUPPORT_BLE_PERIPHERAL 1)
 
