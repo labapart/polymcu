@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2017, Lab A Part
+# Copyright (c) 2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Heap for MicroPython Garbage collector
-set(FIRMWARE_HEAP 0x2000)
+find_package(Board)
 
-# List of modules needed by the application
-set(LIST_MODULES CMSIS Lib/PolyMCU Lib/MicroPython)
+include_directories(${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/build)
+
+set(MicroPython_LIBRARIES polymcu_micropython ${CMAKE_CURRENT_LIST_DIR}/libmicropython.a)
+#set(MicroPython_LIBRARIES polymcu_micropython)

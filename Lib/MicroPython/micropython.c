@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, Lab A Part
+ * Copyright (c) 2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,58 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "board.h"
-
-#include "py/nlr.h"
-#include "py/compile.h"
-#include "py/runtime.h"
-#include "py/repl.h"
 #include "py/gc.h"
-#include "lib/utils/pyexec.h"
 
-#include <stdio.h>
-
-extern uint8_t __HeapBase, __HeapLimit;
-
-// The processor clock is initialized by CMSIS startup + system file
-int main (void) {
-#if MICROPY_ENABLE_GC
-	gc_init(&__HeapBase, &__HeapLimit);
+void gc_collect(void) {
+#if 0
+	// WARNING: This gc_collect implementation doesn't try to get root
+    // pointers from CPU registers, and thus may function incorrectly.
+    void *dummy;
+    gc_collect_start();
+    gc_collect_root(&dummy, ((mp_uint_t)stack_top - (mp_uint_t)&dummy) / sizeof(mp_uint_t));
+    gc_collect_end();
+    gc_dump_info();
 #endif
-
-	mp_init();
-
-#if MICROPY_REPL_EVENT_DRIVEN
-	pyexec_event_repl_init();
-	for (;;) {
-		int c = mp_hal_stdin_rx_chr();
-		if (pyexec_event_repl_process_char(c)) {
-			break;
-		}
-	}
-#else
-	pyexec_friendly_repl();
-#endif
-
-	//do_str("print('hello world!', list(x+1 for x in range(10)), end='eol\\n')", MP_PARSE_SINGLE_INPUT);
-	//do_str("for i in range(10):\r\n  print(i)", MP_PARSE_FILE_INPUT);
-
-	mp_deinit();
-	return 0;
 }
-
-void nlr_jump_fail(void *val) {
-}
-
-mp_lexer_t *mp_lexer_new_from_file(const char *filename) {
-    return NULL;
-}
-
-mp_import_stat_t mp_import_stat(const char *path) {
-    return MP_IMPORT_STAT_NO_EXIST;
-}
-
-mp_obj_t mp_builtin_open(uint n_args, const mp_obj_t *args, mp_map_t *kwargs) {
-    return mp_const_none;
-}
-MP_DEFINE_CONST_FUN_OBJ_KW(mp_builtin_open_obj, 1, mp_builtin_open);
