@@ -24,5 +24,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# List of modules needed by the application
-set(LIST_MODULES CMSIS Lib/PolyMCU)
+cmake_minimum_required(VERSION 2.6)
+
+find_package(Board)
+find_package(CMSIS)
+find_package(PolyMCU)
+find_package(MicroPython)
+
+set(Firmware_SRCS main.c)
+set(Firmware_LIBS ${Board_LIBRARIES} ${PolyMCU_LIBRARIES} ${MicroPython_LIBRARIES})
+BUILD_FIRMWARE(Firmware micropython "${Firmware_SRCS}" "${Firmware_LIBS}")
