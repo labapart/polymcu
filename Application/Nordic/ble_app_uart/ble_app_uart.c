@@ -112,11 +112,20 @@ static void gap_params_init(void)
 /**@snippet [Handling the data received over BLE] */
 static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t length)
 {
-    for (uint32_t i = 0; i < length; i++)
-    {
-        while(app_uart_put(p_data[i]) != NRF_SUCCESS);
-    }
-    while(app_uart_put('\n') != NRF_SUCCESS);
+	for (uint32_t i = 0; i < length; i++)
+	{
+		uint8_t data = p_data[i];
+
+		if (data == '\n') {
+			static const char thank_you[] = "Thank you!\n";
+			uint32_t err_code = ble_nus_string_send(p_nus, (uint8_t*)thank_you, strlen(thank_you) + 1);
+			if (err_code != NRF_ERROR_INVALID_STATE)
+			{
+				APP_ERROR_CHECK(err_code);
+			}
+		}
+		while(app_uart_put(data) != NRF_SUCCESS);
+	}
 }
 /**@snippet [Handling the data received over BLE] */
 
