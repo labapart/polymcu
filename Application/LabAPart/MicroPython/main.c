@@ -39,6 +39,7 @@ extern uint8_t __HeapBase, __HeapLimit;
 
 // The processor clock is initialized by CMSIS startup + system file
 int main (void) {
+soft_reset:
 #if MICROPY_ENABLE_GC
 	gc_init(&__HeapBase, &__HeapLimit);
 #endif
@@ -61,7 +62,7 @@ int main (void) {
 	//do_str("for i in range(10):\r\n  print(i)", MP_PARSE_FILE_INPUT);
 
 	mp_deinit();
-	return 0;
+	goto soft_reset;
 }
 
 void nlr_jump_fail(void *val) {
