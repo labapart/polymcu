@@ -42,6 +42,7 @@ set(MICROPYTHON_BUILD_HEADER_DIR ${MICROPYTHON_BUILD_DIR}/genhdr)
 
 # List of sources
 set(micropython_lib_SRCS micropython.c
+                         modpyb.c
                          uart_core.c)
 
 if(NOT IS_DIRECTORY ${MICROPYTHON_SRC_DIR})
