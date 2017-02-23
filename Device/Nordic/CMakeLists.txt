@@ -40,6 +40,7 @@ include_directories(${NORDIC_SDK_ROOT}
 
 set(nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/clock/nrf_drv_clock.c
+				${NORDIC_SDK_ROOT}/drivers_nrf/delay/nrf_delay.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/rtc/nrf_drv_rtc.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/gpiote/nrf_drv_gpiote.c
 				${NORDIC_SDK_ROOT}/drivers_nrf/timer/nrf_drv_timer.c
