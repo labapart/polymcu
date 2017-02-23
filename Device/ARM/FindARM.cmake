@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,11 @@
 find_package(CMSIS)
 
 # Extract the CPU from the Board
-string(REGEX REPLACE "ARM/" "" board_cpu ${BOARD})
+string(REGEX REPLACE "ARM/" "" _board_cpu ${BOARD})
 
 # MCU specific definitions
-set(MCU_EXE_LINKER_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/${board_cpu}/Source/GCC/gcc_arm.ld")
+set(MCU_EXE_LINKER_FLAGS "-T ${CMAKE_CURRENT_LIST_DIR}/${_board_cpu}/Source/GCC/gcc_arm.ld")
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/${board_cpu}/Include)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/${_board_cpu}/Include)
 
 set(ARM_LIBRARIES device_arm)

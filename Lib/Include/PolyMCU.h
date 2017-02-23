@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "board.h"
+#include "polymcu_config.h"
 
 //
 // Mailbox support

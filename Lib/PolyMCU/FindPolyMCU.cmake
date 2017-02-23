@@ -51,9 +51,6 @@ if(SUPPORT_WATCHDOG)
   add_definitions(-DSUPPORT_WATCHDOG -DWATCHDOG_RESOLUTION_MS=${WATCHDOG_RESOLUTION_MS})
 endif()
 
-# Debug Support
-add_definitions(-DDEBUG_MASK=${DEBUG_MASK})
-
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../Include)
 
 set(PolyMCU_LIBRARIES polymcu)

@@ -154,6 +154,10 @@ mingw32-make
 Support
 =======
 
+All CMake variables that do not start with `CMAKE_` and `_` are defined in `${CMAKE_BINARY_DIR}/polymcu_config.h`
+which is generated at build time.  
+This include file can be included in your project to access CMake configuration variables.
+
 Basic variables
 ---------------
 

@@ -26,7 +26,7 @@
 
 find_package(ARM)
 
-string(REGEX REPLACE "ARM/" "" board_cpu ${BOARD})
-include_directories(${CMAKE_CURRENT_LIST_DIR}/${board_cpu})
+string(REGEX REPLACE "ARM/" "" _board_cpu ${BOARD})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/${_board_cpu})
 
 set(Board_LIBRARIES board_arm ${ARM_LIBRARIES})

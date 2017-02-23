@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,6 @@ add_definitions(-DCOREIF_NG=1)
 set(RTOS_LIBRARIES riot_rtos)
 
 # CMSIS RTOS support
-if(SUPPORT_RTOS_NO_CMSIS)
-  add_definitions(-DSUPPORT_RTOS_NO_CMSIS)
-else()
+if(NOT SUPPORT_RTOS_NO_CMSIS)
   add_definitions(-D__CMSIS_RTOS)
 endif()

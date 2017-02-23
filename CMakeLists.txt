@@ -102,43 +102,43 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 MACRO(GET_GCC_INCLUDE_PATH is_cxx gcc_path gcc_include_path)
   if (${is_cxx} STREQUAL "TRUE")
     if (WIN32)
-      execute_process(COMMAND ${gcc_path} -v -x c++ -E NUL ERROR_VARIABLE gcc_output OUTPUT_QUIET)
+      execute_process(COMMAND ${gcc_path} -v -x c++ -E NUL ERROR_VARIABLE _gcc_output OUTPUT_QUIET)
     else()
-      execute_process(COMMAND ${gcc_path} -v -x c++ -E - INPUT_FILE /dev/null ERROR_VARIABLE gcc_output OUTPUT_QUIET)
+      execute_process(COMMAND ${gcc_path} -v -x c++ -E - INPUT_FILE /dev/null ERROR_VARIABLE _gcc_output OUTPUT_QUIET)
     endif()
   else()
     if (WIN32)
-      execute_process(COMMAND ${gcc_path} -v -x c -E NUL ERROR_VARIABLE gcc_output OUTPUT_QUIET)
+      execute_process(COMMAND ${gcc_path} -v -x c -E NUL ERROR_VARIABLE _gcc_output OUTPUT_QUIET)
     else()
-      execute_process(COMMAND ${gcc_path} -v -x c -E - INPUT_FILE /dev/null ERROR_VARIABLE gcc_output OUTPUT_QUIET)
+      execute_process(COMMAND ${gcc_path} -v -x c -E - INPUT_FILE /dev/null ERROR_VARIABLE _gcc_output OUTPUT_QUIET)
     endif()
   endif()
 
   # Build an array of string from the GCC output
-  string(REPLACE "\n" ";" gcc_output "${gcc_output}")
+  string(REPLACE "\n" ";" _gcc_output "${_gcc_output}")
 
-  set(capture_include FALSE)
-  set(include_path "")
+  set(_capture_include FALSE)
+  set(_include_path "")
 
   # Go through the lines and capture between '"#include <...> search starts here:"' and 'End of search list.'
-  foreach(line ${gcc_output})
-    if(${line} STREQUAL "End of search list.")
-      set(capture_include FALSE)
+  foreach(_line ${_gcc_output})
+    if(${_line} STREQUAL "End of search list.")
+      set(_capture_include FALSE)
     endif()
 
-    if(capture_include)
+    if(_capture_include)
       # Remove the leading and trailing empty characters
-      string(REPLACE "\r" "" line ${line})
-      string(SUBSTRING "${line}" 1 -1 line)
+      string(REPLACE "\r" "" _line ${_line})
+      string(SUBSTRING "${_line}" 1 -1 _line)
 
-      set(include_path "${include_path} -I${line}")
+      set(_include_path "${_include_path} -I${_line}")
     endif()
 
-    if(${line} STREQUAL "#include <...> search starts here:")
-      set(capture_include TRUE)
+    if(${_line} STREQUAL "#include <...> search starts here:")
+      set(_capture_include TRUE)
     endif()
   endforeach()
-  set(${gcc_include_path} ${include_path})
+  set(${gcc_include_path} ${_include_path})
 ENDMACRO()
 
 #
@@ -179,13 +179,13 @@ endif()
 #
 # Macro to return all the entries by vendor for a specific directory
 MACRO(GET_ENTRIES_BY_VENDOR base_dir list)
-  FILE(GLOB vendors RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir}/*)
+  FILE(GLOB _vendors RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir}/*)
   SET(${list} "")
-  FOREACH(vendor ${vendors})
-    FILE(GLOB entries RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir}/${vendor}/*)
-    FOREACH(entry ${entries})
-      IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir}/${entry})
-        LIST(APPEND ${list} ${entry})
+  FOREACH(_vendor ${_vendors})
+    FILE(GLOB _entries RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir}/${_vendor}/*)
+    FOREACH(_entry ${_entries})
+      IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${base_dir}/${_entry})
+        LIST(APPEND ${list} ${_entry})
       ENDIF()
     ENDFOREACH()
   ENDFOREACH()
@@ -316,30 +316,29 @@ endif()
 # Add RTOS Support
 if (SUPPORT_RTOS)
   list(APPEND LIST_MODULES "RTOS/${SUPPORT_RTOS}")
-  add_definitions(-DSUPPORT_RTOS=${SUPPORT_RTOS})
 endif()
 
 # Remove duplicate entries
 list(REMOVE_DUPLICATES LIST_MODULES)
 
 # Declare module directories to use their potential Find*.cmake files
-foreach(module ${LIST_MODULES})
-  if(IS_ABSOLUTE "${module}")
+foreach(_module ${LIST_MODULES})
+  if(IS_ABSOLUTE "${_module}")
     # Sanity check
-    if(NOT EXISTS ${module})
-      message(FATAL_ERROR "Module '${module}' does not exist.")
+    if(NOT EXISTS ${_module})
+      message(FATAL_ERROR "Module '${_module}' does not exist.")
     endif()
 
     # Declare directory to use its potential Find*.cmake files
-    list(APPEND CMAKE_MODULE_PATH ${module})
+    list(APPEND CMAKE_MODULE_PATH ${_module})
   else()
     # Sanity check
-    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${module})
-      message(FATAL_ERROR "Module '${module}' does not exist.")
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_module})
+      message(FATAL_ERROR "Module '${_module}' does not exist.")
     endif()
 
     # Declare directory to use its potential Find*.cmake files
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${module})
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${_module})
   endif()
 endforeach()
 
@@ -376,13 +375,48 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CPU_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CPU_FLAGS}")
 set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${CPU_FLAGS}")
 
+#
+# Generate 'polymcu_config.h'
+#
+file(WRITE "${CMAKE_BINARY_DIR}/polymcu_config.h" "#ifndef __POLYMCU_CONFIG_H__\n#define __POLYMCU_CONFIG_H__\n\n")
+# Get list of Variables
+get_cmake_property(_variableNames VARIABLES)
+# Get list of Cached Variables
+get_cmake_property(_cacheVariableNames CACHE_VARIABLES)
+set(_listVariableName ${_variableNames} ${_cacheVariableNames})
+list(REMOVE_DUPLICATES _listVariableName)
+foreach (_variableName ${_listVariableName})
+  # Remove variable name that starts with 'CMAKE_' and '_'
+  if ((NOT (_variableName MATCHES "^CMAKE_")) AND (NOT (_variableName MATCHES "^_")))
+    # Workaround to remove variables 'val' that are defined by CMake
+    set(_ignoredVariableNames "val;type;f;l")
+    list(FIND _ignoredVariableNames "${_variableName}" _foundVariableName)
+    if (${_foundVariableName} EQUAL -1)
+      # Try to get type of the variable
+      get_property(_typeVariableName CACHE ${_variableName} PROPERTY TYPE)
+      if ("${_typeVariableName}" STREQUAL "BOOL")
+        file(APPEND "${CMAKE_BINARY_DIR}/polymcu_config.h" "#define ${_variableName} ${${_variableName}}\n")
+      elseif ((${_variableName} MATCHES "^[0-9]+$") OR (${_variableName} MATCHES "^0x"))
+        file(APPEND "${CMAKE_BINARY_DIR}/polymcu_config.h" "#define ${_variableName} ${${_variableName}}\n")
+      else()
+        file(APPEND "${CMAKE_BINARY_DIR}/polymcu_config.h" "#define ${_variableName} \"${${_variableName}}\"\n")
+      endif()
+    endif()
+  endif()
+endforeach()
+file(APPEND "${CMAKE_BINARY_DIR}/polymcu_config.h" "\n#endif\n")
+# Add '${CMAKE_BINARY_DIR}' to include "polymcu_config.h"
+include_directories(${CMAKE_BINARY_DIR})
+
+#
 # Build the different modules
-foreach(module ${LIST_MODULES})
-  if(IS_ABSOLUTE "${module}")
-    get_filename_component(module_name "${module}" NAME)
-    add_subdirectory(${module} ${PROJECT_BINARY_DIR}/${module_name})
+#
+foreach(_module ${LIST_MODULES})
+  if(IS_ABSOLUTE "${_module}")
+    get_filename_component(module_name "${_module}" NAME)
+    add_subdirectory(${_module} ${PROJECT_BINARY_DIR}/${module_name})
   else()
-    add_subdirectory(${module})
+    add_subdirectory(${_module})
   endif()
 endforeach()
 

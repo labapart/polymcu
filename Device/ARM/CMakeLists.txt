@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015, Lab A Part
+# Copyright (c) 2015-2017, Lab A Part
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,9 @@ cmake_minimum_required(VERSION 2.6)
 
 find_package(Board)
 
-string(REGEX REPLACE "ARM/" "" board_cpu ${BOARD})
+string(REGEX REPLACE "ARM/" "" _board_cpu ${BOARD})
 
-list(APPEND arm_SRCS ${board_cpu}/Source/GCC/startup_${board_cpu}.c
-                     ${board_cpu}/Source/system_${board_cpu}.c)
+list(APPEND arm_SRCS ${_board_cpu}/Source/GCC/startup_${_board_cpu}.c
+                     ${_board_cpu}/Source/system_${_board_cpu}.c)
 
 add_library(device_arm STATIC ${arm_SRCS})
