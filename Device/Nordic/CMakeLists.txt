@@ -53,6 +53,7 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
 
 if (SUPPORT_I2C)
   list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/twi_master/nrf_drv_twi.c)
+  list(APPEND nordic_SRCS Driver/CMSIS_I2C/Driver_I2C.c)
 endif()
 
 if (SUPPORT_SPI)
