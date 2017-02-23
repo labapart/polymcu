@@ -51,6 +51,14 @@ set(nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/common/nrf_drv_common.c
 				${NORDIC_SDK_ROOT}/libraries/util/app_util_platform.c
 				${NORDIC_SDK_ROOT}/libraries/util/nrf_log.c)
 
+if (SUPPORT_I2C)
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/twi_master/nrf_drv_twi.c)
+endif()
+
+if (SUPPORT_SPI)
+  list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/drivers_nrf/spi_master/nrf_drv_spi.c)
+endif()
+
 if (NORDIC_NRF51)
   list(APPEND nordic_SRCS ${NORDIC_SDK_ROOT}/toolchain/gcc/gcc_startup_nrf51.s
 				          ${NORDIC_SDK_ROOT}/toolchain/system_nrf51.c)

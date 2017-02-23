@@ -188,6 +188,8 @@ Device variables
 | SUPPORT_DEVICE_USB_MSC          | (0\|1)      | Add MSC USB Device support                        |
 | SUPPORT_BLE_CENTRAL             | (0\|1)      | Add Bluetooth Low Energy (BLE) Central support    |
 | SUPPORT_BLE_PERIPHERAL          | (0\|1)      | Add Bluetooth Low Energy (BLE) Peripheral support |
+| SUPPORT_I2C                     | (0\|1)      | Add I2C support                                   |
+| SUPPORT_SPI                     | (0\|1)      | Add SPI support                                   |
 
 ### USB Specific Variables
 

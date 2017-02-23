@@ -216,7 +216,9 @@
 #define PWM_COUNT   (PWM0_ENABLED + PWM1_ENABLED + PWM2_ENABLED)
 
 /* SPI */
-#define SPI0_ENABLED 0
+#ifndef SPI0_ENABLED
+  #define SPI0_ENABLED 0
+#endif
 
 #if (SPI0_ENABLED == 1)
 #define SPI0_USE_EASY_DMA 0
@@ -229,7 +231,9 @@
 #define SPI0_INSTANCE_INDEX 0
 #endif
 
-#define SPI1_ENABLED 0
+#ifndef SPI1_ENABLED
+  #define SPI1_ENABLED 0
+#endif
 
 #if (SPI1_ENABLED == 1)
 #define SPI1_USE_EASY_DMA 0
@@ -242,7 +246,9 @@
 #define SPI1_INSTANCE_INDEX (SPI0_ENABLED)
 #endif
 
-#define SPI2_ENABLED 0
+#ifndef SPI2_ENABLED
+  #define SPI2_ENABLED 0
+#endif
 
 #if (SPI2_ENABLED == 1)
 #define SPI2_USE_EASY_DMA 0
@@ -258,7 +264,9 @@
 #define SPI_COUNT   (SPI0_ENABLED + SPI1_ENABLED + SPI2_ENABLED)
 
 /* SPIS */
-#define SPIS0_ENABLED 0
+#ifndef SPIS0_ENABLED
+  #define SPIS0_ENABLED 0
+#endif
 
 #if (SPIS0_ENABLED == 1)
 #define SPIS0_CONFIG_SCK_PIN         2
@@ -269,7 +277,9 @@
 #define SPIS0_INSTANCE_INDEX 0
 #endif
 
-#define SPIS1_ENABLED 0
+#ifndef SPIS1_ENABLED
+  #define SPIS1_ENABLED 0
+#endif
 
 #if (SPIS1_ENABLED == 1)
 #define SPIS1_CONFIG_SCK_PIN         2
@@ -280,7 +290,9 @@
 #define SPIS1_INSTANCE_INDEX SPIS0_ENABLED
 #endif
 
-#define SPIS2_ENABLED 0
+#ifndef SPIS2_ENABLED
+  #define SPIS2_ENABLED 0
+#endif
 
 #if (SPIS2_ENABLED == 1)
 #define SPIS2_CONFIG_SCK_PIN         2
@@ -315,7 +327,9 @@
 #endif //NRF52
 #endif
 
-#define TWI0_ENABLED 0
+#ifndef TWI0_ENABLED
+  #define TWI0_ENABLED 0
+#endif
 
 #if (TWI0_ENABLED == 1)
 #define TWI0_USE_EASY_DMA 0
@@ -328,7 +342,9 @@
 #define TWI0_INSTANCE_INDEX      0
 #endif
 
-#define TWI1_ENABLED 0
+#ifndef TWI1_ENABLED
+  #define TWI1_ENABLED 0
+#endif
 
 #if (TWI1_ENABLED == 1)
 #define TWI1_USE_EASY_DMA 0

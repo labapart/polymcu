@@ -102,6 +102,18 @@ include_directories(${NORDIC_SDK_ROOT}/ble/common
 					${NORDIC_SDK_ROOT}/libraries/experimental_section_vars
                     ${NORDIC_SDK_ROOT}/toolchain)
 
+if (SUPPORT_I2C)
+  add_definitions(-DTWI0_ENABLED=1)
+  include_directories(${NORDIC_SDK_ROOT}/drivers_nrf/twi_master
+                      ${NORDIC_SDK_ROOT}/drivers_nrf/twis_slave)
+endif()
+
+if (SUPPORT_SPI)
+  add_definitions(-DSPI0_ENABLED=1)
+  include_directories(${NORDIC_SDK_ROOT}/drivers_nrf/spi_master
+                      ${NORDIC_SDK_ROOT}/drivers_nrf/spi_slave)
+endif()
+
 if (SUPPORT_BLE_PERIPHERAL)
   include_directories(${NORDIC_SDK_ROOT}/ble/ble_services/ble_bas
                       ${NORDIC_SDK_ROOT}/ble/ble_services/ble_bps

@@ -1,3 +1,10 @@
+Nordic Specific Configuration
+-----------------------------
+
+NORDIC_I2C_SCL_PIN
+NORDIC_I2C_SDA_PIN
+
+
 Systick
 -------
 
