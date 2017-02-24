@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,13 +28,6 @@
 #define __BOARD_H__
 
 #include "chip.h"
-
-/* DFU boot definitions */
-#define DFU_DEST_BASE         0x20004000
-#define DFU_MAX_IMAGE_LEN     (32 * 1024)
-#define DFU_XFER_BLOCK_SZ     (USB_DFU_XFER_SIZE)
-#define DFU_MAX_BLOCKS        (DFU_MAX_IMAGE_LEN / DFU_XFER_BLOCK_SZ)
-
-void set_led(int led, int value);
+#include "../../board_common.h"
 
 #endif

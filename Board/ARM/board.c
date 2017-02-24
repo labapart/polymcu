@@ -26,5 +26,22 @@
 
 #include "board.h"
 
-void set_led(int led, int value) {
+void led_on(int led) {
+
+}
+
+void led_off(int led) {
+
+}
+
+void led_toggle(int led) {
+
+}
+
+void led_set(int led, int value) {
+
+}
+
+int  led_get(int led) {
+	return 0;
 }

@@ -28,8 +28,7 @@
 #define __BOARD_H__
 
 #include "nrf51.h"
-
-void set_led(int led, int value);
+#include "../../board_common.h"
 
 /*
  * FreeRTOS support

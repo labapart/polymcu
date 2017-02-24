@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,8 +86,38 @@ void hardware_init_hook(void) {
 #endif
 }
 
-void set_led(int led, int value) {
+void led_on(int led) {
+	if(led < LED_COUNT) {
+		Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 1);
+	}
+}
+
+void led_off(int led) {
+	if(led < LED_COUNT) {
+		Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 0);
+	}
+}
+
+void led_toggle(int led) {
+	if(led < LED_COUNT) {
+		if (Chip_GPIO_ReadPortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit)) {
+			Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 0);
+		} else {
+			Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 1);
+		}
+	}
+}
+
+void led_set(int led, int value) {
 	if(led < LED_COUNT) {
 		Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, value);
+	}
+}
+
+int led_get(int led) {
+	if(led < LED_COUNT) {
+		return Chip_GPIO_ReadPortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit);
+	} else {
+		return 0;
 	}
 }

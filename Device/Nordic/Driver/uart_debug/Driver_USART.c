@@ -121,7 +121,6 @@ int32_t ARM_USART_Initialize(ARM_USART_SignalEvent_t cb_event) {
 #endif
 
 	if (err_code != NRF_SUCCESS) {
-		set_led(0, 1);
 		return ARM_DRIVER_ERROR;
 	} else {
 		return ARM_DRIVER_OK;

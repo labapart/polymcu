@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@
 #define __BOARD_H__
 
 #include <ARMCM7.h>
-
-void set_led(int led, int value);
+#include "../../board_common.h"
 
 #endif

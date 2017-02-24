@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,15 @@
 
 #define LED_COUNT  4
 
-static const int g_led_gpio_port_num[LED_COUNT] = { 1,   1,  1,  1 };
-static const int g_led_gpio_bit_num[LED_COUNT]  = { 18, 20, 21, 23 };
+static const struct {
+	int port;
+	int bit;
+} g_leds[LED_COUNT] = {
+	{ 1, 18 }, // LED1
+	{ 1, 20 }, // LED2
+	{ 1, 21 }, // LED3
+	{ 1, 23 }, // LED4
+};
 
 extern const ARM_DRIVER_USART Driver_UART_DEBUG;
 
@@ -53,7 +60,7 @@ void hardware_init_hook(void) {
 
 	// Initialize Board LEDs
 	for (i = 0; i < LED_COUNT; i++) {
-		Chip_GPIO_WriteDirBit(LPC_GPIO, g_led_gpio_port_num[i], g_led_gpio_bit_num[i], true);
+		Chip_GPIO_WriteDirBit(LPC_GPIO, g_leds[i].port, g_leds[i].bit, true);
 	}
 
 #ifndef SUPPORT_DEBUG_UART_NONE
@@ -74,9 +81,39 @@ void hardware_init_hook(void) {
 #endif
 }
 
-void set_led(int led, int value) {
+void led_on(int led) {
 	if(led < LED_COUNT) {
-		Chip_GPIO_WritePortBit(LPC_GPIO, g_led_gpio_port_num[led], g_led_gpio_bit_num[led], value);
+		Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 1);
+	}
+}
+
+void led_off(int led) {
+	if(led < LED_COUNT) {
+		Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 0);
+	}
+}
+
+void led_toggle(int led) {
+	if(led < LED_COUNT) {
+		if (Chip_GPIO_ReadPortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit)) {
+			Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 0);
+		} else {
+			Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, 1);
+		}
+	}
+}
+
+void led_set(int led, int value) {
+	if(led < LED_COUNT) {
+		Chip_GPIO_WritePortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit, value);
+	}
+}
+
+int led_get(int led) {
+	if(led < LED_COUNT) {
+		return Chip_GPIO_ReadPortBit(LPC_GPIO, g_leds[led].port, g_leds[led].bit);
+	} else {
+		return 0;
 	}
 }
 

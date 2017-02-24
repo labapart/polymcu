@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -180,14 +180,34 @@ void hardware_init_hook(void) {
 #endif
 }
 
-void set_led(int led, int value) {
-	if (led >= LED_COUNT) {
-		return;
-	}
-
-	if (value) {
-		GPIO_ClearPinsOutput(g_leds[led].gpio, 1U << g_leds[led].pin);
-	} else {
+void led_on(int led) {
+	if (led < LED_COUNT) {
 		GPIO_SetPinsOutput(g_leds[led].gpio, 1U << g_leds[led].pin);
+	}
+}
+
+void led_off(int led) {
+	if (led < LED_COUNT) {
+		GPIO_ClearPinsOutput(g_leds[led].gpio, 1U << g_leds[led].pin);
+	}
+}
+
+void led_toggle(int led) {
+	if (led < LED_COUNT) {
+		GPIO_TogglePinsOutput(g_leds[led].gpio, 1U << g_leds[led].pin);
+	}
+}
+
+void led_set(int led, int value) {
+	if (led < LED_COUNT) {
+		GPIO_WritePinOutput(g_leds[led].gpio, 1U << g_leds[led].pin, value);
+	}
+}
+
+int led_get(int led) {
+	if (led < LED_COUNT) {
+		return GPIO_ReadPinInput(g_leds[led].gpio, 1U << g_leds[led].pin);
+	} else {
+		return 0;
 	}
 }

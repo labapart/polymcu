@@ -62,7 +62,21 @@ void hardware_init_hook(void) {
 	SystemCoreClockUpdate();
 }
 
-void set_led(int led, int value) {
+void led_on(int led) {
+	LEDS_ON(1 << leds_list[led]);
+}
+
+void led_off(int led) {
+	LEDS_OFF(1 << leds_list[led]);
+}
+
+void led_toggle(int led) {
+	if (led < LEDS_NUMBER) {
+		LEDS_INVERT(1 << leds_list[led]);
+	}
+}
+
+void led_set(int led, int value) {
 	if (led < LEDS_NUMBER) {
 		if (value) {
 			LEDS_ON(1 << leds_list[led]);
@@ -72,9 +86,16 @@ void set_led(int led, int value) {
 	}
 }
 
-void toggle_led(int i) {
-	if (i < LEDS_NUMBER) {
-		LEDS_INVERT(1 << leds_list[i]);
+int led_get(int led) {
+	if (led < LEDS_NUMBER) {
+		uint32_t gpio_state = NRF_GPIO->OUT;
+		if (gpio_state & (1 << leds_list[led])) {
+			return 1;
+		} else {
+			return 0;
+		}
+	} else {
+		return 0;
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, Lab A Part
+ * Copyright (c) 2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,14 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "board.h"
-#include <stdio.h>
+#ifndef __BOARD_COMMON_H__
+#define __BOARD_COMMON_H__
 
-// The processor clock is initialized by CMSIS startup + system file
-int main (void) {
-	led_on(1);
+void led_on(int led);
+void led_off(int led);
+void led_toggle(int led);
+void led_set(int led, int value);
+int  led_get(int led);
 
-	while (1) {
-		puts("Hello World!");
-	}
-}
+#endif

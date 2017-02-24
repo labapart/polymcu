@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ int main (void) {
 	polymcu_timer_task_t task_periodic;
 	polymcu_timer_task_t task_one_time;
 
-	set_led(1, 1);
+	led_on(1);
 
 	// Initialize PolyMCU Timer Support
 	ret = polymcu_timer_init(TIMER_PERIOD);

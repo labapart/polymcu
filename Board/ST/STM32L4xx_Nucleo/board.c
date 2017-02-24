@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,9 @@
 #include "Driver_USART.h"
 
 extern const ARM_DRIVER_USART Driver_UART_DEBUG;
+
+extern GPIO_TypeDef* GPIO_PORT[LEDn];
+extern const uint16_t GPIO_PIN[LEDn];
 
 /**
   * @brief  System Clock Configuration
@@ -113,12 +116,43 @@ void hardware_init_hook(void) {
 	SystemCoreClockUpdate();
 }
 
-void set_led(int led, int value) {
+void led_on(int led) {
+	if (led == 0) {
+		BSP_LED_On(LED2);
+	}
+}
+
+void led_off(int led) {
+	if (led == 0) {
+		BSP_LED_Off(LED2);
+	}
+}
+
+void led_toggle(int led) {
+	if (led == 0) {
+		BSP_LED_Toggle(LED2);
+	}
+}
+
+void led_set(int led, int value) {
 	if (led == 0) {
 		if (value) {
 			BSP_LED_On(LED2);
 		} else {
 			BSP_LED_Off(LED2);
 		}
+	}
+}
+
+int led_get(int led) {
+	if (led == 0) {
+		GPIO_PinState state = HAL_GPIO_ReadPin(GPIO_PORT[LED2], GPIO_PIN[LED2]);
+		if (state == GPIO_PIN_SET) {
+			return 1;
+		} else {
+			return 0;
+		}
+	} else {
+		return 0;
 	}
 }

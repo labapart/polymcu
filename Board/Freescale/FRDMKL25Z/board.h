@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Lab A Part
+ * Copyright (c) 2015-2017, Lab A Part
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,8 @@
 #include <MKL25Z4.h>
 #include <MKL25Z4_features.h>
 
+#include "../../board_common.h"
+
 #define BOARD_DEBUG_UART_INSTANCE   0
 #define BOARD_DEBUG_UART_FREQUENCY  CLOCK_GetCoreSysClkFreq()
 
@@ -39,7 +41,5 @@
 #ifndef CLOCK_INIT_CONFIG
   #define CLOCK_INIT_CONFIG CLOCK_RUN
 #endif
-
-void set_led(int led, int value);
 
 #endif
