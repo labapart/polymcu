@@ -37,6 +37,8 @@
 
 extern uint8_t __HeapBase, __HeapLimit;
 
+void pin_init0(void);
+
 // The processor clock is initialized by CMSIS startup + system file
 int main (void) {
 soft_reset:
@@ -45,6 +47,9 @@ soft_reset:
 #endif
 
 	mp_init();
+
+	// Initialize MicroPython components
+	pin_init0();
 
 #if MICROPY_REPL_EVENT_DRIVEN
 	pyexec_event_repl_init();

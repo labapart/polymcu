@@ -46,6 +46,10 @@ set(micropython_lib_SRCS micropython.c
                          led.c
                          uart_core.c)
 
+if (BOARD MATCHES "Nordic/")
+  list(APPEND micropython_lib_SRCS board/nordic/pin.c board/nordic/nRF52_pins.c board/nordic/pin_named_pins.c)
+endif()
+
 if(NOT IS_DIRECTORY ${MICROPYTHON_SRC_DIR})
   include(ExternalProject)
 
@@ -78,6 +82,35 @@ set(SOURCE_QSTR "")
 foreach(_src ${micropython_lib_SRCS})
   set(SOURCE_QSTR "${SOURCE_QSTR} ${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
 endforeach()
+
+if (BOARD STREQUAL "Nordic/nRF52DK")
+  # On Nordic boards, any peripherals can be assigned to any pins. There is no need to add
+  # the complexity of the auto-generation
+else()
+  # If we use a script to generate the pin list then we need to set the following variables
+  #set(MAKE_PINS board/nordic/make-pins.py)
+  #set(BOARD_PINS board/nordic/nRF52DK.csv)
+  #set(AF_FILE board/nordic/nRF52_af.csv)
+  #set(PREFIX_FILE board/nordic/nRF52_prefix.c)
+endif()
+
+# If we use a script to generate the pin list
+if (MAKE_PINS)
+  set(GEN_PINS_HDR ${MICROPYTHON_BUILD_HEADER_DIR}/pins.h)
+  set(GEN_PINS_QSTR ${MICROPYTHON_BUILD_DIR}/pins_qstr.h)
+  set(GEN_PINS_AF_CONST ${MICROPYTHON_BUILD_HEADER_DIR}/pins_af_const.h)
+  set(GEN_PINS_AF_PY ${MICROPYTHON_BUILD_DIR}/pins_af.py)
+  set(GEN_PINS_SRC ${MICROPYTHON_BUILD_DIR}/pins_gen.c)
+
+  add_custom_command(OUTPUT ${GEN_PINS_HDR} ${GEN_PINS_QSTR} ${GEN_PINS_AF_CONST} ${GEN_PINS_AF_PY} ${GEN_PINS_SRC}
+                     COMMAND ${CMAKE_COMMAND} -E make_directory ${MICROPYTHON_BUILD_HEADER_DIR}
+                     COMMAND python ${MAKE_PINS} --board ${BOARD_PINS} --af ${AF_FILE} --prefix ${PREFIX_FILE} --hdr ${GEN_PINS_HDR} --qstr ${GEN_PINS_QSTR} --af-const ${GEN_PINS_AF_CONST} --af-py ${GEN_PINS_AF_PY} > ${GEN_PINS_SRC}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                     DEPENDS ${BOARD_PINS} ${AF_FILE} ${PREFIX_FILE}
+                     COMMENT "Generate pins"
+                     )
+  list(APPEND micropython_lib_SRCS ${GEN_PINS_SRC})
+endif()
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/libmicropython.a
                    COMMAND make V=1 CC=${CMAKE_C_COMPILER} CFLAGS=${LIBMICROPYTHON_CFLAGS} SOURCE_QSTR=${SOURCE_QSTR} libmicropython.a

@@ -24,30 +24,55 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __MP_HAL_PLATFORM_PORT_H__
-#define __MP_HAL_PLATFORM_PORT_H__
+#ifndef __PIN_H__
+#define __PIN_H__
 
-//
-// MicroPython HAL
-//
-#include "nrf_delay.h"
+#include "py/obj.h"
 
-#define mp_hal_delay_us  nrf_delay_us
-#define mp_hal_delay_ms  nrf_delay_ms
+#define IS_GPIO_PULL(PULL) (((PULL) == GPIO_PIN_CNF_PULL_Disabled) || ((PULL) == GPIO_PIN_CNF_PULL_Pullup) || \
+                            ((PULL) == GPIO_PIN_CNF_PULL_Pulldown))
 
-#include "pin.h"
+extern const mp_obj_type_t pyb_pin_type;
 
-#define mp_hal_pin_obj_t const pin_obj_t*
-#define mp_hal_get_pin_obj(o)   pin_find(o)
-#define mp_hal_pin_name(p)      ((p)->name)
-#define mp_hal_pin_input(p)     nrf_gpio_cfg_input(p->pin_number, GPIO_PIN_CNF_PULL_Disabled)
-#define mp_hal_pin_output(p)    nrf_gpio_cfg_output(p->pin_number)
-//#define mp_hal_pin_open_drain(p) mp_hal_pin_config((p), MP_HAL_PIN_MODE_OPEN_DRAIN, MP_HAL_PIN_PULL_NONE, 0)
-#define mp_hal_pin_high(p)      nrf_gpio_pin_set(p->pin_number)
-#define mp_hal_pin_low(p)       nrf_gpio_pin_clear(p->pin_number)
-//#define mp_hal_pin_od_low(p)    mp_hal_pin_low(p)
-//#define mp_hal_pin_od_high(p)   mp_hal_pin_high(p)
-#define mp_hal_pin_read(p)      nrf_gpio_pin_read(p->pin_number)
-#define mp_hal_pin_write(p, v)  nrf_gpio_pin_write(p->pin_number, v)
+#if 0
+typedef struct {
+  mp_obj_base_t base;
+  qstr          name;
+  uint8_t       fn;
+  union {
+    void*           reg;
+    ARM_DRIVER_I2C* i2c;
+  };
+} pin_af_obj_t;
+#endif
+
+typedef struct {
+	mp_obj_base_t base;
+	qstr          name;
+	uint32_t      pin_number;
+} pin_obj_t;
+
+typedef struct {
+  const char      *name;
+  const pin_obj_t *pin;
+} pin_named_pin_t;
+
+//extern const pin_named_pin_t g_pin_board_pins[];
+//extern const pin_named_pin_t g_pin_cpu_pins[];
+
+typedef struct {
+    mp_obj_base_t base;
+    qstr name;
+    const pin_named_pin_t *named_pins;
+} pin_named_pins_obj_t;
+
+extern const mp_obj_type_t pin_board_pins_obj_type;
+extern const mp_obj_type_t pin_cpu_pins_obj_type;
+
+extern const mp_obj_dict_t pin_cpu_pins_locals_dict;
+extern const mp_obj_dict_t pin_board_pins_locals_dict;
+
+const pin_obj_t *pin_find_named_pin(const mp_obj_dict_t *named_pins, mp_obj_t name);
+//const pin_af_obj_t *pin_find_af_by_index(const pin_obj_t *pin, mp_uint_t af_idx);
 
 #endif

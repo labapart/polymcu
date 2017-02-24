@@ -82,6 +82,9 @@
 #define MICROPY_LONGINT_IMPL        (MICROPY_LONGINT_IMPL_NONE)
 #define MICROPY_FLOAT_IMPL          (MICROPY_FLOAT_IMPL_NONE)
 
+// extended modules
+#define MICROPY_PY_UTIME_MP_HAL     (1)
+
 // type definitions for the specific machine
 
 #define BYTES_PER_WORD (4)
@@ -128,6 +131,22 @@ extern const struct _mp_obj_module_t pyb_module;
 #define MP_STATE_PORT MP_STATE_VM
 
 #define MICROPY_PORT_ROOT_POINTERS \
-    const char *readline_hist[8];
+    const char *readline_hist[8]; \
+    mp_obj_t pin_class_mapper; \
+    mp_obj_t pin_class_map_dict; \
+
+// these states correspond to values from query_irq, enable_irq and disable_irq
+#define IRQ_STATE_DISABLED (0x00000001)
+#define IRQ_STATE_ENABLED  (0x00000000)
+
+static inline void enable_irq(mp_uint_t state) {
+    __set_PRIMASK(state);
+}
+
+static inline mp_uint_t disable_irq(void) {
+    mp_uint_t state = __get_PRIMASK();
+    __disable_irq();
+    return state;
+}
 
 #endif

@@ -49,14 +49,64 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "board.h"
+
 #include "py/mpconfig.h"
 #include "py/obj.h"
+#include "extmod/utime_mphal.h"
 
 #include "led.h"
+#include "pin.h"
+
+/// \function wfi()
+/// Wait for an interrupt.
+/// This executies a `wfi` instruction which reduces power consumption
+/// of the MCU until an interrupt occurs, at which point execution continues.
+STATIC mp_obj_t pyb_wfi(void) {
+    __WFI();
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(pyb_wfi_obj, pyb_wfi);
+
+/// \function disable_irq()
+/// Disable interrupt requests.
+/// Returns the previous IRQ state: `False`/`True` for disabled/enabled IRQs
+/// respectively.  This return value can be passed to enable_irq to restore
+/// the IRQ to its original state.
+STATIC mp_obj_t pyb_disable_irq(void) {
+    return mp_obj_new_bool(disable_irq() == IRQ_STATE_ENABLED);
+}
+MP_DEFINE_CONST_FUN_OBJ_0(pyb_disable_irq_obj, pyb_disable_irq);
+
+/// \function enable_irq(state=True)
+/// Enable interrupt requests.
+/// If `state` is `True` (the default value) then IRQs are enabled.
+/// If `state` is `False` then IRQs are disabled.  The most common use of
+/// this function is to pass it the value returned by `disable_irq` to
+/// exit a critical section.
+STATIC mp_obj_t pyb_enable_irq(uint n_args, const mp_obj_t *arg) {
+    enable_irq((n_args == 0 || mp_obj_is_true(arg[0])) ? IRQ_STATE_ENABLED : IRQ_STATE_DISABLED);
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(pyb_enable_irq_obj, 0, 1, pyb_enable_irq);
+
+// Resets the pyboard in a manner similar to pushing the external RESET button.
+STATIC mp_obj_t pyb_hard_reset_obj(void) {
+    NVIC_SystemReset();
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_0(pyb_hard_reset_obj_obj, pyb_hard_reset_obj);
 
 STATIC const mp_map_elem_t pyb_module_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pyb) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_wfi), (mp_obj_t)&pyb_wfi_obj },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_disable_irq), (mp_obj_t)&pyb_disable_irq_obj },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_enable_irq), (mp_obj_t)&pyb_enable_irq_obj },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_hard_reset), (mp_obj_t)&pyb_hard_reset_obj },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_delay), (mp_obj_t)&mp_utime_sleep_ms_obj },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_udelay), (mp_obj_t)&mp_utime_sleep_us_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_LED), (mp_obj_t)&pyb_led_type },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_Pin), (mp_obj_t)&pyb_pin_type },
 };
 
 STATIC MP_DEFINE_CONST_DICT(pyb_module_globals, pyb_module_globals_table);
