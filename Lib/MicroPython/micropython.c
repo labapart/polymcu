@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Driver_Common.h"
 #include "py/gc.h"
+#include "py/runtime.h"
+#include "py/mperrno.h"
 
 void gc_collect(void) {
 #if 0
@@ -36,4 +39,19 @@ void gc_collect(void) {
     gc_collect_end();
     gc_dump_info();
 #endif
+}
+
+// This table converts from ARM CMSIS to POSIX errno
+static const byte mp_hal_status_to_errno_table[7] = {
+    [ARM_DRIVER_OK] = 0,
+    [-ARM_DRIVER_ERROR] = MP_EIO,
+    [-ARM_DRIVER_ERROR_BUSY] = MP_EBUSY,
+    [-ARM_DRIVER_ERROR_TIMEOUT] = MP_ETIMEDOUT,
+    [-ARM_DRIVER_ERROR_UNSUPPORTED] = MP_EIO, //TODO: Find better error code
+    [-ARM_DRIVER_ERROR_PARAMETER] = MP_EIO, //TODO: Find better error code
+    [-ARM_DRIVER_ERROR_SPECIFIC] = MP_EIO //TODO: Find better error code
+};
+
+NORETURN void mp_hal_cmsis_raise(int32_t status) {
+    mp_raise_OSError(mp_hal_status_to_errno_table[-status]);
 }

@@ -50,6 +50,10 @@ if (BOARD MATCHES "Nordic/")
   list(APPEND micropython_lib_SRCS board/nordic/pin.c board/nordic/nRF52_pins.c board/nordic/pin_named_pins.c)
 endif()
 
+if (SUPPORT_I2C)
+  list(APPEND micropython_lib_SRCS i2c.c)
+endif()
+
 if(NOT IS_DIRECTORY ${MICROPYTHON_SRC_DIR})
   include(ExternalProject)
 
@@ -130,6 +134,7 @@ add_custom_command(OUTPUT ${MICROPYTHON_BUILD_DIR}/_frozen_mpy.c
 list(APPEND micropython_lib_SRCS ${MICROPYTHON_SRC_DIR}/lib/utils/pyexec.c
                                  ${MICROPYTHON_SRC_DIR}/lib/libc/string0.c
                                  ${MICROPYTHON_SRC_DIR}/lib/mp-readline/readline.c
+                                 ${MICROPYTHON_SRC_DIR}/stmhal/bufhelper.c
                                  ${MICROPYTHON_BUILD_DIR}/_frozen_mpy.c)
 
 add_library(polymcu_micropython STATIC ${micropython_lib_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/libmicropython.a)

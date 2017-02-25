@@ -33,4 +33,6 @@
 #define PYB_LED_COUNT	      4
 #define PYB_LED_HAS_INTENSITY 0
 
+#define PYB_I2C_COUNT	      1
+
 #endif

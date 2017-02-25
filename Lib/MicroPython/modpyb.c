@@ -55,6 +55,7 @@
 #include "py/obj.h"
 #include "extmod/utime_mphal.h"
 
+#include "i2c.h"
 #include "led.h"
 #include "pin.h"
 
@@ -107,6 +108,7 @@ STATIC const mp_map_elem_t pyb_module_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_udelay), (mp_obj_t)&mp_utime_sleep_us_obj },
     { MP_OBJ_NEW_QSTR(MP_QSTR_LED), (mp_obj_t)&pyb_led_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Pin), (mp_obj_t)&pyb_pin_type },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_I2C), (mp_obj_t)&pyb_i2c_type },
 };
 
 STATIC MP_DEFINE_CONST_DICT(pyb_module_globals, pyb_module_globals_table);

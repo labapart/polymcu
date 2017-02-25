@@ -27,5 +27,9 @@
 # Heap for MicroPython Garbage collector
 set(FIRMWARE_HEAP 0x2000)
 
+if (BOARD STREQUAL "Nordic/nRF52DK")
+  set(SUPPORT_I2C 1)
+endif()
+
 # List of modules needed by the application
 set(LIST_MODULES CMSIS Lib/PolyMCU Lib/MicroPython)
