@@ -25,7 +25,9 @@
  */
 
 #include <stdint.h>
+#include "board.h"
 #include "polymcu_config.h"
+#include "mpplatformport.h"
 
 // options to control how Micro Python is built
 

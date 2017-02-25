@@ -28,5 +28,9 @@ find_package(Board)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/build)
 
+if (BOARD MATCHES "Nordic/")
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/board/nordic)
+endif()
+
 set(MicroPython_LIBRARIES polymcu_micropython ${CMAKE_CURRENT_LIST_DIR}/libmicropython.a)
 #set(MicroPython_LIBRARIES polymcu_micropython)
