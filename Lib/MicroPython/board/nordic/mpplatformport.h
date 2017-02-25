@@ -27,4 +27,10 @@
 #ifndef __MP_PLATFORM_PORT_H__
 #define __MP_PLATFORM_PORT_H__
 
+//
+// Platform Specific Settings
+//
+#define PYB_LED_COUNT	      4
+#define PYB_LED_HAS_INTENSITY 0
+
 #endif
