@@ -46,6 +46,40 @@ set(micropython_lib_SRCS micropython.c
                          led.c
                          uart_core.c)
 
+# Add math support
+set(LIBM_DIR src/lib/libm)
+list(APPEND micropython_lib_SRCS ${LIBM_DIR}/acoshf.c
+                                 ${LIBM_DIR}/asinfacosf.c
+                                 ${LIBM_DIR}/asinhf.c
+                                 ${LIBM_DIR}/atan2f.c
+                                 ${LIBM_DIR}/atanf.c
+                                 ${LIBM_DIR}/atanhf.c
+                                 ${LIBM_DIR}/ef_rem_pio2.c
+                                 ${LIBM_DIR}/erf_lgamma.c
+                                 ${LIBM_DIR}/fdlibm.h
+                                 ${LIBM_DIR}/fmodf.c
+                                 ${LIBM_DIR}/kf_cos.c
+                                 ${LIBM_DIR}/kf_rem_pio2.c
+                                 ${LIBM_DIR}/kf_sin.c
+                                 ${LIBM_DIR}/kf_tan.c
+                                 ${LIBM_DIR}/log1pf.c
+                                 ${LIBM_DIR}/math.c
+                                 ${LIBM_DIR}/roundf.c
+                                 ${LIBM_DIR}/sf_cos.c
+                                 ${LIBM_DIR}/sf_erf.c
+                                 ${LIBM_DIR}/sf_frexp.c
+                                 ${LIBM_DIR}/sf_ldexp.c
+                                 ${LIBM_DIR}/sf_modf.c
+                                 ${LIBM_DIR}/sf_sin.c
+                                 ${LIBM_DIR}/sf_tan.c
+                                 ${LIBM_DIR}/wf_lgamma.c
+                                 ${LIBM_DIR}/wf_tgamma.c)
+if(CPU STREQUAL "ARM Cortex-M4")
+  list(APPEND micropython_lib_SRCS ${LIBM_DIR}/thumb_vfp_sqrtf.c)
+else()
+  list(APPEND micropython_lib_SRCS ${LIBM_DIR}/ef_sqrt.c)
+endif()
+
 if (BOARD MATCHES "Nordic/")
   list(APPEND micropython_lib_SRCS board/nordic/pin.c board/nordic/nRF52_pins.c board/nordic/pin_named_pins.c)
 endif()
