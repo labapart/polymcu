@@ -6,6 +6,9 @@ QSTR_DEFS = qstrdefsport.h
 # include py core make definitions
 include src/py/py.mk
 
+# List of sources for qstr extraction
+SRC_QSTR += $(SOURCE_QSTR)
+
 OBJ = $(PY_O)
 
 $(BUILD)/_frozen_mpy.c: frozentest.mpy $(BUILD)/genhdr/qstrdefs.generated.h

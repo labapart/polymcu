@@ -71,8 +71,14 @@ foreach(dir ${dirs})
   set(LIBMICROPYTHON_CFLAGS "${LIBMICROPYTHON_CFLAGS} -I${dir}")
 endforeach()
 
+# List files for QSTR extraction
+set(SOURCE_QSTR "")
+foreach(_src ${micropython_lib_SRCS})
+  set(SOURCE_QSTR "${SOURCE_QSTR} ${CMAKE_CURRENT_SOURCE_DIR}/${_src}")
+endforeach()
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/libmicropython.a
-                   COMMAND make V=1 CC=${CMAKE_C_COMPILER} CFLAGS=${LIBMICROPYTHON_CFLAGS} libmicropython.a
+                   COMMAND make V=1 CC=${CMAKE_C_COMPILER} CFLAGS=${LIBMICROPYTHON_CFLAGS} SOURCE_QSTR=${SOURCE_QSTR} libmicropython.a
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${micropython_lib_SRCS} mpconfigport.h
                    COMMENT "Build MicroPython main library"
