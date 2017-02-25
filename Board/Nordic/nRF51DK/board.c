@@ -29,6 +29,7 @@
 #include "board.h"
 #include "Driver_USART.h"
 #include "boards.h"
+#include "app_error.h"
 #if defined(__CMSIS_RTOS) && defined(SOFTDEVICE_PRESENT)
 #include "softdevice_handler.h"
 #endif
@@ -77,11 +78,18 @@ void toggle_led(int i) {
 	}
 }
 
+#ifdef DEBUG
 void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name) {
 	char error[40];
 	sprintf(error, "Nordic assert: error_code:%u", (unsigned int)error_code);
 	__assert_func((const char *)p_file_name, line_num, NULL, error);
 }
+#else
+void app_error_handler_bare(ret_code_t error_code) {
+	led_on(3);
+	while(1);
+}
+#endif
 
 /**@brief Function for asserts in the SoftDevice.
  *
@@ -95,5 +103,5 @@ void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p
  * @param[in] p_file_name  File name of the failing ASSERT call.
  */
 void assert_nrf_callback(uint16_t line_num, const uint8_t * file_name) {
-	app_error_handler(0xDEADBEEF, line_num, file_name);
+	APP_ERROR_HANDLER(0xDEADBEEF);
 }
