@@ -599,9 +599,9 @@ uint32_t CLOCK_GetPll0Freq(void)
 status_t CLOCK_SetExternalRefClkConfig(mcg_oscsel_t oscsel)
 {
 #if (defined(MCG_CONFIG_CHECK_PARAM) && MCG_CONFIG_CHECK_PARAM)
+    oscsel = oscsel;
 #endif /* MCG_CONFIG_CHECK_PARAM */
 
-    oscsel = oscsel;
     {
         if (MCG->C2 & MCG_C2_EREFS_MASK)
         {
