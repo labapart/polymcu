@@ -31,6 +31,15 @@ find_package(CMSIS)
 find_package(PolyMCU)
 find_package(MicroPython)
 
+include_directories(.)
+
 set(Firmware_SRCS main.c)
+
+if (BOARD MATCHES "Nordic/*")
+  if (NORDIC_NUS)
+    list(APPEND Firmware_SRCS board/nordic/nordic.c)
+  endif()
+endif()
+
 set(Firmware_LIBS ${Board_LIBRARIES} ${PolyMCU_LIBRARIES} ${MicroPython_LIBRARIES})
 BUILD_FIRMWARE(Firmware micropython "${Firmware_SRCS}" "${Firmware_LIBS}")

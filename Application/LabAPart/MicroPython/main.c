@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "board.h"
+#include "micropython_internal.h"
 
 #include "py/nlr.h"
 #include "py/compile.h"
@@ -33,14 +33,17 @@
 #include "py/gc.h"
 #include "lib/utils/pyexec.h"
 
-#include <stdio.h>
-
 extern uint8_t __HeapBase, __HeapLimit;
 
 void pin_init0(void);
 
+__attribute__((weak)) void platform_init(void) {
+	// This function could be overwritten by platform specific function
+}
+
 // The processor clock is initialized by CMSIS startup + system file
 int main (void) {
+	platform_init();
 soft_reset:
 #if MICROPY_ENABLE_GC
 	gc_init(&__HeapBase, &__HeapLimit);

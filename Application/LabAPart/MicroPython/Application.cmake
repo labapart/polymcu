@@ -28,6 +28,17 @@
 set(FIRMWARE_HEAP 0x2000)
 
 if (BOARD STREQUAL "Nordic/nRF52DK")
+  if (NORDIC_NUS)
+    # Required by buttons_leds_init()
+    add_definitions(-DGPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS=4)
+
+    # This example requires BLE Peripheral support
+    set(SUPPORT_BLE_PERIPHERAL 1)
+
+    # RAM Memory requires by Nordic SoftDevice
+    set(NORDIC_SOFTDEVICE_RAM_SIZE 0x2080)
+  endif()
+
   set(SUPPORT_I2C 1)
 endif()
 
