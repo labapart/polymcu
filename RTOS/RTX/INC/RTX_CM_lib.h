@@ -38,7 +38,9 @@
 #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 #define __USED __attribute__((used))
 #elif defined (__GNUC__)
+#if !defined(__clang__)
 #pragma GCC optimize ("O3")
+#endif
 #define __USED __attribute__((used))
 #elif defined (__ICCARM__)
 #define __USED __root
