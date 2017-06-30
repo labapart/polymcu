@@ -386,8 +386,11 @@ get_cmake_property(_cacheVariableNames CACHE_VARIABLES)
 set(_listVariableName ${_variableNames} ${_cacheVariableNames})
 list(REMOVE_DUPLICATES _listVariableName)
 foreach (_variableName ${_listVariableName})
-  # Remove variable name that starts with 'CMAKE_' and '_'
-  if ((NOT (_variableName MATCHES "^CMAKE_")) AND (NOT (_variableName MATCHES "^_")))
+  # Get the size of the variable
+  string(LENGTH ${_variableName} _variableNameLength)
+
+  # Remove variable name that starts with 'CMAKE_' and '_' and are only one character long
+  if ((NOT (_variableName MATCHES "^CMAKE_")) AND (NOT (_variableName MATCHES "^_")) AND (NOT _variableNameLength EQUAL 1))
     # Workaround to remove variables 'val' that are defined by CMake
     set(_ignoredVariableNames "val;type;f;l")
     list(FIND _ignoredVariableNames "${_variableName}" _foundVariableName)
