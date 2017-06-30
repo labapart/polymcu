@@ -47,37 +47,38 @@ set(micropython_lib_SRCS micropython.c
                          uart_core.c)
 
 # Add math support
-set(LIBM_DIR src/lib/libm)
-list(APPEND micropython_lib_SRCS ${LIBM_DIR}/acoshf.c
-                                 ${LIBM_DIR}/asinfacosf.c
-                                 ${LIBM_DIR}/asinhf.c
-                                 ${LIBM_DIR}/atan2f.c
-                                 ${LIBM_DIR}/atanf.c
-                                 ${LIBM_DIR}/atanhf.c
-                                 ${LIBM_DIR}/ef_rem_pio2.c
-                                 ${LIBM_DIR}/erf_lgamma.c
-                                 ${LIBM_DIR}/fdlibm.h
-                                 ${LIBM_DIR}/fmodf.c
-                                 ${LIBM_DIR}/kf_cos.c
-                                 ${LIBM_DIR}/kf_rem_pio2.c
-                                 ${LIBM_DIR}/kf_sin.c
-                                 ${LIBM_DIR}/kf_tan.c
-                                 ${LIBM_DIR}/log1pf.c
-                                 ${LIBM_DIR}/math.c
-                                 ${LIBM_DIR}/roundf.c
-                                 ${LIBM_DIR}/sf_cos.c
-                                 ${LIBM_DIR}/sf_erf.c
-                                 ${LIBM_DIR}/sf_frexp.c
-                                 ${LIBM_DIR}/sf_ldexp.c
-                                 ${LIBM_DIR}/sf_modf.c
-                                 ${LIBM_DIR}/sf_sin.c
-                                 ${LIBM_DIR}/sf_tan.c
-                                 ${LIBM_DIR}/wf_lgamma.c
-                                 ${LIBM_DIR}/wf_tgamma.c)
+set(LIBM_DIR ${MICROPYTHON_SRC_DIR}/lib/libm)
+list(APPEND micropython_imported_SRCS ${LIBM_DIR}/acoshf.c
+                                      ${LIBM_DIR}/asinfacosf.c
+                                      ${LIBM_DIR}/asinhf.c
+                                      ${LIBM_DIR}/atan2f.c
+                                      ${LIBM_DIR}/atanf.c
+                                      ${LIBM_DIR}/atanhf.c
+                                      ${LIBM_DIR}/ef_rem_pio2.c
+                                      ${LIBM_DIR}/erf_lgamma.c
+                                      ${LIBM_DIR}/fdlibm.h
+                                      ${LIBM_DIR}/fmodf.c
+                                      ${LIBM_DIR}/kf_cos.c
+                                      ${LIBM_DIR}/kf_rem_pio2.c
+                                      ${LIBM_DIR}/kf_sin.c
+                                      ${LIBM_DIR}/kf_tan.c
+                                      ${LIBM_DIR}/log1pf.c
+                                      ${LIBM_DIR}/math.c
+                                      ${LIBM_DIR}/nearbyintf.c
+                                      ${LIBM_DIR}/roundf.c
+                                      ${LIBM_DIR}/sf_cos.c
+                                      ${LIBM_DIR}/sf_erf.c
+                                      ${LIBM_DIR}/sf_frexp.c
+                                      ${LIBM_DIR}/sf_ldexp.c
+                                      ${LIBM_DIR}/sf_modf.c
+                                      ${LIBM_DIR}/sf_sin.c
+                                      ${LIBM_DIR}/sf_tan.c
+                                      ${LIBM_DIR}/wf_lgamma.c
+                                      ${LIBM_DIR}/wf_tgamma.c)
 if(CPU STREQUAL "ARM Cortex-M4")
-  list(APPEND micropython_lib_SRCS ${LIBM_DIR}/thumb_vfp_sqrtf.c)
+  list(APPEND micropython_imported_SRCS ${LIBM_DIR}/thumb_vfp_sqrtf.c)
 else()
-  list(APPEND micropython_lib_SRCS ${LIBM_DIR}/ef_sqrt.c)
+  list(APPEND micropython_imported_SRCS ${LIBM_DIR}/ef_sqrt.c)
 endif()
 
 if (BOARD MATCHES "Nordic/")
@@ -93,15 +94,16 @@ if(NOT IS_DIRECTORY ${MICROPYTHON_SRC_DIR})
 
   ExternalProject_Add(micropython_src
     SOURCE_DIR ${MICROPYTHON_SRC_DIR}
-    #BINARY_DIR ${MICROPYTHON_INSTALL_DIR}
-    GIT_REPOSITORY /home/olivier/labapart/micropython
-    # mbedtls-2.0.0 cannot install file properly
-    #GIT_TAG 6f42417b
-    #CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MBEDTLS_INSTALL_DIR} -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID} -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_SYSTEM_NAME=Generic -DCMAKE_C_FLAGS=${MBEDTLS_CFLAGS}
+    GIT_REPOSITORY https://github.com/micropython/micropython.git
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
+
+  # Workaround to add a dependency on sources from MicroPython repository to the PolyMCU library
+  add_custom_command(OUTPUT ${micropython_imported_SRCS}
+                     COMMAND echo
+                     DEPENDS micropython_src)
 endif()
 
 # Generate flags
@@ -157,7 +159,14 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/libmicropython.a
                    COMMENT "Build MicroPython main library"
                    )
 
-add_custom_command(OUTPUT ${MICROPYTHON_BUILD_DIR}/_frozen_mpy.c
+# List sources that will be generated
+set(micropython_generated_SRCS ${MICROPYTHON_SRC_DIR}/lib/utils/pyexec.c
+                               ${MICROPYTHON_SRC_DIR}/lib/libc/string0.c
+                               ${MICROPYTHON_SRC_DIR}/lib/mp-readline/readline.c
+                               ${MICROPYTHON_SRC_DIR}/stmhal/bufhelper.c
+                               ${MICROPYTHON_BUILD_DIR}/_frozen_mpy.c)
+
+add_custom_command(OUTPUT ${micropython_generated_SRCS}
                    COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${MICROPYTHON_SRC_DIR}/py:$ENV{PYTHONPATH}" ${MICROPYTHON_SRC_DIR}/tools/mpy-tool.py -f -q ${MICROPYTHON_BUILD_HEADER_DIR}/qstrdefs.preprocessed.h -mlongint-impl=none ${MICROPYTHON_SRC_DIR}/minimal/frozentest.mpy > ${MICROPYTHON_BUILD_DIR}/_frozen_mpy.c
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/libmicropython.a
@@ -170,5 +179,7 @@ list(APPEND micropython_lib_SRCS ${MICROPYTHON_SRC_DIR}/lib/utils/pyexec.c
                                  ${MICROPYTHON_SRC_DIR}/lib/mp-readline/readline.c
                                  ${MICROPYTHON_SRC_DIR}/stmhal/bufhelper.c
                                  ${MICROPYTHON_BUILD_DIR}/_frozen_mpy.c)
+
+list(APPEND micropython_lib_SRCS ${micropython_imported_SRCS})
 
 add_library(polymcu_micropython STATIC ${micropython_lib_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/libmicropython.a)
